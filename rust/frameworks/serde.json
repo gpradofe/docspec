@@ -1,0 +1,12 @@
+{
+  "framework": "serde",
+  "language": "rust",
+  "version": "1.x",
+  "serializationAttributes": {
+    "rename": "jsonProperty",
+    "skip": "exclude",
+    "default": "defaultValue",
+    "rename_all": "namingStrategy"
+  },
+  "containerAttributes": ["rename_all", "deny_unknown_fields", "tag", "content", "untagged"]
+}

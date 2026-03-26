@@ -1,0 +1,13 @@
+{
+  "framework": "pydantic",
+  "language": "python",
+  "version": "2.x",
+  "modelPatterns": {
+    "BaseModel": "dto",
+    "BaseSettings": "configuration"
+  },
+  "fieldAttributes": {
+    "Field": { "maps": ["alias", "default", "description", "min_length", "max_length", "ge", "le"] }
+  },
+  "validatorDecorators": ["@field_validator", "@model_validator"]
+}

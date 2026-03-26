@@ -1,0 +1,7 @@
+packages:
+  - "core"
+  - "cli"
+  - "themes/*"
+  - "app"
+  - "create-docspec-site"
+  - "../examples/example-docs-site"

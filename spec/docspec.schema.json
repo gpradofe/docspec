@@ -1,0 +1,2189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docspec.dev/schemas/docspec/3.0.0/docspec.schema.json",
+  "title": "DocSpec",
+  "description": "DocSpec v3.0.0 — A machine-readable specification for documenting software artifacts.",
+  "type": "object",
+  "required": ["docspec", "artifact", "modules"],
+  "additionalProperties": false,
+  "properties": {
+    "docspec": {
+      "type": "string",
+      "const": "3.0.0",
+      "description": "The DocSpec specification version."
+    },
+    "artifact": {
+      "$ref": "#/$defs/Artifact"
+    },
+    "project": {
+      "$ref": "#/$defs/Project"
+    },
+    "modules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Module" },
+      "description": "The modules that compose this artifact."
+    },
+    "flows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Flow" },
+      "default": [],
+      "description": "Business or technical flows described by this artifact."
+    },
+    "contexts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Context" },
+      "default": [],
+      "description": "Contextual narratives attached to modules or flows."
+    },
+    "crossRefs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/CrossRef" },
+      "default": [],
+      "description": "Cross-references between artifacts, flows, steps, and members."
+    },
+    "errors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Error" },
+      "default": [],
+      "description": "Known error codes and their descriptions."
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Event" },
+      "default": [],
+      "description": "Events published or consumed by this artifact."
+    },
+    "dataModels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/DataModel" },
+      "default": [],
+      "description": "Data models (entities, DTOs, value objects) discovered in this artifact."
+    },
+    "dataStores": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/DataStore" },
+      "default": [],
+      "description": "Data stores (databases, caches, message brokers) used by this artifact."
+    },
+    "configuration": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ConfigurationProperty" },
+      "default": [],
+      "description": "Configuration properties consumed by this artifact."
+    },
+    "security": {
+      "$ref": "#/$defs/Security",
+      "description": "Security model for this artifact."
+    },
+    "externalDependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ExternalDependency" },
+      "default": [],
+      "description": "External services and APIs consumed by this artifact."
+    },
+    "observability": {
+      "$ref": "#/$defs/Observability",
+      "description": "Observability instrumentation (metrics, traces, health checks)."
+    },
+    "privacy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PrivacyField" },
+      "default": [],
+      "description": "Privacy-sensitive fields and their handling policies."
+    },
+    "intentGraph": {
+      "$ref": "#/$defs/IntentGraph",
+      "description": "DSTI intent graph extracted from source code analysis."
+    },
+    "discovery": {
+      "$ref": "#/$defs/Discovery"
+    }
+  },
+
+  "$defs": {
+
+    "Artifact": {
+      "type": "object",
+      "description": "Identification and build metadata for the documented artifact.",
+      "required": ["groupId", "artifactId", "version", "language"],
+      "additionalProperties": false,
+      "properties": {
+        "groupId": {
+          "type": "string",
+          "description": "The group or organisation identifier (e.g. Maven groupId)."
+        },
+        "artifactId": {
+          "type": "string",
+          "description": "The artifact identifier (e.g. Maven artifactId)."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the artifact."
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary programming language (e.g. java, kotlin, python)."
+        },
+        "repository": {
+          "type": "string",
+          "description": "URL of the source repository."
+        },
+        "sourceUrl": {
+          "type": "string",
+          "description": "URL template or base URL for browsing source files."
+        },
+        "buildTool": {
+          "type": "string",
+          "description": "Build tool used (e.g. maven, gradle, sbt)."
+        },
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Frameworks detected or declared (e.g. spring-boot, quarkus)."
+        }
+      }
+    },
+
+    "Project": {
+      "type": "object",
+      "description": "High-level project metadata.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable project name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of the project."
+        },
+        "homepage": {
+          "type": "string",
+          "description": "URL of the project homepage or documentation site."
+        },
+        "license": {
+          "type": "string",
+          "description": "SPDX license identifier or license name."
+        },
+        "authors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of authors or maintainers."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Freeform tags for categorisation."
+        },
+        "audiences": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Intended audiences (e.g. internal, partner, public)."
+        }
+      }
+    },
+
+    "Module": {
+      "type": "object",
+      "description": "A logical module or component within the artifact.",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the module."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable module name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the module's purpose."
+        },
+        "since": {
+          "type": "string",
+          "description": "Version in which this module was introduced."
+        },
+        "audience": {
+          "type": "string",
+          "default": "public",
+          "description": "Target audience for this module."
+        },
+        "stereotype": {
+          "type": "string",
+          "enum": ["service", "api", "data-access", "component", "configuration", "library", "entity"],
+          "description": "Architectural stereotype of this module."
+        },
+        "discoveredFrom": {
+          "type": "string",
+          "enum": ["annotation", "auto", "framework"],
+          "description": "How this module was discovered."
+        },
+        "framework": {
+          "type": ["string", "null"],
+          "description": "Framework that contributed this module (null if none)."
+        },
+        "members": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Member" },
+          "description": "Classes, interfaces, enums, records, and annotations in this module."
+        }
+      }
+    },
+
+    "Member": {
+      "type": "object",
+      "description": "A type-level member (class, interface, enum, record, annotation) within a module.",
+      "required": ["kind", "name", "qualified"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["class", "interface", "enum", "record", "annotation", "struct", "trait", "function", "type_alias", "tagged_union", "module", "constant"],
+          "description": "The kind of type declaration."
+        },
+        "kindCategory": {
+          "type": "string",
+          "enum": ["controller", "service", "repository", "entity", "dto", "config", "event", "exception", "utility", "other", "composite_type", "abstract_type", "record_type", "enumeration", "tagged_union", "function", "type_alias", "module", "constant"],
+          "description": "Semantic category of this member based on its role or type."
+        },
+        "name": {
+          "type": "string",
+          "description": "Simple name of the type."
+        },
+        "qualified": {
+          "type": "string",
+          "description": "Fully qualified name of the type."
+        },
+        "description": {
+          "type": "string",
+          "description": "Documentation description of this member."
+        },
+        "since": {
+          "type": "string",
+          "description": "Version in which this member was introduced."
+        },
+        "deprecated": {
+          "type": ["string", "null"],
+          "description": "Deprecation notice, or null if not deprecated."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Freeform tags associated with this member."
+        },
+        "visibility": {
+          "type": "string",
+          "enum": ["public", "protected", "private", "package-private"],
+          "description": "Access visibility of the member."
+        },
+        "modifiers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Language modifiers (e.g. abstract, final, static)."
+        },
+        "typeParams": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Generic type parameters (e.g. [\"T\", \"K extends Comparable\"])."
+        },
+        "extends": {
+          "type": ["string", "null"],
+          "description": "Qualified name of the superclass, or null."
+        },
+        "implements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Qualified names of implemented interfaces."
+        },
+        "constructors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Constructor" },
+          "description": "Constructors declared by this type."
+        },
+        "methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Method" },
+          "description": "Methods declared by this type."
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Field" },
+          "description": "Fields declared by this type."
+        },
+        "values": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Enum constant names (only applicable when kind is enum)."
+        },
+        "examples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Example" },
+          "description": "Usage examples for this member."
+        },
+        "audience": {
+          "type": "string",
+          "description": "Target audience for this member."
+        },
+        "discoveredFrom": {
+          "type": "string",
+          "description": "How this member was discovered."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MemberDependency" },
+          "description": "Dependencies injected or required by this member."
+        },
+        "referencedBy": {
+          "$ref": "#/$defs/ReferencedBy"
+        },
+        "ordering": { "$ref": "#/$defs/Ordering" },
+        "monotonic": { "$ref": "#/$defs/Monotonic" },
+        "conservation": { "$ref": "#/$defs/Conservation" },
+        "comparisons": { "type": "array", "items": { "$ref": "#/$defs/Compare" } },
+        "relations": { "type": "array", "items": { "$ref": "#/$defs/Relation" } }
+      }
+    },
+
+    "MemberDependency": {
+      "type": "object",
+      "description": "A dependency injected into or required by a member.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field or parameter name of the dependency."
+        },
+        "type": {
+          "type": "string",
+          "description": "Qualified type of the dependency."
+        },
+        "classification": {
+          "type": "string",
+          "enum": ["service", "repository", "config", "client", "database", "message_broker", "cache", "file_system", "other"],
+          "description": "Classification of the dependency."
+        },
+        "injectionMechanism": {
+          "type": "string",
+          "enum": ["constructor", "field", "setter"],
+          "description": "How the dependency is injected."
+        },
+        "required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this dependency is required."
+        }
+      }
+    },
+
+    "Method": {
+      "type": "object",
+      "description": "A method declared within a member type.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Method name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Documentation description of the method."
+        },
+        "since": {
+          "type": "string",
+          "description": "Version in which this method was introduced."
+        },
+        "deprecated": {
+          "type": ["string", "null"],
+          "description": "Deprecation notice, or null if not deprecated."
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Access visibility of the method."
+        },
+        "modifiers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Language modifiers (e.g. static, final, abstract)."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Freeform tags associated with this method."
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MethodParam" },
+          "description": "Parameters accepted by this method."
+        },
+        "returns": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Return type."
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of the return value."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Return type and description."
+        },
+        "throws": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Exception type."
+              },
+              "description": {
+                "type": "string",
+                "description": "When this exception is thrown."
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Exceptions thrown by this method."
+        },
+        "examples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Example" },
+          "description": "Usage examples for this method."
+        },
+        "endpointMapping": {
+          "oneOf": [
+            { "$ref": "#/$defs/EndpointMapping" },
+            { "type": "null" }
+          ],
+          "description": "HTTP endpoint mapping if this method is a web endpoint, or null."
+        },
+        "async": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mechanism": {
+              "type": "string",
+              "description": "Async mechanism (e.g. CompletableFuture, Mono, suspend)."
+            },
+            "returnWrapper": {
+              "type": "string",
+              "description": "Wrapper type for async return value."
+            }
+          },
+          "description": "Async execution details for this method."
+        },
+        "errorConditions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MethodErrorCondition" },
+          "description": "Error conditions that this method can produce."
+        },
+        "performance": {
+          "$ref": "#/$defs/MethodPerformance",
+          "description": "Performance characteristics of this method."
+        },
+        "asyncApi": {
+          "type": "string",
+          "description": "AsyncAPI channel for event-driven methods"
+        }
+      }
+    },
+
+    "MethodErrorCondition": {
+      "type": "object",
+      "description": "An error condition that a method can produce.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Exception or error type."
+        },
+        "mechanism": {
+          "type": "string",
+          "enum": ["throws", "returns", "callback"],
+          "description": "How the error is communicated."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of when this error occurs."
+        },
+        "code": {
+          "type": "string",
+          "description": "Application error code associated with this condition."
+        }
+      }
+    },
+
+    "MethodPerformance": {
+      "type": "object",
+      "description": "Performance characteristics of a method.",
+      "additionalProperties": false,
+      "properties": {
+        "expectedLatency": {
+          "type": "string",
+          "description": "Expected latency (e.g. '< 6s at p99')."
+        },
+        "bottleneck": {
+          "type": "string",
+          "description": "Known performance bottleneck."
+        }
+      }
+    },
+
+    "MethodParam": {
+      "type": "object",
+      "description": "A parameter of a method or constructor.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Parameter name."
+        },
+        "type": {
+          "type": "string",
+          "description": "Parameter type."
+        },
+        "required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this parameter is required."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the parameter."
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "Default value, or null if none."
+        }
+      }
+    },
+
+    "Field": {
+      "type": "object",
+      "description": "A field declared within a member type.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name."
+        },
+        "type": {
+          "type": "string",
+          "description": "Field type."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the field."
+        },
+        "since": {
+          "type": "string",
+          "description": "Version in which this field was introduced."
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Access visibility of the field."
+        },
+        "modifiers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Language modifiers (e.g. static, final, transient)."
+        }
+      }
+    },
+
+    "Constructor": {
+      "type": "object",
+      "description": "A constructor declared within a member type.",
+      "additionalProperties": false,
+      "properties": {
+        "visibility": {
+          "type": "string",
+          "description": "Access visibility of the constructor."
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MethodParam" },
+          "description": "Parameters accepted by this constructor."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the constructor."
+        }
+      }
+    },
+
+    "Example": {
+      "type": "object",
+      "description": "A code example demonstrating usage.",
+      "required": ["code"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title or caption for the example."
+        },
+        "language": {
+          "type": "string",
+          "description": "Programming language of the code snippet."
+        },
+        "code": {
+          "type": "string",
+          "description": "The example source code."
+        },
+        "verified": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this example has been verified to compile/run."
+        },
+        "sourceFile": {
+          "type": "string",
+          "description": "Path to the source file from which this example was extracted."
+        }
+      }
+    },
+
+    "ReferencedBy": {
+      "type": "object",
+      "description": "Back-references indicating where this member is used.",
+      "additionalProperties": false,
+      "properties": {
+        "endpoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Endpoint paths that reference this member."
+        },
+        "flows": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Flow IDs that reference this member."
+        },
+        "contexts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Context IDs that reference this member."
+        }
+      }
+    },
+
+    "EndpointMapping": {
+      "type": "object",
+      "description": "HTTP endpoint mapping for a web-exposed method.",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+          "description": "HTTP method."
+        },
+        "path": {
+          "type": "string",
+          "description": "URL path pattern (e.g. /api/v1/users/{id})."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the endpoint."
+        }
+      }
+    },
+
+    "Flow": {
+      "type": "object",
+      "description": "A business or technical flow composed of ordered steps.",
+      "required": ["id", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the flow."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the flow."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the flow's purpose."
+        },
+        "trigger": {
+          "type": "string",
+          "description": "What triggers this flow (e.g. HTTP request, scheduled job, event)."
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FlowStep" },
+          "description": "Ordered steps that compose this flow."
+        }
+      }
+    },
+
+    "FlowStep": {
+      "type": "object",
+      "description": "A single step within a flow.",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this step within the flow."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the step."
+        },
+        "actor": {
+          "type": "string",
+          "description": "Simple name of the class or component performing this step."
+        },
+        "actorQualified": {
+          "type": "string",
+          "description": "Fully qualified name of the actor."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what happens in this step."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["process", "ai", "storage", "trigger", "retry", "external", "bridge", "observability"],
+          "description": "Classification of the step type."
+        },
+        "ai": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this step involves AI/ML processing."
+        },
+        "retryTarget": {
+          "type": ["string", "null"],
+          "description": "Step ID to retry on failure, or null."
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Inputs consumed by this step."
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Outputs produced by this step."
+        },
+        "dataStoreOps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FlowStepDataStoreOp" },
+          "description": "Data store operations performed in this step."
+        },
+        "configDependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Configuration property keys consumed by this step."
+        },
+        "observability": {
+          "$ref": "#/$defs/FlowStepObservability",
+          "description": "Observability instrumentation for this step."
+        }
+      }
+    },
+
+    "FlowStepDataStoreOp": {
+      "type": "object",
+      "description": "A data store operation performed within a flow step.",
+      "required": ["store", "operation"],
+      "additionalProperties": false,
+      "properties": {
+        "store": {
+          "type": "string",
+          "description": "Identifier of the data store."
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["read", "write", "delete", "update", "query"],
+          "description": "Type of operation performed."
+        },
+        "tables": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tables or collections involved."
+        },
+        "transactional": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this operation is transactional."
+        },
+        "cascading": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this operation cascades."
+        }
+      }
+    },
+
+    "FlowStepObservability": {
+      "type": "object",
+      "description": "Observability instrumentation for a flow step.",
+      "additionalProperties": false,
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Metrics emitted during this step."
+        },
+        "logLevel": {
+          "type": "string",
+          "enum": ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"],
+          "description": "Expected log level for this step."
+        }
+      }
+    },
+
+    "Context": {
+      "type": "object",
+      "description": "A contextual narrative that explains how a module, flow, or feature works.",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this context."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of this context."
+        },
+        "attachedTo": {
+          "type": "string",
+          "description": "ID of the module, flow, or member this context is attached to."
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ContextInput" },
+          "description": "Inputs described in this context."
+        },
+        "flow": {
+          "type": "string",
+          "description": "Narrative text describing the flow of this context."
+        },
+        "uses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ContextUses" },
+          "description": "Artifacts and capabilities used in this context."
+        },
+        "schedule": {
+          "type": "object",
+          "description": "Schedule for periodic contexts.",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["cron", "fixed-rate", "fixed-delay"],
+              "description": "Schedule type."
+            },
+            "interval": {
+              "type": "string",
+              "description": "Interval expression (e.g. '5m', '1h')."
+            },
+            "cron": {
+              "type": "string",
+              "description": "Cron expression."
+            }
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Outputs produced by this context."
+        }
+      }
+    },
+
+    "ContextInput": {
+      "type": "object",
+      "description": "An input described within a context.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the input."
+        },
+        "source": {
+          "type": "string",
+          "description": "Where this input comes from."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the input."
+        },
+        "items": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sub-items or fields within this input."
+        }
+      }
+    },
+
+    "ContextUses": {
+      "type": "object",
+      "description": "A reference to an artifact or capability used within a context.",
+      "required": ["artifact", "what"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "type": "string",
+          "description": "Identifier of the artifact being used."
+        },
+        "what": {
+          "type": "string",
+          "description": "What is being used from the artifact."
+        },
+        "why": {
+          "type": "string",
+          "description": "Why this artifact/capability is needed."
+        }
+      }
+    },
+
+    "CrossRef": {
+      "type": "object",
+      "description": "A cross-reference linking elements across artifacts.",
+      "required": ["sourceQualified", "targetArtifact"],
+      "additionalProperties": false,
+      "properties": {
+        "sourceQualified": {
+          "type": "string",
+          "description": "Fully qualified name of the source element."
+        },
+        "targetArtifact": {
+          "type": "string",
+          "description": "Identifier of the target artifact."
+        },
+        "targetFlow": {
+          "type": "string",
+          "description": "ID of the target flow."
+        },
+        "targetStep": {
+          "type": "string",
+          "description": "ID of the target step within the target flow."
+        },
+        "targetMember": {
+          "type": "string",
+          "description": "Qualified name of the target member."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the cross-reference."
+        }
+      }
+    },
+
+    "Error": {
+      "type": "object",
+      "description": "A documented error code and its metadata.",
+      "required": ["code"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Application-specific error code."
+        },
+        "httpStatus": {
+          "type": "integer",
+          "description": "HTTP status code associated with this error."
+        },
+        "exception": {
+          "type": "string",
+          "description": "Qualified name of the exception class."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the error."
+        },
+        "causes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Possible causes of this error."
+        },
+        "resolution": {
+          "type": "string",
+          "description": "Suggested resolution or workaround."
+        },
+        "thrownBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Qualified names of methods that throw this error."
+        },
+        "endpoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Endpoint paths where this error may occur."
+        },
+        "since": {
+          "type": "string",
+          "description": "Version in which this error was introduced."
+        }
+      }
+    },
+
+    "Event": {
+      "type": "object",
+      "description": "An event published or consumed by the artifact.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Event name or topic."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the event."
+        },
+        "trigger": {
+          "type": "string",
+          "description": "What triggers this event."
+        },
+        "channel": {
+          "type": "string",
+          "description": "Messaging channel or topic name."
+        },
+        "payload": {
+          "$ref": "#/$defs/EventPayload"
+        },
+        "deliveryGuarantee": {
+          "type": "string",
+          "description": "Delivery guarantee (e.g. at-least-once, at-most-once, exactly-once)."
+        },
+        "retryPolicy": {
+          "type": "string",
+          "description": "Retry policy description."
+        },
+        "since": {
+          "type": "string",
+          "description": "Version in which this event was introduced."
+        }
+      }
+    },
+
+    "EventPayload": {
+      "type": "object",
+      "description": "The payload schema of an event.",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Qualified type name of the payload class."
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EventPayloadField" },
+          "description": "Fields within the event payload."
+        }
+      }
+    },
+
+    "EventPayloadField": {
+      "type": "object",
+      "description": "A field within an event payload.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name."
+        },
+        "type": {
+          "type": "string",
+          "description": "Field type."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the field."
+        }
+      }
+    },
+
+    "DataModel": {
+      "type": "object",
+      "description": "A data model (entity, DTO, value object) discovered in the artifact.",
+      "required": ["name", "qualified"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Simple name of the data model."
+        },
+        "qualified": {
+          "type": "string",
+          "description": "Fully qualified name of the data model."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the data model."
+        },
+        "table": {
+          "type": "string",
+          "description": "Database table name mapped to this model."
+        },
+        "discoveredFrom": {
+          "type": "string",
+          "enum": ["jpa", "annotation", "auto"],
+          "description": "How this data model was discovered."
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DataModelField" },
+          "description": "Fields of the data model."
+        },
+        "relationships": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DataModelRelationship" },
+          "description": "Relationships to other data models."
+        },
+        "jsonShape": {
+          "$ref": "#/$defs/JsonShape"
+        },
+        "usedBy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "endpoints": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Endpoint paths that use this data model."
+            },
+            "repositories": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Repository classes that manage this data model."
+            }
+          },
+          "description": "Where this data model is used."
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Index name."
+              },
+              "columns": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Columns included in this index."
+              },
+              "unique": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether this is a unique index."
+              }
+            }
+          },
+          "description": "Database indexes for this data model."
+        }
+      }
+    },
+
+    "DataModelField": {
+      "type": "object",
+      "description": "A field within a data model.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name."
+        },
+        "type": {
+          "type": "string",
+          "description": "Field type."
+        },
+        "column": {
+          "type": "string",
+          "description": "Database column name."
+        },
+        "primaryKey": {
+          "type": "boolean",
+          "description": "Whether this field is a primary key."
+        },
+        "nullable": {
+          "type": "boolean",
+          "description": "Whether this field allows null values."
+        },
+        "unique": {
+          "type": "boolean",
+          "description": "Whether this field has a unique constraint."
+        },
+        "length": {
+          "type": "integer",
+          "description": "Maximum length (for string/varchar columns)."
+        },
+        "enumType": {
+          "type": "string",
+          "description": "Enum type if this field maps to an enum."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the field."
+        },
+        "generated": {
+          "type": "boolean",
+          "description": "Whether this field value is auto-generated (e.g. sequences, UUIDs)."
+        },
+        "foreignKey": {
+          "type": "object",
+          "description": "Foreign key reference.",
+          "additionalProperties": false,
+          "properties": {
+            "table": {
+              "type": "string",
+              "description": "Referenced table name."
+            },
+            "column": {
+              "type": "string",
+              "description": "Referenced column name."
+            },
+            "onDelete": {
+              "type": "string",
+              "description": "ON DELETE action (e.g. CASCADE, SET NULL, RESTRICT)."
+            }
+          }
+        },
+        "checkConstraint": {
+          "type": "string",
+          "description": "SQL check constraint expression."
+        },
+        "maxLength": {
+          "type": "integer",
+          "description": "Maximum character length for string fields."
+        }
+      }
+    },
+
+    "DataModelRelationship": {
+      "type": "object",
+      "description": "A relationship between data models.",
+      "required": ["type", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ONE_TO_ONE", "ONE_TO_MANY", "MANY_TO_ONE", "MANY_TO_MANY"],
+          "description": "Cardinality of the relationship."
+        },
+        "target": {
+          "type": "string",
+          "description": "Qualified name of the target data model."
+        },
+        "field": {
+          "type": "string",
+          "description": "Field name that holds this relationship."
+        },
+        "mappedBy": {
+          "type": "string",
+          "description": "Field on the inverse side that owns the relationship."
+        },
+        "cascade": {
+          "type": "string",
+          "description": "Cascade operations (e.g. ALL, PERSIST, MERGE)."
+        }
+      }
+    },
+
+    "JsonShape": {
+      "type": "object",
+      "description": "The JSON serialization shape of a data model.",
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the JSON shape."
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/JsonShapeField" },
+          "description": "Fields as they appear in JSON serialization."
+        }
+      }
+    },
+
+    "JsonShapeField": {
+      "type": "object",
+      "description": "A field within a JSON shape.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name in the JSON output."
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON type of the field."
+        },
+        "jsonProperty": {
+          "type": "string",
+          "description": "Explicit JSON property name (if different from the field name)."
+        },
+        "enum": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed enum values for this field."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the field."
+        }
+      }
+    },
+
+    "DataStore": {
+      "type": "object",
+      "description": "A data store (database, cache, message broker) used by the artifact.",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this data store."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["rdbms", "nosql", "cache", "message-broker", "search", "object-store"],
+          "description": "Type of data store."
+        },
+        "tables": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tables or collections in this store."
+        },
+        "schemaSource": {
+          "type": "string",
+          "description": "Source of schema (e.g. 'jpa', 'flyway', 'liquibase')."
+        },
+        "migrationTool": {
+          "type": "string",
+          "description": "Migration tool used (e.g. 'flyway', 'liquibase')."
+        },
+        "migrations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DataStoreMigration" },
+          "description": "Known schema migrations."
+        },
+        "keyPatterns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DataStoreKeyPattern" },
+          "description": "Key patterns for key-value stores."
+        },
+        "buckets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DataStoreBucket" },
+          "description": "Buckets for object stores."
+        },
+        "topics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DataStoreTopic" },
+          "description": "Topics for message brokers."
+        }
+      }
+    },
+
+    "DataStoreMigration": {
+      "type": "object",
+      "description": "A schema migration for a data store.",
+      "required": ["version"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Migration version identifier."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this migration does."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date the migration was created."
+        },
+        "tables": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tables affected by this migration."
+        }
+      }
+    },
+
+    "DataStoreKeyPattern": {
+      "type": "object",
+      "description": "A key pattern for key-value stores.",
+      "required": ["pattern"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Key pattern (e.g. 'session:{userId}')."
+        },
+        "type": {
+          "type": "string",
+          "description": "Value type stored at this key."
+        },
+        "ttl": {
+          "type": "string",
+          "description": "Time-to-live for keys matching this pattern."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this key pattern stores."
+        }
+      }
+    },
+
+    "DataStoreBucket": {
+      "type": "object",
+      "description": "A bucket in an object store.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Bucket name."
+        },
+        "keyPattern": {
+          "type": "string",
+          "description": "Key pattern used within this bucket."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this bucket stores."
+        }
+      }
+    },
+
+    "DataStoreTopic": {
+      "type": "object",
+      "description": "A topic in a message broker.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Topic name."
+        },
+        "partitionKey": {
+          "type": "string",
+          "description": "Partition key expression."
+        },
+        "schema": {
+          "type": "string",
+          "description": "Qualified name of the message schema type."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this topic."
+        }
+      }
+    },
+
+    "ConfigurationProperty": {
+      "type": "object",
+      "description": "A configuration property consumed by the artifact.",
+      "required": ["key"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Configuration property key (e.g. 'spring.datasource.url')."
+        },
+        "type": {
+          "type": "string",
+          "description": "Java type of the property value."
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "Default value, or null if required."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the property."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["@Value", "@ConfigurationProperties", "Environment", "manual"],
+          "description": "How this property is consumed."
+        },
+        "usedBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Qualified names of classes that use this property."
+        },
+        "affectsFlow": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Flow IDs affected by this property."
+        },
+        "validRange": {
+          "$ref": "#/$defs/ValidRange",
+          "description": "Valid range constraints for numeric properties."
+        },
+        "environment": {
+          "type": "string",
+          "description": "Environment variable mapping."
+        },
+        "affectsStep": {
+          "type": "string",
+          "description": "Flow step ID directly affected by this property."
+        }
+      }
+    },
+
+    "ValidRange": {
+      "type": "object",
+      "description": "Valid range constraints for a configuration property.",
+      "additionalProperties": false,
+      "properties": {
+        "min": {
+          "type": "number",
+          "description": "Minimum allowed value."
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum allowed value."
+        }
+      }
+    },
+
+    "Security": {
+      "type": "object",
+      "description": "Security model for the artifact.",
+      "additionalProperties": false,
+      "properties": {
+        "authMechanism": {
+          "type": "string",
+          "description": "Authentication mechanism (e.g. 'JWT', 'OAuth2', 'Basic')."
+        },
+        "endpoints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SecurityEndpointRule" },
+          "description": "Security rules per endpoint."
+        },
+        "roles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Known roles in the system."
+        },
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Known OAuth scopes."
+        }
+      }
+    },
+
+    "SecurityEndpointRule": {
+      "type": "object",
+      "description": "Security rule for a specific endpoint.",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Endpoint path pattern."
+        },
+        "rules": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Security rules (e.g. 'hasRole(ADMIN)', 'authenticated')."
+        },
+        "public": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this endpoint is publicly accessible."
+        },
+        "rateLimit": {
+          "$ref": "#/$defs/RateLimit",
+          "description": "Rate limiting configuration."
+        }
+      }
+    },
+
+    "RateLimit": {
+      "type": "object",
+      "description": "Rate limiting configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "requests": {
+          "type": "integer",
+          "description": "Maximum number of requests."
+        },
+        "window": {
+          "type": "string",
+          "description": "Time window (e.g. '1m', '1h')."
+        }
+      }
+    },
+
+    "ExternalDependency": {
+      "type": "object",
+      "description": "An external service or API consumed by the artifact.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the external dependency."
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "Base URL of the service."
+        },
+        "auth": {
+          "type": "string",
+          "description": "Authentication method used."
+        },
+        "endpoints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ExternalDependencyEndpoint" },
+          "description": "Known endpoints consumed."
+        },
+        "rateLimit": {
+          "$ref": "#/$defs/RateLimit",
+          "description": "Rate limit of the external service."
+        },
+        "sla": {
+          "type": "string",
+          "description": "SLA expectation (e.g. '99.9%')."
+        },
+        "fallback": {
+          "type": "string",
+          "description": "Fallback strategy when the dependency is unavailable."
+        }
+      }
+    },
+
+    "ExternalDependencyEndpoint": {
+      "type": "object",
+      "description": "An endpoint consumed from an external dependency.",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "HTTP method."
+        },
+        "path": {
+          "type": "string",
+          "description": "Endpoint path."
+        },
+        "usedBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Qualified names of methods that call this endpoint."
+        }
+      }
+    },
+
+    "Observability": {
+      "type": "object",
+      "description": "Observability instrumentation for the artifact.",
+      "additionalProperties": false,
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObservabilityMetric" },
+          "description": "Metrics emitted by the artifact."
+        },
+        "traces": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObservabilityTrace" },
+          "description": "Trace spans defined in the artifact."
+        },
+        "healthChecks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObservabilityHealthCheck" },
+          "description": "Health check endpoints."
+        }
+      }
+    },
+
+    "ObservabilityMetric": {
+      "type": "object",
+      "description": "A metric emitted by the artifact.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Metric name."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["counter", "gauge", "timer", "histogram", "summary"],
+          "description": "Metric type."
+        },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Label keys for this metric."
+        },
+        "emittedBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Qualified names of methods that emit this metric."
+        }
+      }
+    },
+
+    "ObservabilityTrace": {
+      "type": "object",
+      "description": "A trace span defined in the artifact.",
+      "required": ["spanName"],
+      "additionalProperties": false,
+      "properties": {
+        "spanName": {
+          "type": "string",
+          "description": "Name of the trace span."
+        },
+        "service": {
+          "type": "string",
+          "description": "Service name for this span."
+        },
+        "parentSpan": {
+          "type": "string",
+          "description": "Parent span name."
+        }
+      }
+    },
+
+    "ObservabilityHealthCheck": {
+      "type": "object",
+      "description": "A health check endpoint.",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Health check endpoint path."
+        },
+        "checks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Individual checks performed."
+        }
+      }
+    },
+
+    "PrivacyField": {
+      "type": "object",
+      "description": "A privacy-sensitive field and its handling policy.",
+      "required": ["field", "piiType"],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Qualified field reference (e.g. 'com.example.User.email')."
+        },
+        "piiType": {
+          "type": "string",
+          "enum": ["email", "phone", "name", "address", "ssn", "dob", "ip", "financial", "health", "biometric", "other"],
+          "description": "Type of personally identifiable information."
+        },
+        "retention": {
+          "type": "string",
+          "description": "Data retention policy (e.g. '90d', '1y', 'indefinite')."
+        },
+        "gdprBasis": {
+          "type": "string",
+          "description": "GDPR legal basis (e.g. 'consent', 'contract', 'legitimate-interest')."
+        },
+        "encrypted": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field is encrypted at rest."
+        },
+        "neverLog": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field must never appear in logs."
+        },
+        "neverReturn": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field must never be returned in API responses."
+        },
+        "maskedInResponses": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field is masked (not removed) in API responses."
+        }
+      }
+    },
+
+    "IntentGraph": {
+      "type": "object",
+      "description": "DSTI intent graph extracted from source code analysis.",
+      "additionalProperties": false,
+      "properties": {
+        "methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/IntentMethod" },
+          "description": "Methods with extracted intent signals."
+        }
+      }
+    },
+
+    "IntentMethod": {
+      "type": "object",
+      "description": "A method with extracted intent signals.",
+      "required": ["qualified"],
+      "additionalProperties": false,
+      "properties": {
+        "qualified": {
+          "type": "string",
+          "description": "Fully qualified method name."
+        },
+        "intentSignals": {
+          "$ref": "#/$defs/IntentSignals",
+          "description": "Extracted intent signals."
+        }
+      }
+    },
+
+    "IntentSignals": {
+      "type": "object",
+      "description": "Intent signals extracted from a method's source code.",
+      "additionalProperties": false,
+      "properties": {
+        "nameSemantics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "verb": {
+              "type": "string",
+              "description": "Primary verb extracted from method name."
+            },
+            "object": {
+              "type": "string",
+              "description": "Object of the verb."
+            },
+            "intent": {
+              "type": "string",
+              "description": "Inferred intent category."
+            }
+          },
+          "description": "Semantics extracted from the method name."
+        },
+        "guardClauses": {
+          "oneOf": [
+            { "type": "integer" },
+            { "type": "array", "items": { "$ref": "#/$defs/GuardClause" } }
+          ],
+          "description": "Guard clauses detected — count or structured objects."
+        },
+        "branches": {
+          "oneOf": [
+            { "type": "integer" },
+            { "type": "array", "items": { "$ref": "#/$defs/BranchInfo" } }
+          ],
+          "description": "Conditional branches — count or structured objects."
+        },
+        "dataFlow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reads": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Fields or repositories read from."
+            },
+            "writes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Fields or repositories written to."
+            }
+          },
+          "description": "Data flow analysis."
+        },
+        "loopProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hasStreams": {
+              "type": "boolean",
+              "description": "Whether streams are used."
+            },
+            "hasEnhancedFor": {
+              "type": "boolean",
+              "description": "Whether enhanced-for loops are used."
+            },
+            "streamOps": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Stream operations used (e.g. 'filter', 'map', 'collect')."
+            }
+          },
+          "description": "Loop and iteration analysis."
+        },
+        "errorHandling": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "catchBlocks": {
+              "type": "integer",
+              "description": "Number of catch blocks."
+            },
+            "caughtTypes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Exception types caught."
+            }
+          },
+          "description": "Error handling analysis."
+        },
+        "constants": {
+          "oneOf": [
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "array", "items": { "$ref": "#/$defs/ConstantInfo" } }
+          ],
+          "description": "Constants used — simple names or structured objects."
+        },
+        "dependencies": {
+          "oneOf": [
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "array", "items": { "$ref": "#/$defs/DependencyInfo" } }
+          ],
+          "description": "Dependencies — simple names or structured objects."
+        },
+        "intentDensityScore": {
+          "type": "number",
+          "description": "Composite intent signal density score (0.0 - 1.0)."
+        },
+        "nullChecks": {
+          "type": "integer",
+          "description": "Number of null checks detected."
+        },
+        "assertions": {
+          "type": "integer",
+          "description": "Number of assertion statements detected."
+        },
+        "logStatements": {
+          "type": "integer",
+          "description": "Number of log statements detected."
+        },
+        "validationAnnotations": {
+          "type": "integer",
+          "description": "Number of validation annotations detected."
+        },
+        "contractChecks": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hasEquals": { "type": "boolean" },
+            "hasHashCode": { "type": "boolean" },
+            "hasCompareTo": { "type": "boolean" },
+            "hasToString": { "type": "boolean" }
+          },
+          "description": "Contract method checks (equals, hashCode, compareTo, toString)."
+        }
+      }
+    },
+
+    "GuardClause": {
+      "type": "object",
+      "description": "A structured guard clause.",
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "type": "string",
+          "description": "Guard condition expression."
+        },
+        "error": {
+          "type": "string",
+          "description": "Error thrown when guard fails."
+        },
+        "boundary": {
+          "type": "string",
+          "description": "Boundary type (e.g. input, state, invariant)."
+        }
+      }
+    },
+
+    "BranchInfo": {
+      "type": "object",
+      "description": "A structured conditional branch.",
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "type": "string",
+          "description": "Branch condition expression."
+        },
+        "output": {
+          "type": "string",
+          "description": "Output or effect of this branch."
+        }
+      }
+    },
+
+    "ConstantInfo": {
+      "type": "object",
+      "description": "A structured constant reference.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Constant name."
+        },
+        "value": {
+          "type": "string",
+          "description": "Constant value."
+        },
+        "implies": {
+          "type": "string",
+          "description": "What this constant implies about the method's intent."
+        }
+      }
+    },
+
+    "DependencyInfo": {
+      "type": "object",
+      "description": "A structured dependency reference.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Dependency name."
+        },
+        "classification": {
+          "type": "string",
+          "description": "Dependency classification (service, repository, etc.)."
+        }
+      }
+    },
+
+    "Discovery": {
+      "type": "object",
+      "description": "Metadata about how the documentation was discovered and generated.",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["auto", "annotated-only", "hybrid"],
+          "description": "Discovery mode used."
+        },
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Frameworks detected during discovery."
+        },
+        "scannedPackages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Packages that were scanned."
+        },
+        "excludedPackages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Packages that were excluded from scanning."
+        },
+        "totalClasses": {
+          "type": "integer",
+          "description": "Total number of classes found."
+        },
+        "documentedClasses": {
+          "type": "integer",
+          "description": "Number of classes included in documentation."
+        },
+        "autoDiscoveredClasses": {
+          "type": "integer",
+          "description": "Number of classes discovered automatically."
+        },
+        "annotatedClasses": {
+          "type": "integer",
+          "description": "Number of classes discovered via annotations."
+        },
+        "coveragePercent": {
+          "type": "number",
+          "description": "Documentation coverage percentage."
+        },
+        "inferredDescriptions": {
+          "type": "integer",
+          "description": "Number of descriptions inferred automatically."
+        },
+        "totalMethods": {
+          "type": "integer",
+          "description": "Total number of methods found."
+        },
+        "documentedMethods": {
+          "type": "integer",
+          "description": "Number of methods included in documentation."
+        },
+        "totalParams": {
+          "type": "integer",
+          "description": "Total number of method parameters found."
+        },
+        "documentedParams": {
+          "type": "integer",
+          "description": "Number of parameters with documentation."
+        }
+      }
+    },
+
+    "Ordering": {
+      "type": "object",
+      "properties": {
+        "strategy": { "type": "string", "enum": ["natural", "custom", "comparable"] },
+        "field": { "type": "string" },
+        "comparator": { "type": "string" }
+      }
+    },
+
+    "Monotonic": {
+      "type": "object",
+      "properties": {
+        "field": { "type": "string" },
+        "direction": { "type": "string", "enum": ["increasing", "decreasing"] },
+        "description": { "type": "string" }
+      }
+    },
+
+    "Conservation": {
+      "type": "object",
+      "properties": {
+        "quantity": { "type": "string" },
+        "scope": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+
+    "Compare": {
+      "type": "object",
+      "properties": {
+        "strategy": { "type": "string", "enum": ["natural", "custom", "structural"] },
+        "fields": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "Relation": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["oneToMany", "manyToMany", "oneToOne", "manyToOne"] },
+        "target": { "type": "string" },
+        "via": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    }
+  }
+}

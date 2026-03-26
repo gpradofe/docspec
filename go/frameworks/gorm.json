@@ -1,0 +1,31 @@
+{
+  "framework": "gorm",
+  "language": "go",
+  "version": "2.0+",
+  "entityDetection": {
+    "embedded": "gorm.Model",
+    "tags": ["gorm:\"...\""]
+  },
+  "fieldTags": {
+    "primaryKey": { "maps_to": "primaryKey" },
+    "column": { "maps_to": "column" },
+    "type": { "maps_to": "columnType" },
+    "not null": { "maps_to": "nullable", "value": false },
+    "uniqueIndex": { "maps_to": "unique" },
+    "size": { "maps_to": "maxLength" },
+    "default": { "maps_to": "defaultValue" },
+    "foreignKey": { "maps_to": "foreignKey" },
+    "references": { "maps_to": "references" },
+    "constraint": { "maps_to": "checkConstraint" }
+  },
+  "relationships": {
+    "HasOne": "one-to-one",
+    "HasMany": "one-to-many",
+    "BelongsTo": "many-to-one",
+    "Many2Many": "many-to-many"
+  },
+  "migrations": {
+    "autoMigrate": "db.AutoMigrate",
+    "migrator": "db.Migrator()"
+  }
+}

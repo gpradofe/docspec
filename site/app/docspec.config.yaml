@@ -1,0 +1,56 @@
+# DocSpec Self-Documentation Site
+# Documents the DocSpec project using its own toolchain across all languages
+
+site:
+  name: "DocSpec"
+  theme: "@docspec/theme-stripe"
+  baseUrl: /
+
+artifacts:
+  # Java Processor — reference implementation (87 types, 10 modules, 959 intent methods)
+  - label: "DocSpec Processor (Java)"
+    description: "Reference annotation processor with 21-step pipeline, DSTI engine, and 7 extractors"
+    color: "#818cf8"
+    path: ../../java/docspec-processor-java/target/docspec.json
+
+  # Maven Plugin — 10 Mojo goals (14 types, 2 modules)
+  - label: "DocSpec Maven Plugin"
+    description: "Maven plugin with generate, validate, coverage, aggregate, and schema-sync goals"
+    color: "#34d399"
+    path: ../../java/docspec-maven-plugin/target/docspec.json
+
+  # TypeScript Core — site framework (244 types, 15 modules, 51 intent methods)
+  - label: "DocSpec Core (TypeScript)"
+    description: "Site framework with config loader, resolver, page generator, cross-linker, and AI integration"
+    color: "#38bdf8"
+    path: ../../typescript/processor/target/docspec.json
+
+  # Python Processor — AST-based processor (24 types, 29 modules, 45 intent methods)
+  - label: "DocSpec Processor (Python)"
+    description: "Python processor with AST scanner, decorator reader, DSTI engine, and framework detectors"
+    color: "#facc15"
+    path: ../../python/processor/target/docspec.json
+
+  # Rust Processor — syn-based processor (169 types, intent graph)
+  - label: "DocSpec Processor (Rust)"
+    description: "Rust processor with syn-based AST parsing, framework detection, DSTI engine, and domain extractors"
+    color: "#f97316"
+    path: ../../rust/processor/target/docspec.json
+
+navigation:
+  - section: Libraries
+    auto: true
+    tab: docs
+
+  - section: Architecture
+    auto: true
+    tab: docs
+
+  - section: Tests
+    auto: true
+    tab: tests
+
+build:
+  outputDir: ./out
+  cacheDir: ./.docspec-cache
+  search: true

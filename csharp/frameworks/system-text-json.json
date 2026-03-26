@@ -1,0 +1,17 @@
+{
+  "framework": "system-text-json",
+  "language": "csharp",
+  "version": "8.0+",
+  "serializationAttributes": {
+    "JsonPropertyName": { "maps_to": "jsonName" },
+    "JsonIgnore": { "maps_to": "hidden" },
+    "JsonConverter": { "maps_to": "customSerialization" },
+    "JsonRequired": { "maps_to": "required" },
+    "JsonDerivedType": { "maps_to": "polymorphic" },
+    "JsonPolymorphic": { "maps_to": "polymorphicBase" }
+  },
+  "sourceGeneration": {
+    "attribute": "JsonSerializable",
+    "context": "JsonSerializerContext"
+  }
+}

@@ -1,0 +1,55 @@
+name: Java CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'java/**'
+      - 'spec/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'java/**'
+      - 'spec/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [17, 21]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: temurin
+          cache: maven
+
+      - name: Build annotations
+        run: cd java && mvn install -pl docspec-annotations-java -DskipTests
+
+      - name: Build processor
+        run: cd java && mvn install -pl docspec-processor-java -am -DskipTests
+
+      - name: Build Maven plugin
+        run: cd java && mvn install -pl docspec-maven-plugin -am -DskipTests
+
+      - name: Run tests
+        run: cd java && mvn test
+
+      - name: Verify schema sync
+        run: diff spec/docspec.schema.json java/docspec-processor-java/src/main/resources/docspec.schema.json
+
+      - name: Build examples
+        run: |
+          cd examples/spring-boot-zero-config && mvn compile -DskipTests
+          cd ../waypoint-engine && mvn compile -DskipTests
+
+      - name: Validate example output
+        run: |
+          cd examples/waypoint-engine
+          mvn docspec:validate

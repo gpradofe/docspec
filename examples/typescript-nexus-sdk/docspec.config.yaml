@@ -1,0 +1,21 @@
+# DocSpec configuration for Nexus Conversation SDK
+artifact:
+  name: nexus-conversation-sdk
+  label: Nexus SDK
+  color: "#8B5CF6"
+  version: "1.0.0"
+
+source:
+  type: local
+  path: ./src
+  language: typescript
+  framework: nestjs
+
+output:
+  path: ./docspec-output
+  format: json
+  intentGraph: true
+
+documentation:
+  tier: 2
+  includePrivate: false

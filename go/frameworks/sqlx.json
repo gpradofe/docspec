@@ -1,0 +1,21 @@
+{
+  "framework": "sqlx",
+  "language": "go",
+  "version": "1.3+",
+  "queryMethods": {
+    "Get": { "type": "single", "maps_to": "query" },
+    "Select": { "type": "list", "maps_to": "query" },
+    "Exec": { "type": "execute", "maps_to": "mutation" },
+    "NamedExec": { "type": "execute", "maps_to": "mutation" },
+    "QueryRow": { "type": "single", "maps_to": "query" },
+    "Query": { "type": "list", "maps_to": "query" }
+  },
+  "fieldTags": {
+    "db": { "maps_to": "column" }
+  },
+  "transactions": {
+    "begin": "Beginx",
+    "commit": "Commit",
+    "rollback": "Rollback"
+  }
+}

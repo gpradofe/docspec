@@ -1,0 +1,16 @@
+{
+  "framework": "sqlalchemy",
+  "language": "python",
+  "version": "2.x",
+  "entityPatterns": {
+    "DeclarativeBase": "entity",
+    "declarative_base": "entity",
+    "mapped_column": "field"
+  },
+  "fieldPatterns": {
+    "Column": { "maps": ["name", "nullable", "unique", "index"] },
+    "mapped_column": { "maps": ["name", "nullable", "unique"] },
+    "relationship": { "relationship": true }
+  },
+  "migrationTool": "alembic"
+}

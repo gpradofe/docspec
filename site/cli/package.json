@@ -1,0 +1,24 @@
+{
+  "name": "docspec",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "docspec": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@docspec/core": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^13.0.0",
+    "ora": "^8.1.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docspec.dev/schemas/docspec/3.0.0/property-dsl.grammar.json",
+  "title": "DocSpec Property DSL Grammar",
+  "description": "Formal grammar for @DocInvariant rule expressions used in DSTI.",
+  "type": "object",
+  "properties": {
+    "version": { "const": "1.0.0" },
+    "grammar": {
+      "type": "object",
+      "description": "EBNF grammar rules for the Property DSL.",
+      "properties": {
+        "rule": { "const": "field WS operator" },
+        "field": { "const": "IDENTIFIER ('.' IDENTIFIER)*" },
+        "operator": {
+          "const": "nullCheck | emptyCheck | blankCheck | sizeOp | inOp | betweenOp | matchesOp | comparisonOp | customOp"
+        },
+        "nullCheck": { "const": "'NOT_NULL'" },
+        "emptyCheck": { "const": "'NOT_EMPTY'" },
+        "blankCheck": { "const": "'NOT_BLANK'" },
+        "sizeOp": { "const": "'SIZE' WS comparator WS NUMBER" },
+        "inOp": { "const": "'IN' WS '[' value (',' WS value)* ']'" },
+        "betweenOp": { "const": "'BETWEEN' WS NUMBER WS 'AND' WS NUMBER" },
+        "matchesOp": { "const": "'MATCHES' WS PATTERN" },
+        "comparisonOp": { "const": "comparator WS value" },
+        "customOp": { "const": "FREETEXT" },
+        "comparator": { "const": "'>' | '>=' | '<' | '<=' | '==' | '!='" },
+        "value": { "const": "NUMBER | STRING | IDENTIFIER" },
+        "WS": { "const": "(' ' | '\\t')+" },
+        "NUMBER": { "const": "'-'? DIGIT+ ('.' DIGIT+)?" },
+        "STRING": { "const": "'\"' [^\"]* '\"' | \"'\" [^']* \"'\"" },
+        "IDENTIFIER": { "const": "[a-zA-Z_][a-zA-Z0-9_]*" },
+        "PATTERN": { "const": "STRING | NON_WS_CHARS+" },
+        "FREETEXT": { "const": ".*" }
+      }
+    },
+    "operators": {
+      "type": "array",
+      "description": "All supported operators with descriptions.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "syntax": { "type": "string" },
+          "description": { "type": "string" },
+          "example": { "type": "string" }
+        }
+      },
+      "default": [
+        {
+          "name": "NOT_NULL",
+          "syntax": "field NOT_NULL",
+          "description": "Asserts the field must not be null.",
+          "example": "user.email NOT_NULL"
+        },
+        {
+          "name": "NOT_EMPTY",
+          "syntax": "field NOT_EMPTY",
+          "description": "Asserts the collection or string field must not be empty.",
+          "example": "order.items NOT_EMPTY"
+        },
+        {
+          "name": "NOT_BLANK",
+          "syntax": "field NOT_BLANK",
+          "description": "Asserts the string field must not be blank (null, empty, or whitespace).",
+          "example": "user.name NOT_BLANK"
+        },
+        {
+          "name": "SIZE",
+          "syntax": "field SIZE comparator number",
+          "description": "Asserts the size of a collection or string matches the comparator constraint.",
+          "example": "password SIZE >= 8"
+        },
+        {
+          "name": "IN",
+          "syntax": "field IN [value1, value2, ...]",
+          "description": "Asserts the field value is one of the listed values.",
+          "example": "status IN ['ACTIVE', 'PENDING', 'CLOSED']"
+        },
+        {
+          "name": "BETWEEN",
+          "syntax": "field BETWEEN min AND max",
+          "description": "Asserts the numeric field value is within the inclusive range.",
+          "example": "age BETWEEN 0 AND 150"
+        },
+        {
+          "name": "MATCHES",
+          "syntax": "field MATCHES pattern",
+          "description": "Asserts the string field matches the given regex pattern.",
+          "example": "email MATCHES '^[\\w.]+@[\\w.]+$'"
+        },
+        {
+          "name": "GT",
+          "syntax": "field > value",
+          "description": "Asserts the field is greater than the given value.",
+          "example": "balance > 0"
+        },
+        {
+          "name": "GTE",
+          "syntax": "field >= value",
+          "description": "Asserts the field is greater than or equal to the given value.",
+          "example": "quantity >= 1"
+        },
+        {
+          "name": "LT",
+          "syntax": "field < value",
+          "description": "Asserts the field is less than the given value.",
+          "example": "retryCount < 5"
+        },
+        {
+          "name": "LTE",
+          "syntax": "field <= value",
+          "description": "Asserts the field is less than or equal to the given value.",
+          "example": "discount <= 100"
+        },
+        {
+          "name": "EQ",
+          "syntax": "field == value",
+          "description": "Asserts the field is equal to the given value.",
+          "example": "version == '3.0.0'"
+        },
+        {
+          "name": "NEQ",
+          "syntax": "field != value",
+          "description": "Asserts the field is not equal to the given value.",
+          "example": "status != 'DELETED'"
+        },
+        {
+          "name": "CUSTOM",
+          "syntax": "field freetext",
+          "description": "A custom invariant expression that does not match any built-in operator. Treated as free-form text.",
+          "example": "transaction.amount must equal sum of line items"
+        }
+      ]
+    }
+  }
+}

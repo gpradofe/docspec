@@ -1,0 +1,29 @@
+{
+  "docspec": "3.0.0",
+  "artifact": {
+    "groupId": "com.example",
+    "artifactId": "test-app",
+    "version": "1.0.0",
+    "language": "java"
+  },
+  "modules": [
+    {
+      "id": "test-module",
+      "name": "Test Module",
+      "members": [
+        {
+          "kind": "class",
+          "name": "TestService",
+          "qualified": "com.example.TestService",
+          "methods": [
+            {
+              "name": "doSomething",
+              "params": [{"name": "input", "type": "String"}],
+              "returns": {"type": "String"}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

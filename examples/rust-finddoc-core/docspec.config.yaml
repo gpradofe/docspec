@@ -1,0 +1,20 @@
+# DocSpec configuration for FindDoc Core
+artifact:
+  name: finddoc-core
+  label: FindDoc
+  color: "#F97316"
+  version: "1.0.0"
+
+source:
+  type: local
+  path: ./src
+  language: rust
+
+output:
+  path: ./docspec-output
+  format: json
+  intentGraph: true
+
+documentation:
+  tier: 2
+  includePrivate: false

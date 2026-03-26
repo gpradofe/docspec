@@ -1,0 +1,14 @@
+{
+  "framework": "typeorm",
+  "language": "typescript",
+  "version": "0.3.x",
+  "entityDecorators": ["@Entity", "@ViewEntity"],
+  "fieldDecorators": {
+    "@PrimaryColumn": { "primaryKey": true },
+    "@PrimaryGeneratedColumn": { "primaryKey": true, "generated": true },
+    "@Column": { "maps": ["name", "nullable", "unique", "length", "type"] },
+    "@CreateDateColumn": { "generated": true },
+    "@UpdateDateColumn": { "generated": true }
+  },
+  "relationshipDecorators": ["@OneToOne", "@OneToMany", "@ManyToOne", "@ManyToMany"]
+}

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DocSpec.Annotations</RootNamespace>
+    <PackageId>DocSpec.Annotations</PackageId>
+    <Version>0.1.0</Version>
+    <Description>DocSpec attributes for C# — annotate your code for machine-readable documentation</Description>
+    <Authors>DocSpec</Authors>
+    <License>Apache-2.0</License>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,46 @@
+name: TypeScript Processor CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'typescript/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'typescript/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build annotations
+        run: |
+          cd typescript/annotations
+          npm install
+          npm run build
+
+      - name: Build processor
+        run: |
+          cd typescript/processor
+          npm install
+          npm run build
+
+      - name: Build CLI
+        run: |
+          cd typescript/plugin
+          npm install
+          npm run build
+
+      - name: Run tests
+        run: |
+          cd typescript/processor
+          npm test

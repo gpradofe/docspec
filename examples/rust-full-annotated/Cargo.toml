@@ -1,0 +1,8 @@
+[package]
+name = "docspec-rust-full-annotated"
+version = "1.0.0"
+edition = "2021"
+description = "Tier 2 DocSpec example — full annotations in Rust"
+
+[dependencies]
+docspec-macros = { path = "../../annotations/rust" }

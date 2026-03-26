@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+target/
+dist/
+build/
+out/
+.next/
+*.class
+*.jar
+*.war
+
+# Caches
+.docspec-cache/
+.cache/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Misc
+bash.exe.stackdump
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Rust
+/rust/processor/target/
+/rust/**/Cargo.lock
+
+# Go
+/go/**/vendor/
+
+# C#
+bin/
+obj/
+*.suo
+*.user
+packages/
+
+# Claude
+.claude/

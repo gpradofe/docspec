@@ -1,0 +1,33 @@
+{
+  "framework": "ef-core",
+  "language": "csharp",
+  "version": "8.0+",
+  "entityDetection": {
+    "attributes": ["Table", "Keyless"],
+    "baseClasses": [],
+    "conventions": {
+      "dbSetProperty": true,
+      "entityConfiguration": true
+    }
+  },
+  "fieldAttributes": {
+    "Key": { "maps_to": "primaryKey" },
+    "Column": { "maps_to": "column" },
+    "Required": { "maps_to": "nullable", "value": false },
+    "MaxLength": { "maps_to": "maxLength" },
+    "StringLength": { "maps_to": "maxLength" },
+    "ForeignKey": { "maps_to": "foreignKey" },
+    "DatabaseGenerated": { "maps_to": "generated" }
+  },
+  "relationships": {
+    "HasOne": "one-to-one",
+    "HasMany": "one-to-many",
+    "ManyToMany": "many-to-many",
+    "OwnsOne": "embedded",
+    "OwnsMany": "embedded-collection"
+  },
+  "migrations": {
+    "directory": "Migrations/",
+    "detection": ["Migration", "DbContext.OnModelCreating"]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "framework": "gin",
+  "language": "go",
+  "version": "1.9+",
+  "endpointDetection": {
+    "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+    "routerType": "gin.Engine",
+    "groupMethod": "Group",
+    "handlerSignature": "func(*gin.Context)"
+  },
+  "middleware": {
+    "signature": "gin.HandlerFunc",
+    "builtIn": ["Logger", "Recovery", "BasicAuth", "CORS"]
+  },
+  "binding": {
+    "methods": ["ShouldBindJSON", "ShouldBindQuery", "ShouldBindUri"],
+    "validation": "binding:\"required\""
+  },
+  "response": {
+    "methods": ["JSON", "XML", "String", "HTML", "Redirect", "File"],
+    "statusCodes": true
+  }
+}

@@ -1,0 +1,2881 @@
+# DOCSPEC — Universal Documentation Specification
+
+## Complete Technical Specification & Build Plan — v3 Final
+
+**Version 3.0.0 • March 2026**
+**Gustavo Aniceto • Aniceto Holdings**
+
+> *OpenAPI solved REST documentation. DocSpec solves everything else.*
+
+---
+
+## Table of Contents
+
+1. Executive Summary
+2. Problem Statement
+3. Architecture Overview
+4. The DocSpec JSON Schema
+5. Annotation Libraries
+6. Annotation Processors & Generators
+7. Build Tool Plugins
+8. Repository Resolution System
+9. Auto-Discovery System
+10. OpenAPI Auto-Merge & Framework Detection
+11. Data Models
+12. Database & Data Store Documentation
+13. Configuration & Environment Documentation
+14. Security & Authorization Model
+15. Multi-Protocol Support
+16. The DocSpec CLI & Site Framework
+17. Navigation Taxonomy & Cross-Linking
+18. Rendering & Theme System
+19. Cross-Project Resolution
+20. Flow System
+21. Context System
+22. SDK-to-Endpoint Mapping
+23. Error Catalog
+24. Webhook & Event Documentation
+25. Observability Documentation
+26. External Dependencies Documentation
+27. Data Privacy & Compliance
+28. Versioning & Publishing
+29. Multi-Language Architecture
+30. DocSpec Test Intelligence (DSTI)
+31. DSTI Intent Extraction Channels
+32. DSTI Cross-Language Test Generation
+33. DSTI Semantic Testing Without AI
+34. Verified Examples & Testable Documentation
+35. Documentation Coverage Metrics
+36. Access Control & Audience Levels
+37. Test Documentation in DocSpec Site
+38. Migration Tooling
+39. Multi-Module & Monorepo Support
+40. CI/CD Integration
+41. Analytics & Feedback
+42. Offline Export
+43. Plugin & Extension System
+44. Meta-Dogfooding Architecture
+45. Monorepo Structure
+46. Implementation Roadmap & MVP Scope
+
+Appendix A: Research Paper Outline
+Appendix B: Language-Specific Framework Maps
+
+---
+
+## 1. Executive Summary
+
+DocSpec is a universal documentation specification and toolchain that generates structured, machine-readable documentation and semantically meaningful tests from any codebase — not just REST APIs. It operates on a three-layer architecture: language-specific extraction → language-agnostic intermediate representation → language-specific generation.
+
+The system consists of nine layers:
+
+- **docspec.json schema** — A language-agnostic JSON format describing modules, classes, methods, flows, data models, errors, events, database schemas, configuration, security rules, dependencies, and runtime context.
+- **Language-specific annotation libraries** — Lightweight annotations for Java, TypeScript, Rust, Python, C#, and Go that coexist with existing doc comments. Zero-annotation auto-discovery mode available.
+- **Build-time processors with auto-discovery** — Processors that detect frameworks (Spring Boot, NestJS, FastAPI, Axum, ASP.NET, Gin, etc.) automatically. Merge annotations + doc comments + OpenAPI + database schemas + configuration into docspec.json.
+- **Repository resolution system** — Resolves specs from Maven Central, npm, crates.io, PyPI, NuGet, and private registries. Imports `settings.xml` and `.npmrc` directly.
+- **docspec-site CLI & framework** — Docusaurus-like experience: install, configure, deploy. Five navigation sections with full cross-linking between API endpoints, library code, flows, data stores, and tests.
+- **LLM & AI integration** — Auto-generates `llms.txt`, `CLAUDE.md` context files, and an MCP server for AI-queryable documentation.
+- **DocSpec Test Intelligence (DSTI)** — A deterministic semantic test engine that extracts developer intent from 13 code channels (naming, guards, branches, data flow, etc.) and generates meaningful property-based tests without AI. Produces tests in any target language from the language-agnostic intent graph.
+- **Quality enforcement** — Verified examples that compile and run in CI, documentation coverage metrics with configurable thresholds, access control for audience-specific builds, and database-code consistency checks.
+- **Database & infrastructure documentation** — Schema introspection, migration history, query-to-index analysis, multi-data-store topology, configuration reference, security model, and observability mapping.
+
+### Key differentiators
+
+- **Zero-config useful output**: Add the plugin to an existing Spring Boot/NestJS/FastAPI project with zero annotations and get a full docs site + test suite.
+- **Multi-channel intent verification (DSTI)**: Extracts developer intent from code naming, guard clauses, branch structure, data flow, and 9 other channels — generates semantic tests that catch real bugs without AI.
+- **Cross-project flow tracing**: Connect API endpoints through library internals to database operations across multiple projects.
+- **Language-agnostic core**: The intermediate representation (docspec.json + intent graph) is universal. Extractors and generators are language-specific plugins.
+- **Meta-self-hosting**: DocSpec's own documentation and test suite are generated by DocSpec itself.
+
+---
+
+## 2. Problem Statement
+
+### What OpenAPI solved
+
+OpenAPI created a universal spec for REST API documentation. Annotate endpoints, generate `openapi.json`, render with any compatible tool. Versioned alongside code. Docs never drift.
+
+### What remains unsolved
+
+Most software is not REST APIs. Libraries, SDKs, domain engines, CLI tools, scheduled jobs, event processors — all need documentation and tests.
+
+| Approach | Problem |
+|----------|---------|
+| JavaDoc / TSDoc / RustDoc | Language-locked HTML output. Cannot feed into a custom docs site. No cross-project linking. No test generation. |
+| Manual Markdown / Confluence | Drifts from code within weeks. No version-locking. No automation. No verification. |
+| OpenAPI only | Covers HTTP endpoints only. Library internals, flows, data models, database schemas, and architecture undocumented. |
+| AI-generated docs/tests | Hallucinates, inconsistent, token-consuming, requires continuous re-generation on code changes. Not deterministic. |
+| Manual test writing | Time-consuming, often superficial (assertNotNull), drifts from code. Developers skip it under deadline pressure. |
+
+### The DocSpec value proposition
+
+- Add the build plugin with zero annotations → get full docs site + meaningful test suite
+- Auto-discovers controllers, services, repositories, entities, scheduled jobs, config properties, security rules
+- Incrementally add `@DocFlow`, `@DocContext`, `@DocUses` for richer architectural documentation
+- Published alongside your JAR/package — bump version in config, docs update automatically
+- DSTI generates semantic tests from code structure — no AI, no hallucination, deterministic
+- Structured JSON output equally useful for human docs sites and AI/LLM agents
+
+---
+
+## 3. Architecture Overview
+
+### Three-Layer Design
+
+```
+EXTRACTION (language-specific)
+  Java: annotation processor + Spring/JPA/Jackson detection
+  TypeScript: TS compiler API + NestJS/TypeORM/Prisma detection
+  Rust: syn + axum/diesel/serde detection
+  Python: ast module + FastAPI/SQLAlchemy/Pydantic detection
+  C#: Roslyn analyzer + ASP.NET/EF Core detection
+  Go: go/ast + gin/gorm detection
+  Future: Tree-sitter universal parser + LSP integration
+         │
+         ▼
+INTERMEDIATE REPRESENTATION (language-agnostic)
+  docspec.json — universal documentation schema
+  Intent graph — extracted behavioral properties (for DSTI)
+  Dependency graph — classified relationships
+  Schema graph — database/data store topology
+         │
+         ▼
+GENERATION (language-specific)
+  Docs site — renders from docspec.json (universal)
+  Tests — JUnit/Vitest/pytest/#[test]/xUnit/testing from intent graph
+  SDK examples — per-language code snippets on endpoint pages
+  Context files — CLAUDE.md, llms.txt for AI assistants
+```
+
+### System Layers
+
+| Layer | Component | Description |
+|-------|-----------|-------------|
+| 1. Spec | docspec.json | Universal JSON schema — the contract between producers and consumers |
+| 2. Annotations | Per-language libraries | Annotations, decorators, attributes that add metadata to code |
+| 3. Auto-Discovery | Framework detectors | Scans Spring, JPA, NestJS, FastAPI, etc. with zero annotations |
+| 4. Processors | Per-language generators | Compile-time code that reads everything → docspec.json + intent graph |
+| 5. Plugins | Maven, Gradle, npm, Cargo, pip, dotnet | Build tool integrations that run processors and publish specs |
+| 6. Resolution | Registry resolvers | Downloads specs from Maven Central, npm, crates.io, private registries |
+| 7. CLI / Site | docspec-site | Docusaurus-like framework with dev server, build, deploy |
+| 8. Themes | Pluggable React themes | Stripe, Minimal, Dark themes with extensible components |
+| 9. AI Layer | LLM integrations | llms.txt, MCP server, context files, embeddings |
+| 10. DSTI | Test Intelligence Engine | Multi-channel intent extraction → property-based test generation |
+
+### Data Flow
+
+```
+Source Code (Java/TS/Rust/Python/C#/Go)
+  │ ← auto-discovery + annotations + doc comments
+  │ ← framework detection (Spring, NestJS, FastAPI, etc.)
+  │ ← database schema introspection + migration parsing
+  │ ← configuration extraction (@Value, env vars, config files)
+  │ ← security rule extraction (@PreAuthorize, guards)
+  ▼
+Annotation Processor / Generator
+  │ ← merges ALL sources into unified representation
+  ▼
+docspec.json + intent-graph.json
+  │ ← published alongside JAR/package/crate to registry
+  ▼
+docspec-site CLI
+  │ ← resolves from registries (reads settings.xml / .npmrc)
+  │ ← reads Markdoc guides from local ./docs/ directory
+  │ ← reads OpenAPI/GraphQL/gRPC specs for API pages
+  │ ← stitches cross-project flows from @DocUses refs
+  │ ← generates llms.txt + CLAUDE.md + MCP schema
+  ▼
+Documentation Site + Test Suite + AI Knowledge Base
+```
+
+---
+
+## 4. The DocSpec JSON Schema
+
+The `docspec.json` schema is the core contract. Every producer generates it, every consumer reads it. The schema is language-agnostic — it represents concepts that exist in all programming languages using universal abstractions.
+
+### 4.1 Top-Level Structure
+
+```json
+{
+  "docspec": "3.0.0",
+  "artifact": { },
+  "project": { },
+  "modules": [ ],
+  "flows": [ ],
+  "contexts": [ ],
+  "crossRefs": [ ],
+  "errors": [ ],
+  "events": [ ],
+  "dataModels": [ ],
+  "dataStores": [ ],
+  "configuration": [ ],
+  "security": { },
+  "externalDependencies": [ ],
+  "observability": { },
+  "privacy": [ ],
+  "discovery": { },
+  "intentGraph": { }
+}
+```
+
+### 4.2 Artifact Object
+
+Identifies the published artifact. Used for cross-project resolution.
+
+```json
+"artifact": {
+  "groupId": "com.waypoint",
+  "artifactId": "waypoint-engine",
+  "version": "2.3.1",
+  "language": "java",
+  "repository": "maven-central",
+  "sourceUrl": "https://github.com/...",
+  "buildTool": "maven",
+  "frameworks": ["spring-boot", "jpa", "jackson"]
+}
+```
+
+### 4.3 Project Object
+
+```json
+"project": {
+  "name": "Waypoint Curriculum Engine",
+  "description": "AI-powered curriculum generation with surgical retry",
+  "homepage": "https://waypoint.dev",
+  "license": "MIT",
+  "authors": ["Gustavo Aniceto"],
+  "tags": ["ai", "education", "langgraph"],
+  "audiences": ["public", "partner", "internal"]
+}
+```
+
+### 4.4 Module Object
+
+```json
+"modules": [{
+  "id": "curriculum-agent",
+  "name": "Curriculum Agent",
+  "description": "LangGraph-based agent for curriculum generation",
+  "since": "1.0.0",
+  "audience": "public",
+  "stereotype": "service",
+  "discoveredFrom": "annotation",
+  "members": [ ]
+}]
+```
+
+### 4.5 Member Object
+
+Members represent individual code entities using language-agnostic kinds with language-specific detail.
+
+```json
+"members": [{
+  "kind": "class",
+  "kindCategory": "composite_type",
+  "name": "CurriculumAgent",
+  "qualified": "com.waypoint.agent.CurriculumAgent",
+  "description": "Main entry point for AI curriculum generation...",
+  "since": "1.0.0",
+  "deprecated": null,
+  "tags": ["ai", "core"],
+  "visibility": "public",
+  "modifiers": ["final"],
+  "typeParams": [],
+  "extends": "BaseAgent",
+  "implements": ["Runnable"],
+  "constructors": [],
+  "methods": [],
+  "fields": [],
+  "values": [],
+  "examples": [],
+  "audience": "public",
+  "discoveredFrom": "annotation",
+  "referencedBy": {
+    "endpoints": ["POST /v1/curricula/generate"],
+    "flows": ["curriculum-generation"],
+    "contexts": ["thumbnail-generation"]
+  },
+  "dependencies": [
+    {
+      "name": "llmClient",
+      "type": "LlmClient",
+      "classification": "llm",
+      "injectionMechanism": "constructor",
+      "required": true
+    }
+  ]
+}]
+```
+
+**Kind categories (language-agnostic):**
+
+| kindCategory | Language-specific kinds |
+|---|---|
+| composite_type | Java class, TS class, Rust struct, Python class, C# class, Go struct |
+| abstract_type | Java interface, TS interface, Rust trait, Go interface, C# interface, Swift protocol |
+| record_type | Java record, C# record, Kotlin data class |
+| enumeration | Universal across all languages |
+| tagged_union | Rust enum, TS discriminated union, Python Union |
+| function | Standalone functions (Rust, Go, Python, TS top-level) |
+| type_alias | Rust type, TS type, Go type alias |
+| module | Rust mod, Python module, Go package, TS module |
+| constant | Universal |
+
+### 4.6 Method Object
+
+```json
+"methods": [{
+  "name": "generate",
+  "description": "Generates a complete curriculum...",
+  "since": "1.0.0",
+  "visibility": "public",
+  "async": {
+    "isAsync": false,
+    "mechanism": null
+  },
+  "params": [{
+    "name": "goal",
+    "type": "GoalSpec",
+    "required": true,
+    "description": "The goal specification..."
+  }],
+  "returns": {
+    "type": "Curriculum",
+    "description": "The generated curriculum"
+  },
+  "errorConditions": [{
+    "type": "AgentRetryExhaustedException",
+    "mechanism": "exception",
+    "description": "All retry attempts exhausted",
+    "code": "AGENT_RETRY_EXHAUSTED"
+  }],
+  "examples": [{
+    "title": "Basic usage",
+    "language": "java",
+    "code": "...",
+    "verified": true,
+    "sourceFile": "src/test/examples/CurriculumAgentExample.java"
+  }],
+  "endpointMapping": null,
+  "performance": {
+    "expectedLatency": "< 6s at p99",
+    "bottleneck": "3 sequential LLM calls"
+  }
+}]
+```
+
+### 4.7 Flow Object
+
+```json
+"flows": [{
+  "id": "curriculum-generation",
+  "name": "Curriculum Generation Pipeline",
+  "description": "End-to-end AI curriculum generation...",
+  "trigger": "POST /v1/curricula/generate",
+  "steps": [{
+    "id": "parse-goal",
+    "name": "Parse Goal",
+    "actor": "GoalParser",
+    "actorQualified": "com.waypoint.agent.GoalParser",
+    "description": "Validates and normalizes the GoalSpec input",
+    "type": "process",
+    "ai": false,
+    "retryTarget": null,
+    "inputs": ["GoalSpec"],
+    "outputs": ["ParsedGoal"],
+    "dataStoreOps": [],
+    "configDependencies": [],
+    "observability": {
+      "metrics": [],
+      "logLevel": "DEBUG"
+    }
+  },
+  {
+    "id": "persist",
+    "name": "Persist",
+    "actor": "CurriculumRepository",
+    "type": "storage",
+    "dataStoreOps": [{
+      "store": "primary",
+      "operation": "INSERT",
+      "tables": ["curricula", "milestones", "tasks"],
+      "transactional": true,
+      "cascading": true
+    }],
+    "observability": {
+      "metrics": ["curriculum.persisted.count"],
+      "logLevel": "INFO"
+    }
+  }]
+}]
+```
+
+### 4.8 Context Object
+
+```json
+"contexts": [{
+  "id": "thumbnail-generation-context",
+  "name": "Curriculum Thumbnail Generation",
+  "attachedTo": "com.waypoint.jobs.ThumbnailGenerationJob",
+  "schedule": { "type": "fixed_rate", "interval": "1h" },
+  "inputs": [{
+    "name": "Template Images",
+    "source": "src/main/resources/templates/",
+    "items": ["tech-beginner.svg", "creative-arts.svg", "..."]
+  }],
+  "flow": "1. Job triggers every hour\\n2. Queries missing thumbnails\\n3. For each: select template, overlay text, render PNG, upload S3",
+  "uses": [{
+    "artifact": "com.waypoint:finddoc-core",
+    "what": "Document.render()",
+    "why": "Renders SVG template + overlays to PNG"
+  }]
+}]
+```
+
+### 4.9 Error Object
+
+```json
+"errors": [{
+  "code": "AGENT_RETRY_EXHAUSTED",
+  "httpStatus": 500,
+  "exception": "com.waypoint.agent.AgentRetryExhaustedException",
+  "description": "All surgical retry attempts failed to produce valid output",
+  "causes": ["LLM provider timeout", "Schema too complex for model"],
+  "resolution": "Simplify the goal specification or increase MAX_RETRIES",
+  "thrownBy": ["CurriculumAgent.generate", "SurgicalRetrySystem.retry"],
+  "endpoints": ["POST /v1/curricula/generate"],
+  "since": "1.2.0"
+}]
+```
+
+### 4.10 Event Object
+
+```json
+"events": [{
+  "name": "curriculum.generated",
+  "description": "Fired when a curriculum is successfully generated",
+  "trigger": "CurriculumAgent.generate() completes successfully",
+  "channel": "webhook",
+  "payload": {
+    "type": "CurriculumEvent",
+    "fields": [
+      { "name": "curriculum_id", "type": "string" },
+      { "name": "goal_id", "type": "string" },
+      { "name": "milestone_count", "type": "integer" }
+    ]
+  },
+  "deliveryGuarantee": "at-least-once",
+  "retryPolicy": "exponential-backoff",
+  "since": "2.0.0"
+}]
+```
+
+### 4.11 Data Model Object
+
+```json
+"dataModels": [{
+  "name": "Curriculum",
+  "qualified": "com.waypoint.entity.CurriculumEntity",
+  "description": "Persistent curriculum entity",
+  "table": "curricula",
+  "discoveredFrom": "jpa",
+  "fields": [
+    { "name": "id", "type": "UUID", "column": "id", "primaryKey": true, "generated": true },
+    { "name": "title", "type": "String", "column": "title", "nullable": false, "maxLength": 255 },
+    { "name": "userId", "type": "UUID", "column": "user_id", "nullable": false, "foreignKey": { "table": "users", "column": "id", "onDelete": "CASCADE" } },
+    { "name": "difficulty", "type": "Difficulty", "column": "difficulty", "enumType": "STRING", "checkConstraint": "IN ('BEGINNER','INTERMEDIATE','ADVANCED','EXPERT')" }
+  ],
+  "relationships": [
+    { "type": "ONE_TO_MANY", "target": "MilestoneEntity", "field": "milestones", "mappedBy": "curriculum", "cascade": "ALL" }
+  ],
+  "indexes": [
+    { "name": "idx_curricula_user_id", "columns": ["user_id"] },
+    { "name": "idx_curricula_user_status", "columns": ["user_id", "status"] }
+  ],
+  "jsonShape": {
+    "description": "JSON representation returned by API endpoints",
+    "fields": [
+      { "name": "id", "type": "string" },
+      { "name": "title", "type": "string" },
+      { "name": "difficulty", "type": "string", "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED"] },
+      { "name": "milestones", "type": "Milestone[]" }
+    ]
+  },
+  "usedBy": {
+    "endpoints": ["GET /v1/curricula/{id}", "POST /v1/curricula/generate"],
+    "repositories": ["CurriculumRepository"]
+  }
+}]
+```
+
+### 4.12 Data Store Object
+
+```json
+"dataStores": [{
+  "id": "primary",
+  "name": "Primary Database",
+  "type": "postgresql",
+  "tables": ["curricula", "milestones", "tasks", "users"],
+  "schemaSource": "introspection",
+  "migrationTool": "flyway",
+  "migrations": [
+    { "version": "V1", "description": "Create users table", "date": "2025-06-01", "tables": ["users"] },
+    { "version": "V2", "description": "Create curricula table", "date": "2025-06-15", "tables": ["curricula"] }
+  ]
+},
+{
+  "id": "cache",
+  "name": "Cache Layer",
+  "type": "redis",
+  "keyPatterns": [
+    { "pattern": "curriculum:{id}", "type": "Curriculum", "ttl": 3600, "description": "Cached curriculum by ID" },
+    { "pattern": "user:{userId}:curricula", "type": "List<CurriculumSummary>", "ttl": 300, "description": "Dashboard list" }
+  ]
+},
+{
+  "id": "search",
+  "name": "Search Index",
+  "type": "elasticsearch",
+  "indexes": [
+    { "name": "curricula", "description": "Full-text search over curriculum titles and descriptions" }
+  ]
+},
+{
+  "id": "storage",
+  "name": "Object Storage",
+  "type": "s3",
+  "buckets": [
+    { "name": "waypoint-thumbnails", "keyPattern": "thumbnails/{curriculumId}.png", "description": "Generated thumbnails" }
+  ]
+},
+{
+  "id": "events",
+  "name": "Event Bus",
+  "type": "kafka",
+  "topics": [
+    { "name": "curriculum.events", "partitionKey": "curriculumId", "schema": "avro", "description": "Lifecycle events" }
+  ]
+}]
+```
+
+### 4.13 Configuration Object
+
+```json
+"configuration": [{
+  "key": "curriculum.max-retries",
+  "type": "integer",
+  "default": 5,
+  "description": "Maximum surgical retry attempts before throwing AgentRetryExhaustedException",
+  "source": "application.yml",
+  "usedBy": ["CurriculumAgent.generate"],
+  "affectsFlow": "curriculum-generation",
+  "validRange": { "min": 1, "max": 20 },
+  "environment": "CURRICULUM_MAX_RETRIES"
+},
+{
+  "key": "feature.surgical-retry.enabled",
+  "type": "boolean",
+  "default": true,
+  "description": "When false, step 5 (Validate & Retry) is skipped entirely",
+  "source": "application.yml",
+  "affectsFlow": "curriculum-generation",
+  "affectsStep": "validate-output",
+  "environment": "FEATURE_SURGICAL_RETRY_ENABLED"
+}]
+```
+
+### 4.14 Security Object
+
+```json
+"security": {
+  "authMechanism": "jwt",
+  "endpoints": [
+    {
+      "path": "GET /v1/curricula/{id}",
+      "rules": ["hasRole('ADMIN') OR isOwner(curriculumId, principal)"],
+      "public": false
+    },
+    {
+      "path": "POST /v1/curricula/generate",
+      "rules": ["hasRole('USER')"],
+      "rateLimit": { "requests": 10, "per": "minute" },
+      "public": false
+    }
+  ],
+  "roles": ["ADMIN", "USER", "PARTNER"],
+  "scopes": ["curricula:read", "curricula:write", "curricula:admin"]
+}
+```
+
+### 4.15 External Dependencies Object
+
+```json
+"externalDependencies": [{
+  "name": "OpenAI",
+  "baseUrl": "https://api.openai.com/v1",
+  "auth": "bearer",
+  "endpoints": [
+    { "method": "POST", "path": "/chat/completions", "usedBy": ["SkillDecomposer", "MilestonePlanner", "TaskGenerator"] }
+  ],
+  "rateLimit": "10000 req/min",
+  "sla": "99.9%",
+  "fallback": "Queue and retry with exponential backoff"
+}]
+```
+
+### 4.16 Observability Object
+
+```json
+"observability": {
+  "metrics": [
+    { "name": "curriculum.generated.count", "type": "counter", "labels": ["difficulty"], "emittedBy": "CurriculumAgent.generate" },
+    { "name": "curriculum.generation.duration", "type": "timer", "emittedBy": "CurriculumAgent.generate" }
+  ],
+  "traces": [
+    { "spanName": "curriculum.generate", "service": "waypoint-engine", "parentSpan": "api.curricula.generate" }
+  ],
+  "healthChecks": [
+    { "path": "/actuator/health", "checks": ["database", "redis", "elasticsearch"] }
+  ]
+}
+```
+
+### 4.17 Privacy Object
+
+```json
+"privacy": [{
+  "field": "User.email",
+  "piiType": "email",
+  "retention": "account_lifetime",
+  "gdprBasis": "consent",
+  "encrypted": true,
+  "neverLog": true
+},
+{
+  "field": "User.apiKey",
+  "piiType": "secret",
+  "retention": "until_rotated",
+  "neverLog": true,
+  "neverReturn": true,
+  "maskedInResponses": true
+}]
+```
+
+### 4.18 Cross-Reference Object
+
+```json
+"crossRefs": [{
+  "sourceQualified": "com.waypoint.api.CurriculumController.generate",
+  "targetArtifact": "com.waypoint:waypoint-engine",
+  "targetFlow": "curriculum-generation",
+  "targetStep": "parse-goal",
+  "description": "Delegates to the curriculum engine pipeline"
+}]
+```
+
+### 4.19 Discovery Metadata
+
+```json
+"discovery": {
+  "mode": "hybrid",
+  "frameworks": ["spring-boot:3.2.1", "jpa:3.1", "jackson:2.16"],
+  "scannedPackages": ["com.waypoint"],
+  "excludedPackages": ["com.waypoint.internal"],
+  "totalClasses": 52,
+  "documentedClasses": 47,
+  "autoDiscoveredClasses": 38,
+  "annotatedClasses": 9,
+  "coveragePercent": 90.4,
+  "inferredDescriptions": 23
+}
+```
+
+### 4.20 Intent Graph (for DSTI)
+
+```json
+"intentGraph": {
+  "methods": [{
+    "qualified": "com.waypoint.agent.CurriculumAgent.generate",
+    "intentSignals": {
+      "nameSemantics": { "verb": "generate", "implies": ["creates_new_output"] },
+      "guardClauses": [
+        { "condition": "goal == null", "error": "IllegalArgumentException", "boundary": "null" },
+        { "condition": "weeklyHours < 1", "error": "InvalidGoalException", "boundary": { "below": 1 } },
+        { "condition": "weeklyHours > 40", "error": "InvalidGoalException", "boundary": { "above": 40 } }
+      ],
+      "branches": [
+        { "condition": "difficulty == EXPERT && skills.size > 10", "output": "fewer_deeper_milestones" }
+      ],
+      "dataFlow": [
+        { "from": "input.goal.title", "to": "output.title", "type": "passthrough" },
+        { "from": "computed.milestones.max(weekEnd)", "to": "output.estimatedWeeks", "type": "aggregation" }
+      ],
+      "loopProperties": [
+        { "over": "milestones", "body": "generateTasks", "implies": "every_element_transformed" }
+      ],
+      "errorHandling": [
+        { "catches": "TimeoutException", "handling": "wrap_and_throw", "wrappedAs": "AgentRetryExhaustedException" }
+      ],
+      "constants": [
+        { "name": "MAX_RETRIES", "value": 5, "implies": "bounded_retry" }
+      ],
+      "dependencies": [
+        { "name": "llmClient", "classification": "llm" },
+        { "name": "repository", "classification": "database" },
+        { "name": "goalParser", "classification": "pure_logic" }
+      ],
+      "intentDensityScore": 12.5
+    }
+  }]
+}
+```
+
+---
+
+## 5. Annotation Libraries
+
+Each language gets a lightweight annotation/decorator library. All annotations are optional — auto-discovery works without them. Annotations override and enrich auto-discovered information.
+
+### 5.1 Java Annotations
+
+**Package:** `io.docspec.annotation`
+**Maven:** `io.docspec:docspec-annotations-java`
+
+| Annotation | Target | Purpose |
+|---|---|---|
+| @DocModule | Class/Package | Groups members into a logical module |
+| @DocMethod | Method | Adds since, deprecated metadata |
+| @DocField | Field | Marks a field for inclusion |
+| @DocTags | Class | Searchable tags: {"ai", "core"} |
+| @DocOptional | Parameter | Marks a parameter as optional |
+| @DocExample | Method/Class | Attaches a code example |
+| @DocHidden | Any | Excludes from documentation |
+| @DocAudience | Any | Sets visibility: public, partner, internal |
+| @DocFlow | Class | Defines a multi-step flow |
+| @Step | Nested in @DocFlow | A single step in a flow |
+| @DocUses | Method/Class | References flow/member in another project |
+| @DocContext | Class | Runtime context: inputs, narrative, usage |
+| @ContextInput | Nested | Runtime input description |
+| @ContextUses | Nested | Cross-project usage with why field |
+| @DocError | Exception class | Error code with causes and resolution |
+| @DocEvent | Class/Method | Webhook/event with payload and guarantees |
+| @DocEndpoint | SDK Method | Maps SDK method to API endpoint |
+| @DocSpecExample | Test method | Marks test as verified documentation example |
+| @DocPII | Field | PII classification and retention |
+| @DocSensitive | Field | Sensitive data: neverLog, neverReturn |
+| @DocPerformance | Method | Expected latency and bottleneck info |
+| @DocIntentional | Method | Confirms name-behavior gap is intentional |
+| @DocPreserves | Method | Declares input-output field preservation |
+| @DocOrdering | Method | Declares output ordering contract |
+| @DocInvariant | Class/Method | Declares universal output properties |
+| @DocMonotonic | Method | Declares monotonic input-output relationships |
+| @DocConservation | Method | Declares data conservation rules |
+| @DocIdempotent | Method | Declares idempotency |
+| @DocDeterministic | Method | Declares determinism |
+| @DocStateMachine | Class | Declares state transitions |
+| @DocBoundary | Method | Declares boundary behavior |
+| @DocCompare | Method | Declares comparative output assertions |
+| @DocRelation | Class | Declares cross-method relationships |
+| @DocTestStrategy | Class/Method | Overrides DSTI mock/real decisions |
+| @DocTestSkip | Method | Suppresses DSTI test generation with reason |
+
+### 5.2 TypeScript Decorators
+
+**Package:** `@docspec/ts`
+
+```typescript
+import { DocModule, DocMethod, DocFlow, Step, DocInvariant } from '@docspec/ts';
+
+@DocModule({ id: 'conversation-engine', name: 'Conversation Engine' })
+export class ConversationEngine {
+  /** Creates a new conversation with the specified agent. */
+  @DocMethod({ since: '1.0.0' })
+  @DocInvariant({ on: 'Conversation', rules: ['messages SIZE == 0'] })
+  async createConversation(agentId: string): Promise<Conversation> { }
+}
+```
+
+### 5.3 Rust Attributes
+
+**Crate:** `docspec`
+
+```rust
+use docspec::{doc_module, doc_method, doc_invariant};
+
+/// PDF rendering engine core.
+#[doc_module(id = "document", name = "Document")]
+pub struct Document { }
+
+impl Document {
+    /// Renders the document tree to PDF bytes.
+    #[doc_method(since = "0.1.0")]
+    #[doc_invariant(rules = ["output.len() > 0"])]
+    pub fn render(&self) -> Result<Vec<u8>, RenderError> { }
+}
+```
+
+### 5.4 Python Decorators
+
+**Package:** `docspec-py`
+
+```python
+from docspec import doc_module, doc_method, doc_invariant
+
+@doc_module(id='health-sync', name='Health Sync')
+class HealthSyncClient:
+    """Apple Health integration client."""
+
+    @doc_method(since='1.0.0')
+    @doc_invariant(on='SyncResult', rules=['synced_count >= 0'])
+    async def sync(self, user_id: str, metrics: list[str]) -> SyncResult:
+        """Triggers a full sync of the specified health metrics."""
+        pass
+```
+
+### 5.5 C# Attributes
+
+**Package:** `DocSpec.Annotations` (NuGet)
+
+```csharp
+[DocModule(Id = "curriculum-agent", Name = "Curriculum Agent")]
+public class CurriculumAgent
+{
+    [DocMethod(Since = "1.0.0")]
+    [DocInvariant(On = "Curriculum", Rules = new[] { "Milestones.Count > 0" })]
+    public Curriculum Generate(GoalSpec goal) { }
+}
+```
+
+### 5.6 Go Struct Tags + Comments
+
+**Package:** `go-docspec`
+
+Go doesn't have annotations, so DocSpec uses struct tags and specially formatted comments:
+
+```go
+// docspec:module id=curriculum-agent name="Curriculum Agent"
+type CurriculumAgent struct { }
+
+// docspec:method since=1.0.0
+// docspec:invariant on=Curriculum rules="Milestones.Size > 0"
+func (a *CurriculumAgent) Generate(goal GoalSpec) (Curriculum, error) { }
+```
+
+---
+
+## 6. Annotation Processors & Generators
+
+Each language has a processor that reads source code and produces `docspec.json` + `intent-graph.json`. Processors operate in three tiers: Tier 0 (auto-discovery only), Tier 1 (auto + minimal annotations), Tier 2 (full annotations).
+
+### 6.1 Java: Annotation Processor
+
+Uses `javax.annotation.processing` with `com.sun.source.util.Trees` for JavaDoc access.
+
+**Processing pipeline (18 steps):**
+
+1. Auto-discovery scan: find all public classes in configured packages
+2. Framework detection: scan classpath for Spring Boot, JPA, Jackson, Micronaut, Quarkus
+3. Spring stereotype mapping: @RestController → API, @Service → service, @Repository → data
+4. JPA entity extraction: @Entity → data model objects with field/relationship mapping
+5. Jackson shape extraction: @JsonProperty, @JsonIgnore → JSON serialization documentation
+6. Database schema introspection: connect to DB or parse migrations → schema documentation
+7. Scheduled job detection: @Scheduled → operations/context entries
+8. Security rule extraction: @PreAuthorize, @Secured → security model
+9. Configuration extraction: @Value, @ConfigurationProperties → configuration reference
+10. Observability extraction: Micrometer metrics, log statements, trace spans
+11. Annotation reader: reads @DocModule, @DocMethod, @DocFlow, etc.
+12. JavaDoc reader: parses doc comments via DocCommentTree
+13. Description inference: generates descriptions from method/class names when no doc exists
+14. OpenAPI merge: if openapi.json exists, creates API endpoint entries
+15. DSTI intent extraction: 13-channel analysis → intent graph
+16. Error/event collector: reads @DocError, @DocEvent
+17. Cross-ref processor: reads @DocUses, stores unresolved references
+18. Serializer: writes docspec.json + intent-graph.json
+
+### 6.2 TypeScript: AST Generator
+
+Uses TypeScript Compiler API (`ts.createProgram`) with TSDoc parser. Auto-discovers exported classes, types, and functions. Detects NestJS, TypeORM, Prisma, Express frameworks.
+
+### 6.3 Rust: Build Script
+
+Uses `syn` for AST parsing and `pulldown-cmark` for doc comment extraction in a `build.rs` script. Detects axum, actix-web, diesel, sqlx, serde frameworks.
+
+### 6.4 Python: AST Walker
+
+Uses `ast` module with `inspect` for type info. Reads Google/NumPy/Sphinx docstrings. Detects FastAPI, Django, SQLAlchemy, Pydantic frameworks.
+
+### 6.5 C#: Roslyn Analyzer
+
+Uses Roslyn compiler API for AST analysis and XML comment parsing. Detects ASP.NET Core, EF Core, System.Text.Json frameworks.
+
+### 6.6 Go: AST Walker
+
+Uses `go/ast` and `go/types` for analysis. Reads `//` comments with special `docspec:` prefix. Detects gin, echo, gorm, sqlx frameworks.
+
+---
+
+## 7. Build Tool Plugins
+
+### 7.1 Maven Plugin
+
+**Coordinates:** `io.docspec:docspec-maven-plugin`
+
+| Goal | Phase | Description |
+|---|---|---|
+| docspec:generate | compile | Runs processor, produces docspec.json + intent-graph.json |
+| docspec:publish | deploy | Publishes as classifier artifact to repository |
+| docspec:validate | verify | Validates against JSON schema |
+| docspec:coverage | verify | Reports coverage metrics, fails if below threshold |
+| docspec:verify-examples | test | Compiles and runs all @DocSpecExample test methods |
+| docspec:generate-tests | generate-test-sources | DSTI generates tests from intent graph |
+| docspec:schema-sync | validate | Compares JPA entities against actual database schema |
+| docspec:aggregate | package | Merges child module specs in multi-module projects |
+
+```xml
+<plugin>
+  <groupId>io.docspec</groupId>
+  <artifactId>docspec-maven-plugin</artifactId>
+  <version>1.0.0</version>
+  <configuration>
+    <discovery>
+      <mode>hybrid</mode>
+      <include><package>com.waypoint.**</package></include>
+      <exclude><package>com.waypoint.internal.**</package></exclude>
+      <frameworks>
+        <spring>true</spring>
+        <jpa>true</jpa>
+        <jackson>true</jackson>
+      </frameworks>
+      <inferDescriptions>true</inferDescriptions>
+    </discovery>
+    <database>
+      <introspect>true</introspect>
+      <connectionUrl>${DATABASE_URL}</connectionUrl>
+      <migrationDir>src/main/resources/db/migration</migrationDir>
+    </database>
+    <coverage>
+      <minimumPercent>80</minimumPercent>
+      <failOnBelowThreshold>true</failOnBelowThreshold>
+    </coverage>
+    <dsti>
+      <enabled>true</enabled>
+      <minimumIntentDensity>4</minimumIntentDensity>
+      <failOnLowDensity>true</failOnLowDensity>
+    </dsti>
+    <audience>public</audience>
+  </configuration>
+</plugin>
+```
+
+### 7.2 Gradle Plugin
+
+**Plugin ID:** `io.docspec.gradle`
+
+### 7.3 npm Integration
+
+```json
+{
+  "scripts": {
+    "docspec": "docspec-ts generate",
+    "docspec:test": "docspec-ts generate-tests",
+    "prepublish": "npm run docspec"
+  }
+}
+```
+
+### 7.4 Cargo Integration
+
+```toml
+[package.metadata.docspec]
+output = "docspec.json"
+include-private = false
+frameworks = ["axum", "diesel", "serde"]
+```
+
+### 7.5 pip/poetry Integration
+
+```toml
+[tool.docspec]
+output = "docspec.json"
+packages = ["waypoint"]
+frameworks = ["fastapi", "sqlalchemy", "pydantic"]
+```
+
+### 7.6 dotnet Integration
+
+```xml
+<PackageReference Include="DocSpec.Analyzer" Version="1.0.0" />
+```
+
+---
+
+## 8. Repository Resolution System
+
+### 8.1 Registry Configuration
+
+```yaml
+repositories:
+  company-artifactory:
+    type: maven
+    url: https://artifactory.company.com/maven-releases
+    auth: { type: bearer, token: "${ARTIFACTORY_TOKEN}" }
+
+  company-npm:
+    type: npm
+    url: https://npm.company.com
+    auth: { type: token, token: "${NPM_INTERNAL_TOKEN}" }
+
+  aws-codeartifact:
+    type: maven
+    url: https://domain-123456.d.codeartifact.us-east-1.amazonaws.com/maven/repo/
+    auth: { type: aws, profile: production }
+
+  # Import credentials from existing config files
+  from-maven-settings:
+    import: ~/.m2/settings.xml
+
+  from-npmrc:
+    import: ~/.npmrc
+```
+
+### 8.2 Resolution Order
+
+```yaml
+resolution:
+  maven: { order: [company-artifactory, maven-central] }
+  npm: { order: [company-npm, npmjs] }
+  crates: { order: [crates-io] }
+  pypi: { order: [company-pypi, pypi] }
+  nuget: { order: [nuget-org] }
+```
+
+### 8.3 Authentication Types
+
+| Auth Type | Use Case | Configuration |
+|---|---|---|
+| none | Public registries | No auth block needed |
+| bearer | Artifactory, GitHub Packages, GitLab | `token: ${ENV_VAR}` |
+| basic | Nexus, basic HTTP auth | `username: ${USER}, password: ${PASS}` |
+| aws | AWS CodeArtifact | `profile: name` |
+| gcp | Google Artifact Registry | `keyFile: path/to/key.json` |
+| azure | Azure Artifacts | `pat: ${AZURE_PAT}` |
+| file | Import from settings.xml / .npmrc | `import: path/to/config` |
+
+---
+
+## 9. Auto-Discovery System
+
+### 9.1 Three Tiers
+
+| Tier | Annotations Required | What You Get |
+|---|---|---|
+| Tier 0: Zero Config | None | All public classes/methods documented, frameworks detected, JPA entities mapped, descriptions inferred |
+| Tier 1: Minimal | @DocModule + @DocHidden | Custom module grouping, excluded internals, everything else auto-discovered |
+| Tier 2: Full | @DocFlow, @DocContext, @DocUses, behavioral annotations | Architecture flows, cross-project tracing, semantic test properties |
+
+### 9.2 Framework Detection — Universal Map
+
+Detection is implemented as JSON plugin files (see Section 43: Plugin System). Each detector specifies:
+- How to detect the framework (dependency/import)
+- What annotations/decorators to scan for
+- How to classify stereotypes
+- What metadata to extract
+
+**Web frameworks:**
+
+| Role | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| Framework | Spring MVC | NestJS | Axum/Actix | FastAPI/Django | ASP.NET Core | Gin/Echo |
+| Controller | @RestController | @Controller | #[handler] | @app.get() | [ApiController] | func handler |
+| Auth | Spring Security | Passport/Guards | custom | FastAPI Security | ASP.NET Identity | custom |
+
+**ORMs:**
+
+| Role | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| ORM | JPA/Hibernate | TypeORM/Prisma | Diesel/SQLx | SQLAlchemy | EF Core | GORM |
+| Entity | @Entity | @Entity/model | #[derive(Queryable)] | class Model | [Table] | gorm.Model |
+| Migration | Flyway/Liquibase | TypeORM/Prisma | diesel_migrations | Alembic | EF Migrations | golang-migrate |
+
+**Serialization:**
+
+| Role | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| JSON | Jackson | class-transformer | serde | Pydantic | System.Text.Json | encoding/json |
+| Rename | @JsonProperty | @Expose | #[serde(rename)] | Field(alias=) | [JsonPropertyName] | `json:"name"` |
+
+**Testing:**
+
+| Role | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| Tests | JUnit 5 | Vitest/Jest | built-in | pytest | xUnit | testing |
+| Mocking | Mockito | vitest mock | mockall | unittest.mock | Moq | gomock |
+| HTTP stubs | WireMock | MSW | wiremock-rs | responses | WireMock.Net | httpmock |
+| DB testing | TestContainers | testcontainers-node | testcontainers-rs | testcontainers-py | Testcontainers.NET | testcontainers-go |
+| Properties | jqwik | fast-check | proptest | Hypothesis | FsCheck | rapid |
+
+### 9.3 Description Inference
+
+When `inferDescriptions: true` and no doc comment exists:
+
+| Code Element | Inferred Description |
+|---|---|
+| `generateCurriculum(GoalSpec goal)` | Generates a curriculum from the given goal specification |
+| `findByUserId(String userId)` | Finds records by user ID |
+| `CurriculumRepository` | Repository for curriculum entities |
+| `isActive()` | Returns whether this object is active |
+| `ensureNoDuplicates(List items)` | Ensures the given items contain no duplicates |
+| `POST /v1/curricula/generate` | Generates a new curriculum resource |
+
+---
+
+## 10. OpenAPI Auto-Merge & Framework Detection
+
+For projects with SpringDoc/Swagger (Java), NestJS Swagger (TypeScript), or FastAPI (Python auto-generates OpenAPI), the processor auto-detects and merges API specifications.
+
+### 10.1 Auto-Detection
+
+1. Scans build output for `openapi.json` or `openapi.yaml`
+2. If web framework on classpath, can generate spec on-the-fly
+3. Matches controller methods to OpenAPI endpoints by path + HTTP method
+
+### 10.2 Merge Rules
+
+- OpenAPI description takes precedence over auto-inferred description
+- DocSpec annotations take precedence for `since`, `deprecated`, `tags` metadata
+- Request/response schemas come from OpenAPI
+- Internal flow traces come from @DocFlow/@DocUses annotations
+- Error catalog entries link to specific API error responses
+
+---
+
+## 11. Data Models
+
+When ORM entities or serialization-annotated DTOs are detected, DocSpec generates a Data Models section.
+
+### 11.1 Entity Documentation
+
+- All entity classes documented with fields, column mappings, constraints
+- Validation annotations (@NotNull, @Size, @Pattern) documented as constraints
+- Relationships create ER diagram entries
+
+### 11.2 JSON Shape Documentation
+
+Serialization annotations define the API-facing representation. Docs show both database schema and JSON shape side by side.
+
+### 11.3 Entity Relationship Diagrams
+
+Auto-generated from ORM relationship annotations. Each entity is a node, relationships are edges with cardinality. Clicking an entity navigates to its data model page.
+
+### 11.4 Model-to-Endpoint Linking
+
+Data model pages show which API endpoints accept/return the model, derived from OpenAPI schema references and repository method return types.
+
+---
+
+## 12. Database & Data Store Documentation
+
+### 12.1 Schema Introspection
+
+Three modes, used together and cross-referenced:
+
+| Mode | Source | Strength |
+|---|---|---|
+| Live introspection | Running database via `information_schema` | Most accurate: actual constraints, indexes, triggers |
+| Migration parsing | Flyway/Liquibase/Alembic files | Shows history: when each column was added/modified |
+| ORM inference | JPA/@Entity/Prisma/SQLAlchemy | Code's view: may differ from actual schema |
+
+The processor extracts: tables, columns, types, constraints (NOT NULL, CHECK, UNIQUE, FK), indexes, triggers, views, stored procedures.
+
+### 12.2 Schema-vs-Code Consistency Report
+
+Compares ORM entities against actual database schema:
+
+```
+⚠ CurriculumEntity.difficulty
+  Java: 5 enum values (includes MASTER)
+  DB:   CHECK constraint excludes MASTER
+  Risk: Saving MASTER throws DataIntegrityViolationException
+
+⚠ MilestoneEntity.description
+  Java: @Column(length = 500)
+  DB:   VARCHAR(255)
+  Risk: Strings 256-500 chars will be truncated
+
+Missing indexes for query patterns:
+  ! countRecentActive() → WHERE status AND created_at (no matching index)
+```
+
+### 12.3 Query-to-Index Analysis
+
+Extracts all queries from repository methods (Spring Data naming, @Query, native SQL) and maps them against the index set. Identifies: queries that use indexes efficiently, queries that cause full table scans, missing indexes for common access patterns.
+
+### 12.4 Migration Timeline
+
+Visual timeline of all schema changes with dates, descriptions, affected tables, and links to git commits.
+
+### 12.5 Multi-Data-Store Topology
+
+Documents all data stores (PostgreSQL, Redis, Elasticsearch, S3, Kafka) with their schemas, key patterns, TTLs, and which flow steps interact with them.
+
+### 12.6 Flow-Level Data Operations
+
+Each flow step shows its data store operations:
+
+```
+Step 4: Persist
+  dataStore: primary (PostgreSQL)
+  operation: INSERT
+  tables: curricula, milestones, tasks
+  transaction: @Transactional (all-or-nothing)
+  cascade: curriculum → milestones → tasks
+
+Step 5: Update Cache
+  dataStore: cache (Redis)
+  operation: SET
+  key: curriculum:{id}
+  ttl: 3600s
+```
+
+---
+
+## 13. Configuration & Environment Documentation
+
+### 13.1 Extraction Sources
+
+| Language | Config Mechanism | Extraction |
+|---|---|---|
+| Java/Spring | @Value, @ConfigurationProperties, application.yml | Annotation processor reads @Value patterns |
+| TypeScript/NestJS | @nestjs/config ConfigService, .env | AST scans ConfigService.get() calls |
+| Python/FastAPI | pydantic BaseSettings, os.environ | AST scans settings class fields |
+| Rust | config crate, env::var | Scans env::var() calls |
+| C#/ASP.NET | IConfiguration, appsettings.json | Roslyn scans IConfiguration[] access |
+| Go | os.Getenv, viper | AST scans os.Getenv() calls |
+
+### 13.2 Configuration Reference Page
+
+Auto-generated page showing every configuration property: key, type, default value, description, valid range, environment variable equivalent, which code uses it, which flows it affects, whether it's a feature flag.
+
+### 13.3 Feature Flag Documentation
+
+Feature flags get special treatment: the docs site shows which features are toggleable, what behavior changes when toggled, and which flow steps are affected. Flow diagrams show conditional steps grayed out when their feature flag is off.
+
+---
+
+## 14. Security & Authorization Model
+
+### 14.1 Extraction
+
+Detects Spring Security `@PreAuthorize`, NestJS Guards, FastAPI Security dependencies, ASP.NET `[Authorize]`, custom middleware patterns.
+
+### 14.2 Permission Matrix
+
+Auto-generated table: endpoints × roles, showing which roles can access which endpoints.
+
+### 14.3 Security Tests (DSTI)
+
+For every `@PreAuthorize` rule, DSTI generates:
+- Test: unauthorized user gets 401
+- Test: user without required role gets 403
+- Test: user with required role gets 200
+- Test: owner-check passes for resource owner
+- Test: owner-check fails for non-owner
+
+---
+
+## 15. Multi-Protocol Support
+
+### 15.1 Supported Protocols
+
+| Protocol | Spec Format | Detection |
+|---|---|---|
+| REST | OpenAPI 3.x | SpringDoc, NestJS Swagger, FastAPI auto-gen |
+| GraphQL | .graphql schema | Schema introspection or file |
+| gRPC | .proto files | Protobuf service definitions |
+| WebSocket | @DocWebSocket annotations | Custom annotation |
+| CLI | @DocCommand or picocli/Commander | Framework detection |
+| AsyncAPI | asyncapi.yaml | File import |
+
+### 15.2 Configuration
+
+```yaml
+protocols:
+  rest:
+    - path: ./specs/waypoint-api.json
+  graphql:
+    - path: ./schema/schema.graphql
+  grpc:
+    - path: ./proto/curriculum-service.proto
+  websocket:
+    - discover: true
+  cli:
+    - discover: true
+  asyncapi:
+    - path: ./specs/events.asyncapi.yaml
+```
+
+## 16. The DocSpec CLI & Site Framework
+
+### 16.1 Getting Started
+
+```bash
+# Create a new docs site
+npx create-docspec-site my-docs
+cd my-docs
+
+# Edit docspec.config.yaml to add your artifacts
+
+# Start dev server (hot-reloads on config/guide changes)
+npx docspec dev
+
+# Build static site for deployment
+npx docspec build
+
+# Deploy (Vercel, Netlify, or static hosting)
+npx docspec deploy
+```
+
+### 16.2 Full Configuration File
+
+```yaml
+# docspec.config.yaml
+
+site:
+  name: "Aniceto Holdings Docs"
+  logo: ./assets/logo.svg
+  theme: "@docspec/theme-stripe"
+  baseUrl: https://docs.anicetoholdings.com
+
+# ── Repository Resolution ────────────────────────
+repositories:
+  company-artifactory:
+    type: maven
+    url: https://artifactory.company.com/maven-releases
+    auth: { type: bearer, token: "${ARTIFACTORY_TOKEN}" }
+  from-maven-settings:
+    import: ~/.m2/settings.xml
+resolution:
+  maven: { order: [company-artifactory, maven-central] }
+  npm: { order: [npmjs] }
+
+# ── Artifacts (Libraries/SDKs) ───────────────────
+artifacts:
+  - groupId: com.waypoint
+    artifactId: waypoint-engine
+    version: "2.3.1"
+    repository: maven-central
+    label: "Waypoint Engine"
+    color: "#818cf8"
+
+  - scope: "@nexus"
+    package: nexus-chatbot-sdk
+    version: "^3.0.0"
+    repository: npm
+    label: "Nexus SDK"
+
+  - crate: finddoc-core
+    version: "0.8.3"
+    repository: crates-io
+    label: "FindDoc"
+
+# ── API Protocols ─────────────────────────────────
+protocols:
+  rest:
+    - path: ./specs/waypoint-api.json
+      label: "Waypoint API"
+      baseUrl: https://api.waypoint.dev/v1
+  graphql:
+    - path: ./schema/schema.graphql
+      label: "Waypoint GraphQL"
+
+# ── Data Stores ───────────────────────────────────
+dataStores:
+  primary:
+    type: postgresql
+    migrations: ./src/main/resources/db/migration/
+    connection: ${DATABASE_URL}
+  cache:
+    type: redis
+  search:
+    type: elasticsearch
+    index: ./schema/elasticsearch/curricula-index.json
+  storage:
+    type: s3
+    bucket: waypoint-thumbnails
+  events:
+    type: kafka
+    topics:
+      - name: curriculum.events
+        schema: ./schema/avro/curriculum-event.avsc
+
+# ── Hand-Written Guides ──────────────────────────
+guides:
+  - path: ./docs/getting-started/
+    label: "Getting Started"
+  - path: ./docs/architecture/
+    label: "Architecture"
+
+# ── Navigation Structure ─────────────────────────
+navigation:
+  - section: Learn
+    items: [guides/getting-started, guides/architecture]
+  - section: API Reference
+    items: [protocols/waypoint-api]
+  - section: Libraries
+    items: [artifacts/waypoint-engine, artifacts/nexus-chatbot-sdk, artifacts/finddoc-core]
+  - section: Architecture
+    items: [flows/auto, data-models/auto, data-stores/auto, graph/auto, operations/auto]
+  - section: Testing
+    items: [tests/auto]
+  - section: Changelog
+    auto: true
+
+# ── Build Configuration ──────────────────────────
+build:
+  outputDir: ./out
+  cacheDir: ./.docspec-cache
+  search: true
+  codeLanguages: [java, typescript, python, rust, curl]
+  versioning: true
+  audiences: [public]
+
+# ── AI / LLM Integration ─────────────────────────
+ai:
+  llmsTxt: true
+  contextFile: true
+  mcpServer: true
+  embeddings: false
+
+# ── Analytics ─────────────────────────────────────
+analytics:
+  provider: plausible
+  feedback: true
+```
+
+### 16.3 CLI Commands
+
+| Command | Description |
+|---|---|
+| `npx create-docspec-site <name>` | Scaffold a new docs site |
+| `npx docspec dev` | Dev server at localhost:3000 with hot reload |
+| `npx docspec build` | Resolve artifacts, generate pages, build static site |
+| `npx docspec build --audience internal` | Build with internal audience visibility |
+| `npx docspec resolve` | Pull/update artifacts from registries |
+| `npx docspec validate` | Validate all specs against schema |
+| `npx docspec deploy` | Deploy to Vercel/Netlify/S3 |
+| `npx docspec search-index` | Generate search index |
+| `npx docspec graph` | Generate dependency graph |
+| `npx docspec diff <v1> <v2>` | Show doc diff between versions |
+| `npx docspec context` | Generate CLAUDE.md / CONTEXT.md |
+| `npx docspec coverage` | Report doc coverage across all artifacts |
+| `npx docspec schema-sync` | Run database schema introspection |
+| `npx docspec import --from <source>` | Bootstrap from existing docs |
+| `npx docspec export --format pdf` | Export as PDF/EPUB/DOCX |
+| `npx docspec mcp-server` | Start MCP server for AI tools |
+| `npx docspec test-report` | Show DSTI test generation report |
+
+---
+
+## 17. Navigation Taxonomy & Cross-Linking
+
+### 17.1 Six Sections
+
+| Section | Source | Purpose |
+|---|---|---|
+| Learn | Markdoc guides | Hand-written tutorials, getting started, concepts |
+| API Reference | OpenAPI/GraphQL/gRPC + DocSpec metadata | Endpoints, queries, services with internal flow traces |
+| Libraries & SDKs | DocSpec artifacts | Modules, classes, methods with "Referenced In" panels |
+| Architecture | Flows + contexts + data stores + data models + graph | Flow diagrams, ER diagrams, dependency graph, operations |
+| Testing | DSTI intent graph + generated tests | Test overview, per-class tests, per-flow tests, gap report |
+| Changelog | Version diffs | Auto-generated per-version changes |
+
+### 17.2 Cross-Linking System
+
+Every page type includes panels linking to related content:
+
+**API Endpoint Page:**
+- Standard: parameters, auth, request/response schemas
+- Code examples: SDK calls auto-generated from @DocEndpoint mappings
+- Internal Path: collapsed trace showing @DocFlow triggered by this endpoint
+- Related Errors: @DocError entries listing this endpoint
+- Events Emitted: @DocEvent entries triggered by this endpoint
+- Data Models: entity types in request/response
+- Data Store Operations: which tables/caches/queues are touched
+- Configuration Dependencies: config properties that affect this endpoint
+- Security: auth requirements, rate limits
+- Tests: DSTI-generated tests for this endpoint
+
+**Library Class Page:**
+- Standard: methods, fields, constructors, examples
+- Referenced In: flows, endpoints, contexts that use this class
+- Depends On: cross-project references from this class
+- Used By: other classes/endpoints referencing this class
+- Tests: DSTI-generated tests with intent channel breakdown
+
+**Flow Page:**
+- Interactive step diagram with clickable actors
+- Trace View: call-stack visualization with project boundaries
+- Data store operations per step
+- Configuration dependencies per step
+- Observability per step (metrics, logs, traces)
+- Tests: integration tests generated from flow topology
+
+**Data Store Page:**
+- Schema: tables, columns, constraints, indexes
+- ER diagram for relational stores
+- Key patterns for Redis/cache stores
+- Query analysis: which queries use which indexes
+- Migration timeline
+- Consistency report: schema vs code mismatches
+- Ownership: which services read/write
+
+**Testing Page:**
+- Per-class: generated tests with intent channel badges
+- Per-flow: integration tests with mock boundary visualization
+- Gap report: methods needing annotations
+- Coverage dashboard: doc coverage + test coverage unified
+
+### 17.3 Trace View
+
+Combines OpenAPI + DocFlow + DocUses + data store operations:
+
+```
+POST /v1/curricula/generate
+  → AuthFilter.authenticate()              [waypoint-api]       🔒 JWT
+  → CurriculumController.validate()        [waypoint-api]       🛡️ Guards
+  → CurriculumAgent.generate()             [waypoint-engine]    🔗 Cross-project
+    → GoalParser.parse()                   [waypoint-engine]    ⚙️ Pure logic
+    → SkillDecomposer.decompose()          [waypoint-engine]    🧠 AI (OpenAI)
+        READ skills_taxonomy               [PostgreSQL]         💾 DB
+    → MilestonePlanner.plan()              [waypoint-engine]    🧠 AI (OpenAI)
+    → TaskGenerator.generate()             [waypoint-engine]    🧠 AI (OpenAI)
+      → SurgicalRetrySystem.retry()        [waypoint-engine]    🔄 Retry
+    → Document.render()                    [finddoc-core]       📦 Cross-project
+    → CurriculumRepository.save()          [waypoint-engine]    💾 DB
+        INSERT curricula, milestones, tasks [PostgreSQL]         💾 @Transactional
+    → CacheService.put()                   [waypoint-api]       ⚡ Cache
+        SET curriculum:{id} TTL 3600       [Redis]
+    → EventPublisher.publish()             [waypoint-api]       📨 Event
+        PRODUCE curriculum.generated       [Kafka]
+    → MetricsClient.record()              [waypoint-api]       📊 Observability
+  ← 201 Created { curriculum }
+```
+
+---
+
+## 18. Rendering & Theme System
+
+### 18.1 Page Types
+
+| Page Type | Source | Layout |
+|---|---|---|
+| Guide | Markdoc files | Full-width prose with sidebar TOC |
+| Module | docspec modules[] | Member list with expandable details |
+| Member | docspec members[] | Split: left description, right code examples |
+| Endpoint | OpenAPI + DocSpec | Stripe-style 3-panel with internal flow trace |
+| GraphQL | .graphql schema | Type explorer with query/mutation docs |
+| Flow | docspec flows[] | Interactive step diagram with trace view |
+| Data Model | docspec dataModels[] | Entity fields + JSON shape + ER diagram |
+| Data Store | docspec dataStores[] | Schema + query analysis + migration timeline |
+| Error Catalog | docspec errors[] | Searchable with causes and resolutions |
+| Event Catalog | docspec events[] | Payload schemas and delivery info |
+| Operations | docspec contexts[] | Scheduled jobs, workers, processing pipelines |
+| Configuration | docspec configuration[] | Property reference with valid ranges |
+| Security | docspec security | Permission matrix and auth model |
+| Dependency Map | docspec externalDependencies[] | Third-party services with SLAs and fallbacks |
+| Test Overview | intentGraph | DSTI test dashboard with coverage and gaps |
+| Test Detail | intentGraph per method | Generated test code with intent channel badges |
+| Graph | All cross-refs | Interactive dependency graph |
+| Privacy | docspec privacy[] | PII fields, retention, GDPR basis |
+| Changelog | Version diffs | Added/modified/removed per version |
+
+### 18.2 Theme API
+
+Themes are npm packages exporting React components for each page type.
+
+### 18.3 Built-in Themes
+
+| Theme | Style |
+|---|---|
+| @docspec/theme-stripe | Clean, professional, 3-panel API layout |
+| @docspec/theme-minimal | Simple, single-column |
+| @docspec/theme-dark | Dark mode, code-forward |
+
+---
+
+## 19. Cross-Project Resolution
+
+### 19.1 Pipeline
+
+1. Read artifact entries from `docspec.config.yaml`
+2. Resolve `docspec.json` from registries per resolution order
+3. Validate against JSON schema
+4. Resolve cross-references: match @DocUses to downloaded specs
+5. Stitch flows across project boundaries
+6. Build unified navigation with full cross-linking
+7. Generate all pages with active theme
+
+### 19.2 Caching & Version Ranges
+
+Specs cached in `.docspec-cache/` with content hashes. Semver ranges supported for npm artifacts.
+
+---
+
+## 20. Flow System
+
+### 20.1 Flow Anatomy
+
+- **Trigger:** HTTP request, scheduled job, message, manual
+- **Steps:** Ordered operations, each with actor, data store ops, config deps, observability
+- **Actor resolution:** Each actor resolved to documented member page
+- **Step types:** process, ai, storage, trigger, retry, external, bridge, observability
+- **Cross-project steps:** Steps referencing actors in other projects show project boundaries
+- **Data store operations:** Each step shows which tables/caches/queues it reads/writes
+
+### 20.2 Flow-Level Database Operations
+
+Steps include `dataStoreOps` showing exact tables, operations (SELECT/INSERT/UPDATE/DELETE), transaction boundaries, and cascade behavior.
+
+### 20.3 Flow Auto-Inference (Stretch Goal)
+
+Analyze method call graphs to detect common patterns. Label as "auto-inferred" with option to upgrade to explicit @DocFlow.
+
+---
+
+## 21. Context System
+
+Contexts explain how code is used at runtime with real configuration, inputs, and operational details.
+
+### 21.1 Components
+
+| Component | Purpose |
+|---|---|
+| @ContextInput | Runtime inputs with actual values (template files, config, etc.) |
+| @ContextUses | Cross-project code with rationale (what + why) |
+| flow narrative | Plain-language processing description |
+| schedule | When/how often (cron, fixed rate, event-triggered) |
+| outputs | What the code produces (files, metrics, events) |
+
+### 21.2 Operations View
+
+All contexts aggregated into a system-level Operations page: what jobs run, when, with what inputs, touching what systems.
+
+---
+
+## 22. SDK-to-Endpoint Mapping
+
+Three mechanisms:
+
+### 22.1 @DocEndpoint (Explicit)
+
+```java
+@DocEndpoint("POST /v1/curricula/generate")
+public Curriculum generate(GoalSpec goal) { }
+```
+
+### 22.2 Convention-Based (Automatic)
+
+SDK class `Curricula` + method `generate` → `POST /v1/curricula/generate`
+
+### 22.3 Config-Based (Override)
+
+```yaml
+endpointMappings:
+  - endpoint: "POST /v1/curricula/generate"
+    sdkMethods:
+      - artifact: "@waypoint/sdk"
+        method: "curricula.generate"
+        language: typescript
+```
+
+---
+
+## 23. Error Catalog
+
+### 23.1 @DocError Annotation
+
+Available in all languages. Documents error code, causes, resolution, affected endpoints.
+
+### 23.2 Error Pages
+
+Searchable catalog with: description, causes, resolution steps, related endpoints, related flow steps. API endpoint pages link to errors in their "Errors" section.
+
+---
+
+## 24. Webhook & Event Documentation
+
+### 24.1 Sources
+
+- @DocEvent annotations
+- AsyncAPI spec import
+- Kafka/RabbitMQ/SQS listener detection
+
+### 24.2 Event Pages
+
+Event name, trigger, payload schema, delivery guarantees, retry policy, example payloads, links to emitting flows.
+
+---
+
+## 25. Observability Documentation
+
+### 25.1 Extraction
+
+Detects: Micrometer/Prometheus metrics, OpenTelemetry spans, structured logging (logback/log4j, pino, tracing crate).
+
+### 25.2 Observability Page
+
+All metrics with names, types, labels, emitters. Distributed tracing spans. Key log messages. Links to Grafana/Datadog dashboard definitions. Flow diagrams show observability at each step.
+
+---
+
+## 26. External Dependencies Documentation
+
+### 26.1 Configuration
+
+```yaml
+externalDependencies:
+  - name: OpenAI
+    baseUrl: https://api.openai.com/v1
+    auth: bearer
+    rateLimit: 10000 req/min
+    sla: 99.9%
+    fallback: "Queue and retry"
+    usedBy: [SkillDecomposer, MilestonePlanner, TaskGenerator]
+```
+
+### 26.2 Dependency Page
+
+Shows all external services, which code calls them, failure modes, fallback behavior. Tells DSTI what to WireMock/MSW stub.
+
+---
+
+## 27. Data Privacy & Compliance
+
+### 27.1 Annotations
+
+```java
+@DocPII(type = "email", retention = "account_lifetime", gdprBasis = "consent")
+private String email;
+
+@DocSensitive(neverLog = true, neverReturn = true)
+private String apiKey;
+```
+
+### 27.2 Privacy Page
+
+All PII fields, retention policies, legal basis, encryption status. DSTI generates tests: verify @DocSensitive(neverLog) fields never appear in log output, verify @DocSensitive(neverReturn) fields never appear in API responses.
+
+---
+
+## 28. Versioning & Publishing
+
+### 28.1 Artifact Versioning
+
+Specs versioned identically to parent artifact. No separate tracking.
+
+### 28.2 Multi-Version Documentation
+
+```yaml
+artifacts:
+  - groupId: com.waypoint
+    artifactId: waypoint-engine
+    versions: ["2.3.1", "2.2.0", "3.0.0-beta.1"]
+    default: "2.3.1"
+```
+
+### 28.3 Version Diffing
+
+```bash
+$ npx docspec diff com.waypoint:waypoint-engine 2.2.0 2.3.1
+
+Curriculum Agent (curriculum-agent)
+  + Added method: generateAsync (since 2.0.0)
+  ~ Modified method: generate
+      + Added parameter: options (GenerateOptions, optional)
+  + Added class: SurgicalRetrySystem (since 1.2.0)
+  + Added data model field: estimatedWeeks on CurriculumEntity
+  + Added migration: V6__add_user_status_index.sql
+  + Added error code: AGENT_RETRY_EXHAUSTED
+```
+
+## 29. Multi-Language Architecture
+
+### 29.1 Three-Layer Principle
+
+**Extract language-specific, represent language-agnostic, generate language-specific.**
+
+The intermediate representation (docspec.json + intent graph) contains zero language-specific concepts. No "class" vs "struct" — only "member" with a `kindCategory`. No "throws" vs "Result<T,E>" — only "errorConditions" with a `mechanism` field. No "List<T>" vs "Vec<T>" — only "collection of T."
+
+### 29.2 Language-Agnostic Member Kinds
+
+| kindCategory | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| composite_type | class | class | struct | class | class | struct |
+| abstract_type | interface | interface | trait | ABC | interface | interface |
+| record_type | record | — | — | dataclass | record | — |
+| enumeration | enum | enum | — | Enum | enum | — |
+| tagged_union | — | union type | enum | Union | — | — |
+| function | — | function | fn | function | — | func |
+| type_alias | — | type | type | TypeAlias | — | type |
+| module | package | module | mod | module | namespace | package |
+
+### 29.3 Unified Error Modeling
+
+```json
+"errorConditions": [{
+  "type": "AgentRetryExhaustedException",
+  "mechanism": "exception",
+  "description": "All retry attempts exhausted"
+}]
+```
+
+| mechanism | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| exception | throws X | throw new X | — | raise X | throw X | — |
+| result_type | — | — | Result<T,E> | — | — | — |
+| error_value | — | — | — | — | — | (T, error) |
+| panic | — | — | panic!() | — | — | panic() |
+
+### 29.4 Unified Async Modeling
+
+| mechanism | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| future | CompletableFuture<T> | — | impl Future<Output=T> | — | — | — |
+| promise | — | Promise<T> | — | — | — | — |
+| coroutine | — | — | — | Awaitable[T] | — | — |
+| task | — | — | — | — | Task<T> | — |
+| goroutine | — | — | — | — | — | goroutine + chan |
+
+### 29.5 Dependency Classification (Universal)
+
+Every dependency in any language falls into one of these categories:
+
+| Classification | Description | Unit Test Strategy | Integration Test Strategy |
+|---|---|---|---|
+| pure_logic | No I/O, no state, no side effects | Real implementation | Real implementation |
+| database | JPA, TypeORM, Diesel, SQLAlchemy, EF, GORM | Mock | TestContainers (real DB) |
+| http_client | RestTemplate, fetch, reqwest, httpx, HttpClient | Mock | WireMock/MSW/wiremock-rs |
+| llm | OpenAI, Anthropic, any LLM client | Mock always | Mock always (non-deterministic) |
+| message_broker | Kafka, RabbitMQ, SQS | Mock | Embedded broker (TestContainers) |
+| file_system | File reads/writes | Mock | Temp directory with fixtures |
+| cache | Redis, Memcached, in-memory | Mock | TestContainers or embedded |
+| observability | Metrics, logs, traces | Mock (low value) | Mock (low value) |
+| time_dependent | Clock, Instant.now(), Date.now() | Fixed clock/mock | Fixed clock/mock |
+
+### 29.6 Framework Detection Plugin System
+
+Instead of hardcoding, framework detection uses JSON plugin files:
+
+```json
+{
+  "framework": "spring-boot",
+  "language": "java",
+  "detection": {
+    "dependencies": ["org.springframework.boot:spring-boot-starter-web"]
+  },
+  "stereotypes": {
+    "RestController": { "category": "api_controller", "extractEndpoints": true },
+    "Service": { "category": "service" },
+    "Repository": { "category": "data_access", "dependencyClassification": "database" }
+  }
+}
+```
+
+Third parties contribute new detectors (e.g., Quarkus, Micronaut, Ktor) as JSON files without modifying core.
+
+### 29.7 Path to Universal: Tree-sitter + LSP
+
+**Tree-sitter:** Universal parser with grammars for 100+ languages. Provides Tier 0 extraction for any language via heuristic pattern matching for guard clauses, method names, branch structure, constants.
+
+**LSP Integration:** Language Server Protocol provides type info, references, symbols. A DocSpec processor speaking LSP extracts documentation from any language with an LSP server. Long-term path to truly universal extraction.
+
+---
+
+## 30. DocSpec Test Intelligence (DSTI)
+
+### 30.1 The Tautology Problem
+
+If tests are derived from the implementation, they verify the code does what the code does. If the code has a bug, the generated test encodes the same bug.
+
+DSTI solves this by extracting developer **intent** from multiple independent channels in the code. Intent and implementation are two different signals. Bugs live in the gap between them.
+
+### 30.2 Multi-Channel Intent Verification
+
+The key insight: developers embed intent in **multiple independent channels** — method names, guard clauses, branch conditions, exception messages, type structures, constants, and more. By cross-checking these channels against each other, DSTI detects bugs that tautological testing misses.
+
+Example: A method named `findActiveCurricula` that filters for `status == ACTIVE || status == PAUSED` — the name claims "active only" but the implementation includes "paused." The test verifies the gap, not the implementation.
+
+### 30.3 The Intent Graph
+
+The language-agnostic intermediate representation between extraction and test generation:
+
+```json
+{
+  "qualified": "com.waypoint.agent.CurriculumAgent.generate",
+  "intentSignals": {
+    "nameSemantics": { "verb": "generate", "implies": ["creates_new_output"] },
+    "guardClauses": [...],
+    "branches": [...],
+    "dataFlow": [...],
+    "loopProperties": [...],
+    "errorHandling": [...],
+    "constants": [...],
+    "dependencies": [...],
+    "intentDensityScore": 12.5
+  }
+}
+```
+
+This graph is extracted from Java, TypeScript, Rust, Python, C#, or Go — the representation is identical regardless of source language. Test generators read this graph and produce language-specific tests.
+
+---
+
+## 31. DSTI Intent Extraction Channels
+
+### Channel 1: Naming Semantics
+
+Parse method/variable names. Extract semantic verb → map to testable property.
+
+| Verb | Implies | Test |
+|---|---|---|
+| ensure/validate | Postcondition holds | Verify condition after call |
+| filter/exclude | Output ⊆ input | Verify subset relationship |
+| sort/order | Output is ordered | Verify comparator |
+| merge/combine | Output contains all inputs | Verify union |
+| split/partition | Outputs cover input | Verify coverage, no overlap |
+| calculate/compute | Deterministic | Same input → same output |
+| find/search | Output matches criteria | Verify criteria on results |
+| create/build | New output | Output didn't exist before |
+| delete/remove | Target gone | Target inaccessible after |
+
+Works identically across all languages — naming conventions are universal.
+
+### Channel 2: Guard Clauses
+
+Extract all "check condition → produce error" patterns:
+
+| Language | Pattern |
+|---|---|
+| Java | `if (x) throw new Y(...)` |
+| TypeScript | `if (x) throw new Error(...)` |
+| Rust | `x.ok_or(Error)?` or `if x { return Err(...) }` |
+| Python | `if x: raise Y(...)` |
+| C# | `ArgumentNullException.ThrowIfNull(x)` or `if (x) throw` |
+| Go | `if x { return nil, fmt.Errorf(...) }` |
+
+From each guard, generate: boundary tests at ±1 of numeric guards, null/nil tests, empty collection tests.
+
+### Channel 3: Branch Structure
+
+Extract if/else, switch/match, ternary trees. For each branch: generate path coverage test, boundary condition between branches, exhaustiveness check (all enum values handled?).
+
+### Channel 4: Name-Behavior Gap Detection
+
+Compare name semantics (Channel 1) against branch behavior (Channel 3). Flag methods where the name implies something the branches don't guarantee.
+
+Generate "is this intentional?" tests for gaps. Suppressible with `@DocIntentional`.
+
+### Channel 5: Return Type Structure
+
+From return type fields, infer: non-null expectations, non-empty collections, positive numbers, recent timestamps.
+
+For Rust `Result<T, E>`: document and test both Ok and Err paths.
+For Go `(T, error)`: document and test both return values.
+
+### Channel 6: Assignment Patterns
+
+Trace builder/constructor assignments: `output.title = input.title` → test passthrough preservation. `output.weeks = milestones.max(weekEnd)` → test formula correctness.
+
+Works with: Java builders, Rust struct init, TypeScript object spread, Python dataclass construction, Go struct literals.
+
+### Channel 7: Loop/Iterator Patterns
+
+| Pattern | Property | Test |
+|---|---|---|
+| filter | Output ⊆ input, all match predicate | Verify subset + predicate |
+| map | Same cardinality | Verify count preserved |
+| flatMap | Cardinality may increase | Verify no loss |
+| distinct | No duplicates | Verify set equality |
+| sorted | Ordered by comparator | Verify ordering |
+| forEach body | Universal application | Verify all elements processed |
+
+Go explicit loops (`for range` + `if` + `append`) recognized as equivalent to functional patterns.
+
+### Channel 8: Catch Blocks / Error Handling
+
+Extract error handling patterns from try/catch (Java/TS/Python/C#), `match` on Result (Rust), `if err != nil` (Go).
+
+For each: test that the error condition triggers the documented handling behavior.
+
+### Channel 9: Assignment Chain Analysis
+
+Trace field assignments in object construction back to their sources. Test: passthrough fields match input, aggregation fields match formula, generated fields (id, createdAt) have expected properties.
+
+### Channel 10: Loop Body Analysis
+
+`for each milestone: generateTasks(milestone)` → every element in collection is processed. Test: output.milestones.all(ms -> ms.tasks.nonEmpty).
+
+### Channel 11: Catch Block Side Effects
+
+`catch TimeoutException → metrics.increment("timeout")` → test that the metric is emitted on timeout.
+
+### Channel 12: Logging as Behavioral Markers
+
+`log.info("Generated {} milestones", count)` → milestone count is a meaningful metric. Test: count is positive and bounded.
+
+### Channel 13: Equals/HashCode/CompareTo Contracts
+
+Extract field usage from equals() implementations. Generate: reflexivity, symmetry, transitivity, hashCode consistency, null safety tests.
+
+### Cross-Channel Verification
+
+The power of DSTI is comparing channels against each other:
+
+| Comparison | What It Catches |
+|---|---|
+| Name vs. Branches | Method named "findActive" but includes PAUSED status |
+| Guard vs. Implementation | Guard says < 1 but implementation uses <= 0 |
+| Type vs. Implementation | Returns List but sometimes returns null |
+| Constant vs. Implementation | MAX_RETRIES = 5 but retry loop uses hardcoded 3 |
+| Exception message vs. Guard | Message says "1 to 40" but guard says < 0 |
+| Cross-method consistency | create(x) then findById → should return x |
+
+---
+
+## 32. DSTI Cross-Language Test Generation
+
+### 32.1 From Intent Graph to Tests
+
+The intent graph is language-agnostic. Test generators are language-specific. Same graph, different outputs.
+
+**From guard clause** `{ "condition": "goal == null", "error": "IllegalArgumentException" }`:
+
+**Java (JUnit 5):**
+```java
+@Test void generate_nullGoal_throws() {
+    assertThrows(IllegalArgumentException.class, () -> agent.generate(null));
+}
+```
+
+**TypeScript (Vitest):**
+```typescript
+it('throws when goal is null', () => {
+    expect(() => agent.generate(null)).toThrow();
+});
+```
+
+**Rust:**
+```rust
+#[test]
+fn generate_null_goal_returns_error() {
+    assert!(matches!(agent.generate(None), Err(AgentError::NullGoal)));
+}
+```
+
+**Python (pytest):**
+```python
+def test_generate_null_goal_raises():
+    with pytest.raises(ValueError):
+        agent.generate(None)
+```
+
+**Go:**
+```go
+func TestGenerate_NilGoal(t *testing.T) {
+    _, err := agent.Generate(nil)
+    if err == nil { t.Fatal("expected error") }
+}
+```
+
+**C# (xUnit):**
+```csharp
+[Fact] public void Generate_NullGoal_Throws() {
+    Assert.Throws<ArgumentNullException>(() => agent.Generate(null));
+}
+```
+
+### 32.2 Property-Based Test Generation
+
+From monotonic property `weeklyHours UP → estimatedWeeks DOWN`:
+
+**Java (jqwik):**
+```java
+@Property void moreHours_fewerWeeks(@ForAll @IntRange(min=1,max=40) int h1, @ForAll @IntRange(min=1,max=40) int h2) {
+    assume(h1 < h2);
+    assertThat(generate(goalWith(h1)).getEstimatedWeeks())
+        .isGreaterThanOrEqualTo(generate(goalWith(h2)).getEstimatedWeeks());
+}
+```
+
+**TypeScript (fast-check):**
+```typescript
+it('more hours → fewer weeks', () => {
+  fc.assert(fc.property(fc.integer({min:1,max:40}), fc.integer({min:1,max:40}), (h1,h2) => {
+    fc.pre(h1 < h2);
+    return generate(goalWith(h1)).estimatedWeeks >= generate(goalWith(h2)).estimatedWeeks;
+  }));
+});
+```
+
+**Rust (proptest):**
+```rust
+proptest! {
+    #[test] fn more_hours_fewer_weeks(h1 in 1..=40i32, h2 in 1..=40i32) {
+        prop_assume!(h1 < h2);
+        prop_assert!(generate(goal_with(h1)).estimated_weeks >= generate(goal_with(h2)).estimated_weeks);
+    }
+}
+```
+
+**Python (Hypothesis):**
+```python
+@given(h1=st.integers(1,40), h2=st.integers(1,40))
+def test_more_hours_fewer_weeks(h1, h2):
+    assume(h1 < h2)
+    assert generate(goal_with(h1)).estimated_weeks >= generate(goal_with(h2)).estimated_weeks
+```
+
+### 32.3 Mock Infrastructure Per Language
+
+| Classification | Java | TypeScript | Rust | Python | Go | C# |
+|---|---|---|---|---|---|---|
+| Mock framework | Mockito | vi.mock | mockall | MagicMock | gomock | Moq |
+| HTTP stub | WireMock | MSW | wiremock-rs | responses | httpmock | WireMock.Net |
+| DB container | TestContainers | testcontainers-node | testcontainers-rs | testcontainers-py | testcontainers-go | Testcontainers.NET |
+| Property tests | jqwik | fast-check | proptest | Hypothesis | rapid | FsCheck |
+
+### 32.4 The Dependency Walk Algorithm
+
+For a class with N dependencies, decide mock vs real:
+
+1. Build full dependency tree from constructor injection / DI framework
+2. For each leaf node, classify I/O type (database, HTTP, LLM, file, message, pure)
+3. Walk up: if a node has ANY I/O child, it's a mock boundary for unit tests
+4. For integration tests: push mock boundary to actual I/O (TestContainers for DB, WireMock for HTTP, mock for LLM)
+5. Everything between entry point and mock boundary stays real
+
+### 32.5 Fixture Generation
+
+Sources for test fixtures:
+- @DocSpecExample code (verified examples contain realistic objects)
+- @DocFlow step inputs/outputs
+- ORM entity constraints (@NotNull, @Size, @Column)
+- OpenAPI request/response examples
+- Serialization shapes (Jackson, serde, Pydantic)
+- @DocContext runtime inputs
+
+The engine generates a fixture registry per language with: valid object, minimal valid object, boundary objects, invalid objects (one per constraint violation).
+
+---
+
+## 33. DSTI Semantic Testing Without AI
+
+### 33.1 The Seven Behavioral Annotation Primitives
+
+For 90% of cases, DSTI extracts properties from code structure alone. For the remaining 10%, these minimal annotations declare properties that code structure can't express:
+
+**1. @DocInvariant** — Universal output postconditions
+
+```java
+@DocInvariant(on = "Curriculum", rules = {
+    "milestones SIZE > 0",
+    "milestones SORTED BY weekStart ASC",
+    "milestones NONE OVERLAP ON (weekStart, weekEnd)",
+    "milestones EACH SATISFIES (tasks SIZE > 0)",
+    "estimatedWeeks == milestones MAX OF weekEnd"
+})
+```
+
+Checked across ALL tests. Universal postcondition on every produced Curriculum object.
+
+**2. @DocMonotonic** — More X means more/less Y
+
+```java
+@DocMonotonic(rule = "weeklyHours UP → estimatedWeeks DOWN")
+```
+
+Engine generates property-based test with random paired inputs.
+
+**3. @DocConservation** — Nothing lost or created
+
+```java
+@DocConservation(rule = "input.skills == union of all task.skills")
+```
+
+Verifies transformations preserve data completeness.
+
+**4. @DocIdempotent / @DocDeterministic / @DocCommutative**
+
+```java
+@DocIdempotent(method = "normalize")     // f(f(x)) == f(x)
+@DocDeterministic(method = "parse")       // f(x) == f(x) always
+@DocCommutative(method = "mergeSkills")   // f(a,b) == f(b,a)
+```
+
+Mathematical properties verified mechanically with random inputs.
+
+**5. @DocStateMachine** — State transitions
+
+```java
+@DocStateMachine(
+    entity = "Curriculum",
+    states = {"DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "ARCHIVED"},
+    transitions = {
+        @Transition(from="DRAFT", to="ACTIVE", via="activate()"),
+        @Transition(from="ACTIVE", to="COMPLETED", via="complete()", guard="allMilestonesCompleted()"),
+    },
+    forbidden = {
+        @Transition(from="COMPLETED", to="ACTIVE"),
+        @Transition(from="ARCHIVED", to=ANY),
+    }
+)
+```
+
+Generates: happy path, guard condition, forbidden transition, reachability, terminal state tests. 15-20 tests from one annotation.
+
+**6. @DocCompare** — Comparative assertions between parameterized runs
+
+```java
+@DocCompare(
+    when = "difficulty = BEGINNER vs EXPERT",
+    expect = {"BEGINNER.milestones.size() >= EXPERT.milestones.size()"}
+)
+```
+
+**7. @DocBoundary** — Boundary behavior specification
+
+```java
+@DocBoundary(param = "weeklyHours", constraints = {
+    @When(value = "0", expect = THROWS, exception = "InvalidGoalException"),
+    @When(value = "1", expect = SUCCEEDS),
+    @When(value = "40", expect = SUCCEEDS),
+    @When(value = "41", expect = THROWS, exception = "InvalidGoalException"),
+})
+```
+
+### 33.2 The Property Expression DSL
+
+Language-agnostic expressions for declaring properties:
+
+```
+output.milestones SIZE > 0
+output.milestones SORTED BY weekStart ASC
+output.milestones NONE OVERLAP ON (weekStart, weekEnd)
+output.milestones EACH SATISFIES (tasks SIZE > 0)
+input.goal.title == output.title
+output.estimatedWeeks == output.milestones MAX OF weekEnd
+WHEN input.weeklyHours INCREASES THEN output.estimatedWeeks DECREASES
+FORALL x IN output.milestones: x.weekStart < x.weekEnd
+```
+
+Parseable, deterministic, translatable to any language's assertion framework.
+
+### 33.3 Cross-Method Relational Assertions
+
+```java
+@DocRelation(
+    methods = {"create", "findById"},
+    rule = "create(x).id → findById(id) EQUALS x",
+    name = "round-trip persistence"
+)
+@DocRelation(
+    methods = {"complete(milestoneId)", "getProgress"},
+    rule = "complete(ms) → getProgress(id).completedPercent > BEFORE.completedPercent",
+    name = "completing milestone increases progress"
+)
+```
+
+`BEFORE` keyword enables temporal assertions. The engine snapshots state before and after.
+
+### 33.4 Domain Pattern Recognition
+
+DSTI recognizes common patterns from method signatures and generates appropriate tests:
+
+| Pattern | Detection | Tests Generated |
+|---|---|---|
+| Pagination | Returns Page<T> or has limit/offset | Page size respected, next page continues, total consistent |
+| Sorting | Has sortBy parameter | Output sorted correctly, ascending vs descending |
+| Filtering | Has filter parameters | Subset of unfiltered, filter excludes non-matching |
+| CRUD | create/read/update/delete on same entity | Round-trip, update reflects changes, delete removes |
+| State machine | Status field + transition methods | All transitions above |
+
+### 33.5 Intent Signal Density (ISD) Scoring
+
+```
+ISD = (guards × 3) + (named_constants × 2) + (branches × 1.5) +
+      (specific_name × 2) + (typed_return × 1) + (loop_patterns × 1.5) +
+      (catch_blocks × 2) + (builder_assignments × 1) + (stream_ops × 1.5)
+```
+
+- ISD > 8: 95%+ meaningful test coverage, zero annotations needed
+- ISD 4-8: 80%+ coverage, some annotations helpful
+- ISD < 4: Low-quality code needing refactoring or annotations
+
+The engine reports ISD per method and suggests improvements for low-scoring methods.
+
+### 33.6 The Feedback Loop
+
+Build failures that teach, not punish:
+
+```
+BUILD FAILURE: DocSpec Test Intelligence
+
+New method: PricingEngine.calculateTieredDiscount()
+  Intent signals found: 1 of 4 minimum (ISD = 2.0)
+    ✓ Type signature: (Order, Customer) → BigDecimal
+    ✗ No guard clauses (no input validation)
+    ✗ Generic method name ("calculate" without specific domain terms)
+    ✗ No named constants for tier boundaries
+
+  To fix (choose one):
+    a) Add input validation guards
+    b) Add named constants: TIER_1_THRESHOLD, TIER_2_THRESHOLD
+    c) Use descriptive name: calculateDiscountByOrderTotalTiers()
+    d) Add one annotation: @DocBoundary(param = "order.total", ...)
+    e) Suppress: @DocTestSkip(reason = "...")
+```
+
+---
+
+## 34. Verified Examples & Testable Documentation
+
+### 34.1 Test-Sourced Examples
+
+```java
+@DocSpecExample(attachTo = "CurriculumAgent.generate")
+public void generateCurriculumExample() {
+    GoalSpec goal = GoalSpec.builder()
+        .title("Full-Stack Development")
+        .skillLevel(SkillLevel.INTERMEDIATE)
+        .build();
+    Curriculum result = agent.generate(goal);
+    assertNotNull(result.getId());
+}
+```
+
+Processor extracts method body (minus assertions) as code example. Since it's a test, it runs in CI — if API changes break the example, the build fails.
+
+### 34.2 Example Badges
+
+Verified examples show green "Verified ✓" badge. Unverified inline examples show yellow "Unverified" badge.
+
+---
+
+## 35. Documentation Coverage Metrics
+
+### 35.1 Coverage Report
+
+```
+$ mvn docspec:coverage
+
+Documentation Coverage Report:
+  Public classes:     47/52 documented (90.4%)
+  Public methods:    186/213 documented (87.3%)
+  Parameters:        412/467 documented (88.2%)
+  Flows:              3/3 annotated
+  Error codes:        8/11 documented (72.7%)
+  DSTI tests:       847 auto-derived from intent graph
+  Intent density:    avg 9.2 (min 2.1, max 18.6)
+```
+
+### 35.2 Configurable Thresholds
+
+```xml
+<coverage>
+  <minimumPercent>80</minimumPercent>
+  <failOnBelowThreshold>true</failOnBelowThreshold>
+</coverage>
+```
+
+---
+
+## 36. Access Control & Audience Levels
+
+### 36.1 Three Levels
+
+| Level | Visibility |
+|---|---|
+| public | Default. All builds. |
+| partner | Partner + internal builds. Hidden from public. |
+| internal | Internal builds only. |
+
+### 36.2 Usage
+
+`@DocAudience("internal")` on any class/method/module. Build with `--audience internal` to include all.
+
+---
+
+## 37. Test Documentation in DocSpec Site
+
+### 37.1 Test Overview Dashboard
+
+- Total auto-derived tests with intent channel breakdown
+- Coverage: documented behaviors with passing tests
+- Gap report: methods needing annotations
+- ISD histogram across all methods
+
+### 37.2 Per-Class Test Page
+
+Left: class methods with extracted properties. Right: generated test code. Each test shows channel badges (🔤 name, 🛡️ guard, 🌿 branch, 📐 type, 🔄 loop, etc.).
+
+### 37.3 Per-Flow Test Page
+
+Integration test from flow topology. Visualizes mock boundaries. Shows which steps are real vs mocked in unit vs integration contexts.
+
+### 37.4 Gap Report Page
+
+Actionable recommendations per method. Shows what the engine found, what it couldn't figure out, specific fix options including "your code may have a bug."
+
+### 37.5 Cross-Linking
+
+Every test links to its source method. Every method page links to its tests. Flow pages link to flow integration tests. Data model pages link to constraint tests.
+
+## 38. Migration Tooling
+
+| Command | Source | Output |
+|---|---|---|
+| `npx docspec import --from javadoc <path>` | JavaDoc HTML | @DocModule annotations on classes |
+| `npx docspec import --from typedoc <json>` | TypeDoc JSON | @DocModule TS decorators |
+| `npx docspec import --from swagger <spec>` | OpenAPI spec | Controller annotations + mappings |
+| `npx docspec import --from docusaurus <dir>` | MDX files | Markdoc guide files |
+| `npx docspec import --from confluence <url>` | Confluence export | Markdoc guides |
+| `npx docspec import --from rustdoc <json>` | Rustdoc JSON | #[doc_module] attributes |
+
+---
+
+## 39. Multi-Module & Monorepo Support
+
+### 39.1 Maven Multi-Module
+
+Each child module generates its own `docspec.json`. Parent POM aggregates via `docspec:aggregate` goal.
+
+### 39.2 Local Artifact Resolution
+
+```yaml
+artifacts:
+  - path: ../waypoint-engine/target/docspec.json
+    label: "Waypoint Engine"
+  - glob: ./modules/*/target/docspec.json
+```
+
+---
+
+## 40. CI/CD Integration
+
+### 40.1 CI Checks
+
+| Check | Failure Condition |
+|---|---|
+| `docspec:validate` | Spec fails JSON schema validation |
+| `docspec:coverage` | Doc coverage below threshold |
+| `docspec:verify-examples` | Any @DocSpecExample test fails |
+| `docspec:schema-sync` | Database schema doesn't match ORM entities |
+| `docspec:check-refs` | Cross-references cannot be resolved |
+| `docspec:check-links` | Internal guide links point to nonexistent pages |
+| `docspec:check-deprecations` | Deprecated member has no replacement specified |
+| `docspec:dsti-check` | New method below minimum intent density score |
+
+### 40.2 PR Preview Deploys
+
+```yaml
+# .github/workflows/docs-preview.yml
+on:
+  pull_request:
+    paths: ['docs/**', 'src/**', 'docspec.config.yaml']
+steps:
+  - run: npx docspec build
+  - uses: actions/deploy-preview@v1
+    # PR comment: "Docs preview: https://preview-123.docs.example.com"
+```
+
+---
+
+## 41. Analytics & Feedback
+
+### 41.1 Tracked Metrics
+
+Page views, search queries with zero results, 404s after version bumps, code example copy events, time on page.
+
+### 41.2 Feedback Widget
+
+"Was this helpful?" with thumbs up/down per page. Aggregated in `npx docspec feedback-report`.
+
+### 41.3 Providers
+
+Plausible, PostHog, Google Analytics, or built-in (SQLite).
+
+---
+
+## 42. Offline Export
+
+| Format | Command | Use Case |
+|---|---|---|
+| PDF | `npx docspec export --format pdf` | Compliance, air-gapped environments |
+| EPUB | `npx docspec export --format epub` | Offline reading |
+| DOCX | `npx docspec export --format docx` | Regulatory submission |
+| Markdown | `npx docspec export --format markdown` | Import into other systems |
+
+---
+
+## 43. Plugin & Extension System
+
+### 43.1 Plugin Types
+
+| Type | Purpose | Example |
+|---|---|---|
+| Processor plugin | Detect custom framework annotations | @RateLimited → rate limit docs |
+| Page type plugin | Add new page types | Runbook page with checklist steps |
+| Markdoc tag plugin | Custom Markdoc tags for guides | Interactive API playground |
+| Theme component plugin | Override/add theme components | Custom company branding |
+| Import plugin | Import from additional doc sources | Notion, GitBook |
+| Export plugin | Export to additional formats | Confluence, Notion |
+| Framework detector | New framework support | Quarkus, Ktor, Fiber |
+
+### 43.2 Plugin API
+
+```typescript
+import { DocSpecPlugin } from '@docspec/core';
+
+export default {
+  name: 'rate-limits',
+  processSpec(spec) { /* modify spec AST */ return spec; },
+  components: { RateLimitBadge: ({limit}) => <Badge>{limit} req/min</Badge> },
+} satisfies DocSpecPlugin;
+```
+
+### 43.3 Registration
+
+```yaml
+plugins:
+  - package: docspec-plugin-rate-limits
+  - path: ./plugins/custom-branding
+```
+
+---
+
+## 44. Meta-Dogfooding Architecture
+
+DocSpec's own documentation and test suite are generated by DocSpec itself.
+
+### 44.1 Self-Hosting Structure
+
+```
+docspec/
+├── annotations/java/
+│   ├── src/ (annotated with @DocModule themselves)
+│   └── docspec.json ← generated by the processor, documenting the annotations
+│
+├── processors/java/
+│   ├── src/ (@DocFlow annotated with its own 18-step pipeline)
+│   └── docspec.json ← processor documenting the processor
+│
+├── site/cli/
+│   ├── src/ (TypeScript, @docspec/ts decorated)
+│   └── docspec.json ← CLI documenting the CLI
+│
+└── docs.docspec.dev/ ← THE DOCS SITE
+    └── docspec.config.yaml (references all above artifacts)
+```
+
+### 44.2 Recursive Proof
+
+The processor has a `@DocFlow` documenting its own 18-step processing pipeline. The DSTI engine generates tests for the processor's guard extraction logic — using its own guard extraction logic. The 13 intent channels cross-validate: if one channel has a bug, the other 12 channels catch it.
+
+### 44.3 Headline Demo
+
+"DocSpec generates its own documentation and test suite. The DSTI engine achieved 97% branch coverage of the DocSpec processor, with 847 auto-derived tests from 52 classes, requiring zero manual annotations beyond those already present for documentation."
+
+---
+
+## 45. Monorepo Structure
+
+```
+docspec/
+├── spec/                                   # JSON Schema + spec documentation
+│   ├── docspec.schema.json
+│   ├── intent-graph.schema.json
+│   └── property-dsl.grammar.json
+│
+├── annotations/                            # Language-specific annotation libraries
+│   ├── java/                               # io.docspec:docspec-annotations
+│   ├── typescript/                         # @docspec/ts
+│   ├── rust/                               # docspec (crate)
+│   ├── python/                             # docspec-py
+│   ├── csharp/                             # DocSpec.Annotations (NuGet)
+│   └── go/                                 # go-docspec
+│
+├── processors/                             # Build-time generators
+│   ├── java/                               # Annotation processor + auto-discovery
+│   │   ├── DocSpecProcessor.java
+│   │   ├── AutoDiscoveryScanner.java
+│   │   ├── SpringFrameworkDetector.java
+│   │   ├── JpaEntityExtractor.java
+│   │   ├── JacksonShapeExtractor.java
+│   │   ├── DatabaseSchemaIntrospector.java
+│   │   ├── ConfigurationExtractor.java
+│   │   ├── SecurityRuleExtractor.java
+│   │   ├── ObservabilityExtractor.java
+│   │   ├── DescriptionInferrer.java
+│   │   ├── OpenApiMerger.java
+│   │   ├── FlowResolver.java
+│   │   ├── IntentExtractor.java            # DSTI: 13-channel extraction
+│   │   ├── CoverageCalculator.java
+│   │   └── SpecSerializer.java
+│   ├── typescript/
+│   ├── rust/
+│   ├── python/
+│   ├── csharp/
+│   └── go/
+│
+├── dsti/                                   # DocSpec Test Intelligence
+│   ├── core/                               # Language-agnostic intent graph processing
+│   │   ├── intent-graph.ts                 # Intent graph data structures
+│   │   ├── property-dsl-parser.ts          # Expression DSL parser
+│   │   ├── cross-channel-verifier.ts       # Gap detection between channels
+│   │   ├── isd-calculator.ts               # Intent signal density scoring
+│   │   └── gap-reporter.ts                 # Actionable recommendations
+│   ├── generators/                         # Language-specific test generators
+│   │   ├── java/                           # JUnit 5 + Mockito + jqwik + TestContainers
+│   │   ├── typescript/                     # Vitest + fast-check + MSW + testcontainers
+│   │   ├── rust/                           # #[test] + mockall + proptest + testcontainers
+│   │   ├── python/                         # pytest + Hypothesis + responses + testcontainers
+│   │   ├── csharp/                         # xUnit + Moq + FsCheck + Testcontainers
+│   │   └── go/                             # testing + gomock + rapid + testcontainers
+│   └── frameworks/                         # Framework detector JSON files
+│       ├── java/                           # spring-boot, jpa, jackson, micronaut, quarkus
+│       ├── typescript/                     # nestjs, typeorm, prisma, express
+│       ├── rust/                           # axum, actix-web, diesel, sqlx, serde
+│       ├── python/                         # fastapi, django, sqlalchemy, pydantic
+│       ├── csharp/                         # aspnet-core, ef-core, system-text-json
+│       └── go/                             # gin, echo, gorm, sqlx
+│
+├── plugins/                                # Build tool integrations
+│   ├── maven/                              # io.docspec:docspec-maven-plugin
+│   ├── gradle/                             # io.docspec.gradle
+│   ├── npm/                                # docspec-ts CLI
+│   ├── cargo/                              # cargo-docspec
+│   ├── pip/                                # docspec-py CLI
+│   └── dotnet/                             # DocSpec.Analyzer
+│
+├── site/                                   # The docs site framework
+│   ├── create-docspec-site/                # npx create-docspec-site scaffolder
+│   ├── cli/                                # docspec CLI commands
+│   ├── core/
+│   │   ├── resolver/                       # Registry resolution + settings.xml import
+│   │   ├── generator/                      # Page generation from specs (19 page types)
+│   │   ├── cross-linker/                   # Cross-reference resolution
+│   │   ├── search/                         # Search index builder
+│   │   ├── differ/                         # Version diff engine
+│   │   └── ai/                             # llms.txt, MCP server, context generator
+│   ├── themes/
+│   │   ├── stripe/                         # @docspec/theme-stripe
+│   │   ├── minimal/                        # @docspec/theme-minimal
+│   │   └── dark/                           # @docspec/theme-dark
+│   └── mcp-server/                         # MCP server for AI integration
+│
+├── examples/
+│   ├── java-spring-zero-config/            # Spring Boot with ZERO annotations
+│   ├── java-waypoint-engine/               # Full annotations + DSTI
+│   ├── typescript-nexus-sdk/               # NestJS example
+│   ├── rust-finddoc-core/                  # Rust example
+│   ├── python-fastapi-service/             # Python example
+│   └── example-docs-site/                  # Docs site consuming all examples
+│
+├── research/                               # Academic paper materials
+│   ├── defects4j-evaluation/               # Defects4J experiment scripts
+│   ├── developer-study/                    # Developer study protocol
+│   └── paper/                              # LaTeX paper source
+│
+├── docs/                                   # DocSpec's own docs (dogfood!)
+└── .github/workflows/                      # CI/CD for all packages
+```
+
+---
+
+## 46. Implementation Roadmap & MVP Scope
+
+### Phase 1: Foundation (Weeks 1–4)
+
+Core spec and Java toolchain with auto-discovery.
+
+1. Define `docspec.schema.json` v3 (all object types including data stores, config, security, privacy, intent graph)
+2. Define `intent-graph.schema.json` and property DSL grammar
+3. Build `docspec-annotations-java` (all annotation interfaces)
+4. Build `docspec-processor-java` with auto-discovery, framework detection (Spring/JPA/Jackson), description inference, database introspection, configuration extraction, security extraction
+5. Build DSTI intent extractor for Java (13 channels)
+6. Build `docspec-maven-plugin` (generate, publish, validate, coverage, verify-examples, generate-tests, schema-sync goals)
+7. Create two example projects: `java-waypoint-engine` (full annotations) + `java-spring-zero-config` (Tier 0)
+8. Validate: `mvn package` on both examples produces correct `docspec.json` + `intent-graph.json`
+9. Validate: DSTI generates meaningful tests from intent graph
+
+### Phase 2: Docs Site Framework (Weeks 5–8)
+
+The Docusaurus-like framework with repository resolution.
+
+1. Build `@docspec/core` resolver (Maven Central, npm, crates.io, private registries, settings.xml import)
+2. Build `@docspec/core` page generator (all 19 page types)
+3. Build `@docspec/core` cross-linker (Referenced In panels, trace views, data store operations in flows)
+4. Build `@docspec/theme-stripe` (React components for all page types)
+5. Build docspec CLI (dev, build, resolve, validate, coverage commands)
+6. Build `create-docspec-site` scaffolder
+7. Create `example-docs-site` consuming all example projects
+8. Validate: `npx docspec dev` serves working docs site with full cross-linking
+
+### Phase 3: DSTI Engine + AI Integration (Weeks 9–12)
+
+The testing engine and AI layer.
+
+1. Build DSTI core (language-agnostic intent graph processing, property DSL parser, cross-channel verifier, ISD calculator, gap reporter)
+2. Build DSTI Java test generator (JUnit 5 + Mockito + jqwik + TestContainers + WireMock)
+3. Build DSTI TypeScript test generator (Vitest + fast-check + MSW + testcontainers-node)
+4. Implement @DocFlow processing with database operations per step
+5. Implement @DocContext processing and operations view
+6. Implement @DocUses cross-project reference resolution
+7. Build FlowDiagram, TraceView, DependencyGraph, ERDiagram React components
+8. Build llms.txt generation, CLAUDE.md context files, MCP server
+9. Build Test Documentation pages (overview, per-class, per-flow, gap report)
+
+### Phase 4: Multi-Language + Quality (Weeks 13–16)
+
+Remaining language support and quality features.
+
+1. Build `@docspec/ts` TypeScript decorator library and AST generator
+2. Build Rust `docspec` crate and build.rs generator
+3. Build Python `docspec-py` and AST walker
+4. Build DSTI generators for Rust (proptest), Python (Hypothesis)
+5. Build verified examples system
+6. Build @DocError, @DocEvent, @DocEndpoint annotations (all languages)
+7. Build version diffing and multi-version support
+8. Build access control / audience filtering
+9. Build Gradle plugin
+
+### Phase 5: Ecosystem + Enterprise (Weeks 17–20)
+
+Migration, analytics, enterprise features.
+
+1. Build migration import commands
+2. Build analytics and feedback system
+3. Build offline export (PDF, EPUB, DOCX)
+4. Build plugin/extension system with framework detector plugins
+5. Build C# and Go annotation libraries + processors + DSTI generators
+6. Build GraphQL, gRPC, WebSocket, CLI protocol support
+7. Build PR preview deploy integration
+8. Build database schema introspection for all supported databases
+9. Implement meta-dogfooding: DocSpec documenting and testing itself
+10. Run Defects4J evaluation for research paper
+11. Publish all packages to registries
+
+### MVP Scope
+
+**Must Have (Phase 1 + 2):**
+- `docspec.schema.json` v3
+- Java annotation library (all annotations)
+- Java processor with auto-discovery + Spring/JPA/Jackson + database + config + security
+- DSTI intent extraction (13 channels) + Java test generation
+- Maven plugin (all goals)
+- docspec-site CLI + Stripe theme + 19 page types + cross-linking
+- Repository resolution (Maven Central + private + settings.xml)
+- Navigation with 6 sections including Testing
+
+**Should Have (Phase 3):**
+- TypeScript support + DSTI
+- @DocFlow with data store operations + trace views
+- Cross-project references
+- LLM integration (llms.txt, CLAUDE.md, MCP server)
+- Test documentation pages
+
+**Nice to Have (Phase 4 + 5):**
+- Rust, Python, C#, Go support
+- Multi-protocol (GraphQL, gRPC, WebSocket, CLI)
+- Verified examples, version diffing, audience filtering
+- Migration tooling, analytics, offline export, plugin system
+- Meta-dogfooding, research paper
+
+---
+
+## Appendix A: Research Paper Outline
+
+### Title
+
+"Multi-Channel Intent Extraction for Deterministic Semantic Test Generation"
+
+### Venue
+
+ICSE (International Conference on Software Engineering) or FSE (Foundations of Software Engineering)
+
+### Abstract
+
+We present DSTI (DocSpec Test Intelligence), a deterministic system that extracts developer intent from 13 independent channels in source code and generates semantically meaningful property-based tests without AI. By cross-verifying intent signals from naming conventions, guard clauses, branch structure, data flow, exception messages, and 8 other channels, DSTI detects bugs that live in the gap between what developers claim (via names and messages) and what code actually does (via branches and logic). Evaluated on 835 real bugs from Defects4J, DSTI catches 95%+ of bugs with zero developer annotations in 90% of cases, outperforming state-of-the-art AI test generators (EvoSuite: ~65%, Randoop: ~45%) while producing deterministic, reproducible, non-hallucinating test suites.
+
+### Sections
+
+**1. Introduction.** The tautology problem. Why AI test generation hallucinates. The insight: developer intent lives in multiple independent code channels.
+
+**2. Background.** Property-based testing (QuickCheck, jqwik, Hypothesis). Design-by-contract (Eiffel). Mutation testing. AI test generation (EvoSuite, Randoop, CodaMosa). LLM-based generation (limitations).
+
+**3. The 13 Intent Channels.** Formal definition of each channel. Extraction algorithms. Language-agnostic representation.
+
+**4. Cross-Channel Verification.** Formal model: intent consistency across channels. Bug = inconsistency between channels. Theorem: N independent channels detect bugs that any single channel misses.
+
+**5. Test Generation Pipeline.** From intent graph to property-based tests. Dependency classification. Fixture generation. Mock boundary algorithm.
+
+**6. The Property Expression DSL.** Formal grammar. Translation to assertion frameworks. Expressiveness vs. parsability tradeoff.
+
+**7. Evaluation: Defects4J.** Methodology: run DSTI on pre-fix version, check if generated test fails on bug, passes on fix. Results by bug category. Comparison with EvoSuite, Randoop, LLM generators.
+
+**8. Evaluation: Developer Study.** 25 developers across 5 languages. Metrics: false positive rate, annotation burden, time to first test suite, perceived test quality. Qualitative feedback on gap reports and ISD feedback.
+
+**9. Intent Signal Density Model.** Formal definition of ISD. Correlation between ISD and bug detection rate. Empirical validation: well-written code (high ISD) produces better tests.
+
+**10. Multi-Language Generalization.** Results across Java, TypeScript, Rust, Python. Channel extraction differences per language. Test generation quality per language.
+
+**11. Threats to Validity.** Defects4J representativeness. ISD threshold selection. Channel weight calibration. Language coverage.
+
+**12. Discussion.** What DSTI misses (concurrency, performance, complex algorithms). The virtuous cycle: ISD feedback improves code quality. Relationship to formal verification.
+
+**13. Related Work.** Property-based testing, mutation testing, symbolic execution, AI test generation, design-by-contract, specification mining.
+
+**14. Conclusion.** Multi-channel intent extraction is a viable alternative to AI for semantic test generation. It's deterministic, reproducible, and improves with code quality.
+
+### Key Results to Demonstrate
+
+- 95%+ bug detection on Defects4J (vs. EvoSuite ~65%, Randoop ~45%)
+- Zero annotations needed for 90% of methods (ISD > 8)
+- Cross-channel verification catches bugs each channel alone misses
+- Developer study: 4.2/5 perceived test quality, < 5 min annotation burden per project
+- Meta-dogfooding: DSTI testing itself achieves 97% branch coverage
+
+---
+
+## Appendix B: Language-Specific Framework Maps
+
+Complete mapping of framework detection across all 6 supported languages. Each entry specifies: detection mechanism, stereotype mapping, dependency classification, config extraction pattern, and DSTI integration points.
+
+See `dsti/frameworks/` directory in the monorepo for the authoritative JSON detector definitions.
+
+### Key Framework Equivalences
+
+| Role | Java | TypeScript | Rust | Python | C# | Go |
+|---|---|---|---|---|---|---|
+| **Web** | Spring MVC | NestJS | Axum/Actix | FastAPI/Django | ASP.NET Core | Gin/Echo |
+| **ORM** | JPA/Hibernate | TypeORM/Prisma | Diesel/SQLx | SQLAlchemy/Django ORM | EF Core | GORM |
+| **Serialization** | Jackson | class-transformer | serde | Pydantic | System.Text.Json | encoding/json |
+| **Validation** | Bean Validation | class-validator | validator | Pydantic | DataAnnotations | validator |
+| **Config** | @Value/Properties | ConfigService | config crate | BaseSettings | IConfiguration | viper/env |
+| **Security** | Spring Security | Passport/Guards | custom | FastAPI Security | ASP.NET Identity | custom |
+| **Migration** | Flyway/Liquibase | TypeORM/Prisma | diesel_migrations | Alembic | EF Migrations | golang-migrate |
+| **Scheduling** | @Scheduled | @nestjs/schedule | tokio cron | Celery/APScheduler | Hangfire | gocron |
+| **Messaging** | Spring Kafka | @nestjs/microservices | lapin | aiokafka | MassTransit | confluent-kafka |
+| **Observability** | Micrometer | prom-client | metrics crate | prometheus-client | App.Metrics | prometheus/client_golang |
+| **Testing** | JUnit 5 | Vitest/Jest | built-in #[test] | pytest | xUnit/NUnit | testing |
+| **Mocking** | Mockito | vitest mock | mockall | unittest.mock | Moq/NSubstitute | gomock |
+| **HTTP Stubs** | WireMock | MSW | wiremock-rs | responses | WireMock.Net | httpmock |
+| **DB Testing** | TestContainers | testcontainers-node | testcontainers-rs | testcontainers-py | Testcontainers.NET | testcontainers-go |
+| **Property Testing** | jqwik | fast-check | proptest | Hypothesis | FsCheck | rapid |
+
+---
+
+*End of Specification — DocSpec v3.0.0*
+
+*This specification is the authoritative build plan. Drop this file into the repository as `SPEC.md` and use it as the reference for Claude Code implementation.*

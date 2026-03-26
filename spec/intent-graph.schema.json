@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docspec.dev/schemas/docspec/3.0.0/intent-graph.schema.json",
+  "title": "DocSpec Intent Graph",
+  "description": "DSTI (Deep Structural and Textual Intent) intent graph — extracted intent signals from source code analysis.",
+  "type": "object",
+  "required": ["docspec", "artifact", "methods"],
+  "additionalProperties": false,
+  "properties": {
+    "docspec": {
+      "type": "string",
+      "const": "3.0.0",
+      "description": "The DocSpec specification version."
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["groupId", "artifactId", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "groupId": { "type": "string" },
+        "artifactId": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "description": "Artifact coordinates for this intent graph."
+    },
+    "methods": {
+      "type": "array",
+      "items": { "$ref": "docspec.schema.json#/$defs/IntentMethod" },
+      "description": "Methods with extracted intent signals."
+    }
+  }
+}

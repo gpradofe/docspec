@@ -1,0 +1,5 @@
+tsConfigPath: tsconfig.json
+outputDir: ../../typescript/processor/target
+groupId: io.docspec
+artifactId: docspec-core
+version: 0.1.0

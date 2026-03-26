@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DocSpec.Examples.CSharpMinimal</RootNamespace>
+    <Description>Tier 1 DocSpec example — minimal annotations in C#</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocSpec.Annotations" Version="3.0.0" />
+  </ItemGroup>
+
+</Project>

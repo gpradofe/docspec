@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "docspec-cli"
+version = "0.1.0"
+description = "DocSpec CLI for Python projects"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+dependencies = ["docspec-processor-python>=0.1.0"]
+
+[project.scripts]
+docspec-py = "docspec_cli:main"

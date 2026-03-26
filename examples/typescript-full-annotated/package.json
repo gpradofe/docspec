@@ -1,0 +1,17 @@
+{
+  "name": "@docspec-examples/typescript-full-annotated",
+  "version": "1.0.0",
+  "description": "Tier 2 DocSpec example — full annotations in TypeScript",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "docspec": "docspec resolve"
+  },
+  "dependencies": {
+    "@docspec/ts": "file:../../annotations/typescript"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

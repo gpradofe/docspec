@@ -1,0 +1,173 @@
+\documentclass[sigconf,nonacm]{acmart}
+
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  breaklines=true,
+  frame=single,
+}
+
+\title{Deep Semantic Test Intelligence: Extracting Method Intent Signals for Automated Test Generation}
+
+\author{DocSpec Research Team}
+\affiliation{%
+  \institution{DocSpec Project}
+}
+\email{research@docspec.io}
+
+\begin{abstract}
+We present Deep Semantic Test Intelligence (DSTI), a novel approach to
+extracting semantic intent signals from source code across 13 orthogonal
+channels, including naming semantics, guard clauses, branching patterns,
+data flow, error handling, and validation annotations. DSTI computes an
+Intent Signal Density (ISD) score that quantifies method complexity and
+guides automated test generation. We implement DSTI in DocSpec, a
+universal documentation specification tool, and evaluate it against 835
+real-world bugs from the Defects4J benchmark across 17 Java projects.
+Our results show that DSTI-generated test stubs achieve [X]\% mutation
+coverage improvement over baseline approaches, with an average analysis
+time of [Y] seconds per method. A developer study with 30 participants
+demonstrates that DSTI signals reduce time-to-first-test by [Z]\% and
+improve test relevance ratings by [W] points on a 5-point scale.
+\end{abstract}
+
+\keywords{test generation, semantic analysis, documentation, intent signals}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Software testing remains one of the most labor-intensive activities in
+software development. Despite advances in automated test generation tools
+such as Randoop~\cite{pacheco2007randoop} and EvoSuite~\cite{fraser2011evosuite},
+generated tests often lack semantic relevance---they exercise code paths
+but fail to capture the developer's intended behavior.
+
+We observe that source code contains rich \emph{intent signals} beyond
+its executable semantics. Method names encode purpose (``validate,''
+``calculate,'' ``transform''), guard clauses express preconditions,
+branching patterns reveal decision logic, and validation annotations
+declare constraints. These signals, while implicit, form a comprehensive
+picture of what a method \emph{should} do.
+
+This paper makes the following contributions:
+\begin{enumerate}
+  \item \textbf{DSTI Framework:} A systematic taxonomy of 13 intent signal
+    channels extracted from source code via static analysis.
+  \item \textbf{ISD Score:} A weighted composite metric that quantifies
+    intent density, enabling prioritization of test generation effort.
+  \item \textbf{Property DSL:} A domain-specific language for expressing
+    method invariants, enabling property-based test generation.
+  \item \textbf{Evaluation:} Empirical evaluation on Defects4J and a
+    controlled developer study.
+\end{enumerate}
+
+\section{Background and Related Work}
+
+\subsection{Automated Test Generation}
+% EvoSuite, Randoop, Pex, IntelliTest
+% Limitations: semantic relevance, oracle problem
+
+\subsection{Specification Mining}
+% Daikon, JML, contracts
+% Difference: DSTI extracts from code structure, not runtime traces
+
+\subsection{Documentation Generation}
+% Javadoc, Swagger/OpenAPI, TypeDoc
+% Limitation: API surface only, no behavioral intent
+
+\section{Deep Semantic Test Intelligence}
+
+\subsection{Intent Signal Channels}
+
+DSTI extracts signals across 13 orthogonal channels:
+
+\begin{enumerate}
+  \item \textbf{Name Semantics} --- verb/object decomposition of method names
+  \item \textbf{Guard Clauses} --- precondition checks at method entry
+  \item \textbf{Branches} --- conditional logic patterns
+  \item \textbf{Data Flow} --- field reads and writes
+  \item \textbf{Return Type} --- complexity of the return type
+  \item \textbf{Loops} --- iteration patterns (streams, enhanced for)
+  \item \textbf{Error Handling} --- try/catch blocks and exception types
+  \item \textbf{Constants} --- magic numbers and string literals
+  \item \textbf{Null Checks} --- null-safety patterns
+  \item \textbf{Assertions} --- programmatic assertions
+  \item \textbf{Logging} --- log statements indicating intent
+  \item \textbf{Dependencies} --- external service calls
+  \item \textbf{Validation Annotations} --- Bean Validation, etc.
+\end{enumerate}
+
+\subsection{Intent Signal Density (ISD)}
+
+The ISD score combines channel signals into a single metric:
+
+\begin{equation}
+  \text{ISD} = \sum_{i=1}^{13} w_i \cdot s_i(m)
+\end{equation}
+
+where $w_i$ is the channel weight and $s_i(m)$ is the normalized signal
+strength for method $m$ on channel $i$. Weights are empirically tuned
+(Table~\ref{tab:weights}).
+
+\subsection{Property DSL}
+
+The Property DSL enables developers to express invariants declaratively:
+
+\begin{lstlisting}[language=Java]
+@DocInvariant(rules = {
+    "balance >= 0",
+    "transactions SIZE > 0",
+    "currency IN [USD, EUR, GBP]",
+    "amount BETWEEN 0.01 AND 1000000"
+})
+\end{lstlisting}
+
+\section{Implementation}
+
+DocSpec implements DSTI as a Java annotation processor that runs during
+compilation. The processor performs a single-pass AST traversal,
+collecting intent signals from each method, computing ISD scores, and
+generating both documentation (docspec.json) and test stubs.
+
+\section{Evaluation}
+
+\subsection{Defects4J Benchmark}
+% Setup, methodology, results
+
+\subsection{Developer Study}
+% Protocol, results
+
+\section{Results}
+
+% Placeholder for actual results
+
+\section{Threats to Validity}
+
+\subsection{Internal Validity}
+% Learning effects mitigated by crossover design
+
+\subsection{External Validity}
+% Java-only in current evaluation
+
+\subsection{Construct Validity}
+% ISD weights are empirically tuned
+
+\section{Conclusion}
+
+% Summary and future work
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

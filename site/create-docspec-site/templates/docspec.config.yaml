@@ -1,0 +1,33 @@
+# DocSpec Configuration
+# See: https://docspec.dev/docs/configuration
+
+site:
+  name: "My Documentation"
+  # logo: ./assets/logo.svg
+  # baseUrl: https://docs.example.com
+  theme: "@docspec/theme-stripe"
+
+# Add your DocSpec artifacts here:
+artifacts: []
+  # Local file example:
+  # - path: ./path/to/docspec.json
+  #   label: "My Library"
+  #   color: "#818cf8"
+
+  # Maven artifact example:
+  # - groupId: com.example
+  #   artifactId: my-library
+  #   version: "1.0.0"
+  #   label: "My Library"
+
+# Navigation structure:
+# navigation:
+#   - section: Libraries
+#     items: [artifacts/auto]
+#   - section: Architecture
+#     items: [flows/auto, data-models/auto]
+
+build:
+  outputDir: ./out
+  cacheDir: ./.docspec-cache
+  search: true
