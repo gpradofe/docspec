@@ -18,7 +18,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@docspec/core": "workspace:*"
+    "@docspec/core": "workspace:*",
+    "@markdoc/markdoc": "^0.4.0",
+    "flexsearch": "^0.7.43",
+    "shiki": "^3.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

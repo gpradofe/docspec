@@ -29,7 +29,7 @@ export interface SiteConfig {
 }
 
 export interface RepositoryConfig {
-  type?: "maven" | "npm" | "crates";
+  type?: "maven" | "npm" | "crates" | "pypi" | "nuget";
   url?: string;
   import?: string;
   auth?: RepositoryAuth;
@@ -49,6 +49,8 @@ export interface ResolutionConfig {
   maven?: { order: string[] };
   npm?: { order: string[] };
   crates?: { order: string[] };
+  pypi?: { order: string[] };
+  nuget?: { order: string[] };
 }
 
 export interface ArtifactEntry {
@@ -65,6 +67,12 @@ export interface ArtifactEntry {
 
   /** Crates coordinates */
   crate?: string;
+
+  /** PyPI coordinates */
+  pypiPackage?: string;
+
+  /** NuGet coordinates */
+  nugetPackage?: string;
 
   /** Common fields */
   version?: string;

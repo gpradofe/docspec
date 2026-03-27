@@ -27,12 +27,16 @@ import type {
 import { PageType } from "../types/page.js";
 
 export interface SearchEntry {
+  id: string;
   slug: string;
   title: string;
   type: string;
   description: string;
+  content: string;
+  section: string;
   keywords: string[];
   artifact?: string;
+  artifactLabel?: string;
 }
 
 /**
@@ -54,15 +58,83 @@ export function buildSearchIndex(pages: GeneratedPage[]): SearchEntry[] {
   return entries;
 }
 
+/**
+ * Build search entries from generated pages using a simplified extraction approach.
+ *
+ * This is a convenience wrapper that produces entries with full-text content
+ * suitable for direct ingestion by FlexSearch on the client side.
+ */
+export function buildSearchEntries(pages: GeneratedPage[]): SearchEntry[] {
+  return pages.map((page) => ({
+    id: page.slug,
+    title: page.title,
+    description: page.description || "",
+    content: extractTextContent(page),
+    slug: page.slug,
+    section: categorizeSection(page.type),
+    type: page.type,
+    keywords: extractKeywords(page.title),
+    artifactLabel: page.artifactLabel,
+  }));
+}
+
+function extractTextContent(page: GeneratedPage): string {
+  const parts: string[] = [page.title];
+  if (page.description) parts.push(page.description);
+
+  const data = page.data as any;
+  if (data.member?.description) parts.push(data.member.description);
+  if (data.method?.description) parts.push(data.method.description);
+  if (data.flow?.description) parts.push(data.flow.description);
+  if (data.module?.description) parts.push(data.module.description);
+  if (data.content) parts.push(data.content);
+
+  if (data.member?.methods) {
+    for (const m of data.member.methods) {
+      parts.push(m.name);
+      if (m.description) parts.push(m.description);
+    }
+  }
+
+  return parts.join(" ");
+}
+
+function categorizeSection(type: string): string {
+  const sectionMap: Record<string, string> = {
+    guide: "Learn",
+    endpoint: "API Reference",
+    member: "Libraries & SDKs",
+    module: "Libraries & SDKs",
+    flow: "Architecture",
+    "data-model": "Architecture",
+    "error-catalog": "API Reference",
+    "event-catalog": "Architecture",
+    "data-store-page": "Architecture",
+    configuration: "Architecture",
+    security: "Architecture",
+    "dependency-map": "Architecture",
+    privacy: "Architecture",
+    operations: "Architecture",
+    "test-overview": "Testing",
+    "intent-graph": "Testing",
+    changelog: "Changelog",
+    landing: "Home",
+    graph: "Architecture",
+  };
+  return sectionMap[type] || "Other";
+}
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
 function buildEntry(page: GeneratedPage): SearchEntry | null {
-  const base: Pick<SearchEntry, "slug" | "title" | "type"> = {
+  const base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section"> = {
+    id: page.slug,
     slug: page.slug,
     title: page.title,
     type: page.type,
+    section: categorizeSection(page.type),
   };
 
   switch (page.type) {
@@ -116,8 +188,10 @@ function buildEntry(page: GeneratedPage): SearchEntry | null {
       return {
         ...base,
         description: page.description ?? "",
+        content: [page.title, page.description ?? ""].join(" "),
         keywords: extractKeywords(page.title),
         artifact: page.artifactLabel,
+        artifactLabel: page.artifactLabel,
       };
   }
 }
@@ -125,7 +199,7 @@ function buildEntry(page: GeneratedPage): SearchEntry | null {
 // -- Per-type builders ------------------------------------------------------
 
 function buildModuleEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: ModulePageData,
 ): SearchEntry {
   const mod = data.module;
@@ -138,17 +212,21 @@ function buildModuleEntry(
   return {
     ...base,
     description,
+    content: [base.title, description].join(" "),
     keywords: dedup(keywords),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildMemberEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: MemberPageData,
 ): SearchEntry {
   const member = data.member;
   const description = member.description ?? "";
+  const methodNames = (member.methods ?? []).map((m: any) => m.name).filter(Boolean);
+  const methodDescs = (member.methods ?? []).map((m: any) => m.description ?? "").filter(Boolean);
   const keywords = [
     ...extractKeywords(base.title),
     ...extractKeywords(member.qualified),
@@ -158,13 +236,15 @@ function buildMemberEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...methodNames, ...methodDescs].join(" "),
     keywords: dedup(keywords),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildEndpointEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: EndpointPageData,
 ): SearchEntry {
   const method = data.method;
@@ -180,17 +260,20 @@ function buildEndpointEntry(
     path,
   ].filter(Boolean);
 
+  const finalTitle = httpMethod && path ? `${httpMethod} ${path}` : base.title;
   return {
     ...base,
-    title: httpMethod && path ? `${httpMethod} ${path}` : base.title,
+    title: finalTitle,
     description,
+    content: [finalTitle, description, httpMethod, path].filter(Boolean).join(" "),
     keywords: dedup(keywords),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildFlowEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: FlowPageData,
 ): SearchEntry {
   const flow = data.flow;
@@ -207,13 +290,15 @@ function buildFlowEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...stepDescriptions].join(" "),
     keywords: dedup(keywords),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildDataModelEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: DataModelPageData,
 ): SearchEntry {
   const dm = data.dataModel;
@@ -228,13 +313,15 @@ function buildDataModelEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, dm.name].filter(Boolean).join(" "),
     keywords: dedup(keywords),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildErrorCatalogEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: ErrorCatalogPageData,
 ): SearchEntry {
   const errors = data.errors ?? [];
@@ -247,13 +334,15 @@ function buildErrorCatalogEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...codes].join(" "),
     keywords: dedup([...extractKeywords(base.title), ...codes]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildEventCatalogEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: EventCatalogPageData,
 ): SearchEntry {
   const events = data.events ?? [];
@@ -266,13 +355,15 @@ function buildEventCatalogEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...names].join(" "),
     keywords: dedup([...extractKeywords(base.title), ...names]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildOperationsEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: OperationsPageData,
 ): SearchEntry {
   const contextNames = (data.contexts ?? [])
@@ -283,12 +374,13 @@ function buildOperationsEntry(
   return {
     ...base,
     description,
+    content: [base.title, description].join(" "),
     keywords: dedup([...extractKeywords(base.title), ...contextNames]),
   };
 }
 
 function buildDataStoreEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: DataStorePageData,
 ): SearchEntry {
   const stores = data.dataStores ?? [];
@@ -300,6 +392,7 @@ function buildDataStoreEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...tables, ...topics.filter(Boolean)].join(" "),
     keywords: dedup([
       ...extractKeywords(base.title),
       ...names,
@@ -307,11 +400,12 @@ function buildDataStoreEntry(
       ...topics,
     ]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildConfigurationEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: ConfigurationPageData,
 ): SearchEntry {
   const props = data.properties ?? [];
@@ -324,13 +418,15 @@ function buildConfigurationEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...keys].join(" "),
     keywords: dedup([...extractKeywords(base.title), ...keys]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildSecurityEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: SecurityPageData,
 ): SearchEntry {
   const sec = data.security;
@@ -347,13 +443,15 @@ function buildSecurityEntry(
   return {
     ...base,
     description,
+    content: [base.title, description].join(" "),
     keywords: dedup(keywords),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildDependencyMapEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: DependencyMapPageData,
 ): SearchEntry {
   const deps = data.dependencies ?? [];
@@ -366,17 +464,19 @@ function buildDependencyMapEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...baseUrls].join(" "),
     keywords: dedup([
       ...extractKeywords(base.title),
       ...names,
       ...baseUrls,
     ]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildPrivacyEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: PrivacyPageData,
 ): SearchEntry {
   const fields = data.fields ?? [];
@@ -391,17 +491,19 @@ function buildPrivacyEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...fieldNames].join(" "),
     keywords: dedup([
       ...extractKeywords(base.title),
       ...fieldNames,
       ...piiTypes,
     ]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildTestOverviewEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: TestOverviewPageData,
 ): SearchEntry {
   const methods = data.intentGraph?.methods ?? [];
@@ -411,16 +513,18 @@ function buildTestOverviewEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...methodNames].join(" "),
     keywords: dedup([
       ...extractKeywords(base.title),
       ...methodNames.flatMap((n) => extractKeywords(n)),
     ]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 
 function buildIntentGraphEntry(
-  base: Pick<SearchEntry, "slug" | "title" | "type">,
+  base: Pick<SearchEntry, "id" | "slug" | "title" | "type" | "section">,
   data: IntentGraphPageData,
 ): SearchEntry {
   const methods = data.intentGraph?.methods ?? [];
@@ -435,12 +539,14 @@ function buildIntentGraphEntry(
   return {
     ...base,
     description,
+    content: [base.title, description, ...methodNames, ...intentVerbs].join(" "),
     keywords: dedup([
       ...extractKeywords(base.title),
       ...methodNames.flatMap((n) => extractKeywords(n)),
       ...intentVerbs,
     ]),
     artifact: data.artifact.label,
+    artifactLabel: data.artifact.label,
   };
 }
 

@@ -529,9 +529,10 @@ export interface MethodPerformance {
 }
 
 export interface FlowStepDataStoreOp {
-  store?: string;
-  operation?: string;
+  store: string;
+  operation: string;
   tables?: string[];
+  description?: string;
   transactional?: boolean;
   cascading?: boolean;
 }

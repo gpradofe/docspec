@@ -37,11 +37,9 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
     proptestCases += `
         #[test]
         fn test_${snakeFn}_is_idempotent(input in "\\\\PC{0,100}") {
-            // Calling ${snakeFn} twice with the same input should return the same result
-            // let result1 = ${snakeFn}(&input);
-            // let result2 = ${snakeFn}(&input);
-            // prop_assert_eq!(result1, result2);
-            prop_assert!(true); // TODO: implement
+            let result1 = ${snakeFn}(&input);
+            let result2 = ${snakeFn}(&input);
+            prop_assert_eq!(result1, result2);
         }
 `;
   }
@@ -51,13 +49,11 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
     proptestCases += `
         #[test]
         fn test_${snakeFn}_changes_state(input in "\\\\PC{0,100}") {
-            // Calling ${snakeFn} should produce observable state change
-            // let mut sut = create_test_instance();
-            // let before = sut.get_state();
-            // sut.${snakeFn}(&input);
-            // let after = sut.get_state();
-            // prop_assert_ne!(before, after);
-            prop_assert!(true); // TODO: implement
+            let mut sut = create_test_instance();
+            let before = format!("{:?}", sut);
+            sut.${snakeFn}(&input);
+            let after = format!("{:?}", sut);
+            prop_assert_ne!(before, after);
         }
 `;
   }
@@ -72,12 +68,11 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
             // Conservation: data integrity across reads and writes
             // Reads: ${reads}
             // Writes: ${writes}
-            // let mut sut = create_test_instance();
-            // let total_before = sut.get_total();
-            // sut.${snakeFn}(value);
-            // let total_after = sut.get_total();
-            // prop_assert!(total_after relates predictably to total_before);
-            prop_assert!(true); // TODO: implement
+            let mut sut = create_test_instance();
+            let total_before = sut.count();
+            sut.${snakeFn}(value);
+            let total_after = sut.count();
+            prop_assert!(total_after >= total_before);
         }
 `;
   }
@@ -91,10 +86,8 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
             items in proptest::collection::vec(any::<i32>(), 0..50)
         ) {
             // Iterator ops: ${ops}
-            // Pipeline should not produce more elements than input
-            // let result = ${snakeFn}(&items);
-            // prop_assert!(result.len() <= items.len());
-            prop_assert!(true); // TODO: implement
+            let result = ${snakeFn}(&items);
+            prop_assert!(result.len() <= items.len());
         }
 `;
   }
@@ -105,10 +98,8 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
         #[test]
         fn test_${snakeFn}_always_returns_valid(input in "\\\\PC{0,200}") {
             // High ISD (${isd.toFixed(2)}) implies robust error handling
-            // let result = ${snakeFn}(&input);
-            // prop_assert!(result.is_ok() || result.is_err());
-            // If Ok, the value should not be empty/default
-            prop_assert!(true); // TODO: implement
+            let result = std::panic::catch_unwind(|| ${snakeFn}(&input));
+            prop_assert!(result.is_ok(), "Function should not panic on any valid input");
         }
 `;
   }
@@ -121,8 +112,8 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
     fn test_${snakeFn}_error_handling_is_exhaustive() {
         // ${catchBlocks} error handling block(s) for: ${types}
         // Ensure the function does not panic on any expected error path
-        // TODO: Test each error path returns appropriate Err variant
-        assert!(true);
+        let result = std::panic::catch_unwind(|| ${snakeFn}(Default::default()));
+        assert!(result.is_ok(), "Function should handle errors without panicking");
     }
 `;
   }
@@ -133,9 +124,8 @@ export function generatePropertyTests(method: IntentMethod, config: RustTestGene
         #[test]
         fn test_${snakeFn}_returns_consistent_type(input in any::<i32>()) {
             // Transformation should always succeed or return typed error
-            // let result = ${snakeFn}(input);
-            // prop_assert!(result.is_ok());
-            prop_assert!(true); // TODO: implement
+            let result = ${snakeFn}(input);
+            prop_assert!(result.is_ok(), "Transformation should succeed for valid input");
         }
 `;
   }

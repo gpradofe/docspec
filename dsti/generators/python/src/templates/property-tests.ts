@@ -37,10 +37,9 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
     @given(st.text(max_size=100))
     def test_${snakeMethod}_is_idempotent(self, instance, input_val):
         """Calling ${snakeMethod} twice with the same input should return the same result."""
-        # result1 = instance.${snakeMethod}(input_val)
-        # result2 = instance.${snakeMethod}(input_val)
-        # assert result1 == result2
-        pass  # TODO: implement
+        result1 = instance.${snakeMethod}(input_val)
+        result2 = instance.${snakeMethod}(input_val)
+        assert result1 == result2
 `;
   }
 
@@ -50,11 +49,10 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
     @given(st.text(max_size=100))
     def test_${snakeMethod}_changes_state(self, instance, input_val):
         """Calling ${snakeMethod} should produce observable state change."""
-        # before = instance.get_state()
-        # instance.${snakeMethod}(input_val)
-        # after = instance.get_state()
-        # assert before != after
-        pass  # TODO: implement
+        before = hash(repr(instance))
+        instance.${snakeMethod}(input_val)
+        after = hash(repr(instance))
+        assert before != after
 `;
   }
 
@@ -70,11 +68,10 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
         Reads: ${reads}
         Writes: ${writes}
         """
-        # total_before = instance.get_total()
-        # instance.${snakeMethod}(value)
-        # total_after = instance.get_total()
-        # assert total_after relates predictably to total_before
-        pass  # TODO: implement
+        total_before = instance.count()
+        instance.${snakeMethod}(value)
+        total_after = instance.count()
+        assert total_after >= total_before
 `;
   }
 
@@ -88,9 +85,8 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
         Iteration property: ${ops}.
         Pipeline should not produce more elements than input.
         """
-        # result = instance.${snakeMethod}(items)
-        # assert len(result) <= len(items)
-        pass  # TODO: implement
+        result = instance.${snakeMethod}(items)
+        assert len(result) <= len(items)
 `;
   }
 
@@ -100,9 +96,8 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
     @given(st.text(max_size=200))
     def test_${snakeMethod}_never_returns_none(self, instance, input_val):
         """High ISD (${isd.toFixed(2)}) implies robust None handling."""
-        # result = instance.${snakeMethod}(input_val)
-        # assert result is not None
-        pass  # TODO: implement
+        result = instance.${snakeMethod}(input_val)
+        assert result is not None
 `;
   }
 
@@ -116,11 +111,10 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
         Error handling: ${catchBlocks} catch block(s) for ${types}.
         Method should not raise unhandled exceptions.
         """
-        # try:
-        #     instance.${snakeMethod}(input_val)
-        # except (ValueError, TypeError):
-        #     pass  # expected
-        pass  # TODO: implement
+        try:
+            instance.${snakeMethod}(input_val)
+        except (ValueError, TypeError, RuntimeError):
+            pass  # expected error types
 `;
   }
 
@@ -130,9 +124,9 @@ export function generatePropertyTests(method: IntentMethod, config: PythonTestGe
     @given(st.text(max_size=100))
     def test_${snakeMethod}_returns_consistent_type(self, instance, input_val):
         """Transformation should always return the same type."""
-        # result = instance.${snakeMethod}(input_val)
-        # assert isinstance(result, expected_type)
-        pass  # TODO: implement
+        result = instance.${snakeMethod}(input_val)
+        assert result is not None
+        assert type(result) == type(instance.${snakeMethod}(""))
 `;
   }
 
@@ -156,9 +150,7 @@ class Test${className}${capitalize(methodName)}Property:
     @pytest.fixture
     def instance(self):
         """Create a ${className} instance for testing."""
-        # TODO: Initialize with required dependencies
-        # return ${className}(...)
-        pass
+        return ${className}()
 ${testMethods}
 `;
 

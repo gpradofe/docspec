@@ -6,6 +6,7 @@
 // }
 
 import type { IntentMethod } from "@docspec/dsti-core";
+import { mapDslToAssertions } from "@docspec/dsti-core";
 import type { JavaTestGeneratorConfig, GeneratedTestFile } from "../generator.js";
 
 /**
@@ -29,10 +30,9 @@ export function generatePropertyTests(method: IntentMethod, config: JavaTestGene
     testMethods += `
     @Property
     void queryIsIdempotent(@ForAll @StringLength(max = 100) String input) {
-        // Given the same input, calling ${methodName} twice should return the same result
-        // var result1 = sut.${methodName}(input);
-        // var result2 = sut.${methodName}(input);
-        // assertThat(result1).isEqualTo(result2);
+        var result1 = sut.${methodName}(input);
+        var result2 = sut.${methodName}(input);
+        assertThat(result1).isEqualTo(result2);
     }
 `;
   }
@@ -42,11 +42,10 @@ export function generatePropertyTests(method: IntentMethod, config: JavaTestGene
     testMethods += `
     @Property
     void mutationChangesState(@ForAll @StringLength(max = 100) String input) {
-        // Calling ${methodName} should change observable state
-        // var before = sut.getState();
-        // sut.${methodName}(input);
-        // var after = sut.getState();
-        // assertThat(after).isNotEqualTo(before);
+        var stateBefore = sut.hashCode();
+        sut.${methodName}(input);
+        var stateAfter = sut.hashCode();
+        assertThat(stateAfter).isNotEqualTo(stateBefore);
     }
 `;
   }
@@ -56,13 +55,27 @@ export function generatePropertyTests(method: IntentMethod, config: JavaTestGene
     testMethods += `
     @Property
     void conservesDataIntegrity(@ForAll @IntRange(min = 0, max = 1000) int value) {
-        // ${methodName} should preserve data integrity across reads and writes
-        // var total_before = sut.getTotal();
-        // sut.${methodName}(value);
-        // var total_after = sut.getTotal();
-        // Verify conservation law holds
+        long totalBefore = sut.count();
+        sut.${methodName}(value);
+        long totalAfter = sut.count();
+        assertThat(totalAfter).isGreaterThanOrEqualTo(totalBefore);
     }
 `;
+  }
+
+  // Generate invariant rule tests from @DocInvariant Property DSL expressions
+  if (signals.invariantRules) {
+    for (const rule of signals.invariantRules) {
+      const assertions = mapDslToAssertions(rule);
+      const safeRuleName = rule.replace(/[^a-zA-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
+      testMethods += `
+    @Property
+    void invariant_${safeRuleName}(@ForAll @StringLength(max = 100) String input) {
+        var result = sut.${methodName}(input);
+        ${assertions.javaAssertion}
+    }
+`;
+    }
   }
 
   if (!testMethods) return [];

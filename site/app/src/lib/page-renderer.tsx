@@ -55,7 +55,7 @@ export function PageRenderer({ page, referenceIndex }: PageRendererProps) {
     case PageType.GUIDE:
       return <GuidePage data={page.data as any} />;
     case PageType.CHANGELOG:
-      return <ChangelogPage />;
+      return <ChangelogPage data={page.data as any} />;
     case PageType.LANDING:
       return <LandingPage data={page.data as any} />;
     case PageType.DATA_STORE:

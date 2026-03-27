@@ -38,7 +38,7 @@ export function generateMockSetup(method: IntentMethod, config: RustTestGenerato
 
     traitDefs += `
 /// Trait for ${simpleName} (${classification ?? "unknown"})
-/// TODO: Replace with actual trait from your crate
+/// Replace with actual trait from your crate
 #[cfg_attr(test, mockall::automock)]
 pub trait ${traitName} {
 ${traitMethods}
@@ -75,10 +75,10 @@ ${fixtureBuilder}
         }
 
         /// Build the system under test from the mocked dependencies.
-        /// TODO: Replace with actual constructor
+        /// Replace with actual constructor
         fn build_sut(&self) -> ${moduleName} {
             // ${moduleName}::new(${fieldNames.map(f => `&self.${f}`).join(", ")})
-            todo!("Wire mocked dependencies into ${moduleName}")
+            unimplemented!("Wire mocked dependencies into ${moduleName}")
         }
     }
 
@@ -120,7 +120,7 @@ function getTraitMethods(classification: string | undefined): string {
     fn subscribe(&self, topic: &str) -> Result<(), Box<dyn std::error::Error>>;`;
     case "service":
     default:
-      return `    // TODO: Define trait methods for this service dependency
+      return `    // Define trait methods for this service dependency
     fn execute(&self) -> Result<(), Box<dyn std::error::Error>>;`;
   }
 }

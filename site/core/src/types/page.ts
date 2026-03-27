@@ -130,6 +130,7 @@ export interface MemberPageData {
   moduleId: string;
   artifact: { label: string; color?: string };
   referencedIn?: ReferencedInData;
+  examples?: Record<string, string>;
 }
 
 export interface EndpointPageData {
@@ -138,6 +139,9 @@ export interface EndpointPageData {
   memberQualified: string;
   memberName: string;
   artifact: { label: string; color?: string };
+  examples?: Record<string, string>;
+  responseExample?: string;
+  linkedFlowId?: string;
 }
 
 export interface FlowPageData {
@@ -208,6 +212,34 @@ export interface ContextWithMeta {
 export interface ChangelogPageData {
   type: PageType.CHANGELOG;
   entries: unknown[];
+  diffs?: ChangelogDiff[];
+}
+
+export interface ChangelogDiff {
+  version: { from: string; to: string };
+  summary: { added: number; removed: number; modified: number; totalChanges: number };
+  members: ChangelogDiffItem[];
+  methods: ChangelogMethodDiffItem[];
+  flows: ChangelogFlowDiffItem[];
+  errors: ChangelogDiffItem[];
+  events: ChangelogDiffItem[];
+}
+
+export interface ChangelogDiffItem {
+  id?: string;
+  qualified?: string;
+  name: string;
+  status: "added" | "removed" | "modified";
+  changes?: string[];
+}
+
+export interface ChangelogMethodDiffItem extends ChangelogDiffItem {
+  memberName: string;
+}
+
+export interface ChangelogFlowDiffItem extends ChangelogDiffItem {
+  stepsAdded?: number;
+  stepsRemoved?: number;
 }
 
 export interface ReferencedInData {

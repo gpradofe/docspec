@@ -100,6 +100,11 @@ export function DocDeterministic(): MethodDecorator {
 }
 
 /** @docspec:deterministic */
+export function DocCommutative(description?: string): MethodDecorator {
+  return (target, propertyKey) => { setMetadata("commutative", description ?? true, target, propertyKey); };
+}
+
+/** @docspec:deterministic */
 export function DocIntentional(intent: string): MethodDecorator {
   return (target, propertyKey) => { setMetadata("intentional", intent, target, propertyKey); };
 }

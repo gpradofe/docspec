@@ -254,6 +254,21 @@ pub fn doc_deterministic(attr: TokenStream, item: TokenStream) -> TokenStream {
     dsti_attrs::doc_deterministic_impl(attr.into(), item.into()).into()
 }
 
+/// Mark a function as commutative — argument order does not affect the result.
+///
+/// Generates property-based tests verifying that `f(a, b) == f(b, a)`
+/// for all valid input pairs.
+///
+/// # Example
+/// ```rust
+/// #[doc_commutative("addition is commutative")]
+/// pub fn add(a: i32, b: i32) -> i32 { a + b }
+/// ```
+#[proc_macro_attribute]
+pub fn doc_commutative(attr: TokenStream, item: TokenStream) -> TokenStream {
+    dsti_attrs::doc_commutative_impl(attr.into(), item.into()).into()
+}
+
 /// Declare an ordering strategy (e.g., insertion, natural, custom).
 ///
 /// # Example

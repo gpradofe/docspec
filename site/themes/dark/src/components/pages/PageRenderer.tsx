@@ -50,7 +50,7 @@ export function PageRenderer({ pageType, data, referenceIndex }: PageRendererPro
     case "operations":
       return <OperationsPage data={data} />;
     case "changelog":
-      return <ChangelogPage />;
+      return <ChangelogPage data={data} />;
     case "data-store":
       return <DataStorePage data={data} />;
     case "configuration":

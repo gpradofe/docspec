@@ -5,6 +5,26 @@ import { Breadcrumb } from "../layout/Breadcrumb.js";
 import { FlowDiagram } from "../ui/FlowDiagram.js";
 import { TraceView } from "../ui/TraceView.js";
 
+function getStoreIcon(store: string): string {
+  const s = store.toLowerCase();
+  if (s.includes("postgres") || s.includes("mysql") || s.includes("sql")) return "\uD83D\uDCBE";
+  if (s.includes("redis") || s.includes("cache") || s.includes("memcached")) return "\u26A1";
+  if (s.includes("kafka") || s.includes("rabbit") || s.includes("sqs")) return "\uD83D\uDCE8";
+  if (s.includes("mongo") || s.includes("dynamo") || s.includes("cosmos")) return "\uD83D\uDDC4\uFE0F";
+  if (s.includes("elastic") || s.includes("solr")) return "\uD83D\uDD0D";
+  if (s.includes("s3") || s.includes("blob") || s.includes("gcs")) return "\uD83D\uDCE6";
+  return "\uD83D\uDCBE";
+}
+
+function getOpColor(op: string): { bg: string; text: string } {
+  const o = op.toUpperCase();
+  if (o === "INSERT" || o === "CREATE" || o === "PUBLISH") return { bg: "#dcfce7", text: "#166534" };
+  if (o === "SELECT" || o === "READ" || o === "GET") return { bg: "#dbeafe", text: "#1d4ed8" };
+  if (o === "UPDATE" || o === "PATCH") return { bg: "#fef3c7", text: "#92400e" };
+  if (o === "DELETE" || o === "DROP") return { bg: "#fee2e2", text: "#991b1b" };
+  return { bg: "#f1f5f9", text: "#475569" };
+}
+
 interface FlowPageProps {
   data: FlowPageData;
   referenceIndex?: Record<string, string>;
@@ -99,31 +119,86 @@ export function FlowPage({ data, referenceIndex }: FlowPageProps) {
 
                   {/* Data Store Operations */}
                   {step.dataStoreOps && step.dataStoreOps.length > 0 && (
-                    <div className="mt-2 p-2 rounded bg-surface-secondary text-xs">
-                      <span className="text-text-tertiary font-medium">Data Store Ops:</span>
-                      <div className="mt-1 space-y-1">
-                        {step.dataStoreOps.map((op, j) => (
-                          <div key={j} className="flex items-center gap-2">
-                            {op.store && (
-                              <code className="font-mono text-text-secondary">{op.store}</code>
-                            )}
-                            {op.operation && (
-                              <Badge>{op.operation}</Badge>
-                            )}
-                            {op.tables && op.tables.length > 0 && (
-                              <span className="text-text-tertiary">
-                                ({op.tables.join(", ")})
-                              </span>
-                            )}
-                            {op.transactional && (
-                              <Badge variant="warning">txn</Badge>
-                            )}
-                            {op.cascading && (
-                              <Badge variant="info">cascade</Badge>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                    <div style={{
+                      marginTop: 8,
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      background: "var(--ds-surface-secondary, #f8fafc)",
+                      border: "1px solid var(--ds-border, #e2e8f0)",
+                    }}>
+                      {step.dataStoreOps.map((op, opIdx) => (
+                        <div key={opIdx} style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "4px 0",
+                          fontSize: 13,
+                        }}>
+                          {/* Store icon */}
+                          <span style={{ fontSize: 14 }}>
+                            {getStoreIcon(op.store)}
+                          </span>
+                          {/* Store name */}
+                          <span style={{
+                            fontFamily: "var(--font-mono)",
+                            fontWeight: 500,
+                            color: "var(--ds-text-primary)",
+                            fontSize: 12,
+                          }}>
+                            {op.store}:
+                          </span>
+                          {/* Operation badge */}
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 600,
+                            fontFamily: "var(--font-mono)",
+                            padding: "1px 5px",
+                            borderRadius: 3,
+                            background: getOpColor(op.operation).bg,
+                            color: getOpColor(op.operation).text,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.04em",
+                          }}>
+                            {op.operation}
+                          </span>
+                          {/* Tables */}
+                          {op.tables && (
+                            <span style={{
+                              fontFamily: "var(--font-mono)",
+                              fontSize: 12,
+                              color: "var(--ds-text-secondary)",
+                            }}>
+                              {op.tables.join(", ")}
+                            </span>
+                          )}
+                          {/* Transaction badge */}
+                          {op.transactional && (
+                            <span style={{
+                              fontSize: 10,
+                              fontFamily: "var(--font-mono)",
+                              padding: "1px 5px",
+                              borderRadius: 3,
+                              background: "#fef3c7",
+                              color: "#92400e",
+                            }}>
+                              @Transactional
+                            </span>
+                          )}
+                          {/* Cascading badge */}
+                          {op.cascading && (
+                            <span style={{
+                              fontSize: 10,
+                              fontFamily: "var(--font-mono)",
+                              padding: "1px 5px",
+                              borderRadius: 3,
+                              background: "#dbeafe",
+                              color: "#1d4ed8",
+                            }}>
+                              cascade
+                            </span>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
 

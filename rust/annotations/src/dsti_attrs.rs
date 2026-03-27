@@ -51,6 +51,19 @@ pub fn doc_deterministic_impl(_attr: TokenStream, item: TokenStream) -> TokenStr
     output
 }
 
+/// @docspec:deterministic
+/// @docspec:intentional "Marks a function as commutative -- argument order does not affect the result"
+pub fn doc_commutative_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mut output = TokenStream::new();
+    if attr.is_empty() {
+        output.extend(quote! { #[cfg_attr(docspec, doc_commutative)] });
+    } else {
+        output.extend(quote! { #[cfg_attr(docspec, doc_commutative(#attr))] });
+    }
+    output.extend(item);
+    output
+}
+
 pub fn doc_ordering_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut output = TokenStream::new();
     output.extend(quote! { #[cfg_attr(docspec, doc_ordering(#attr))] });

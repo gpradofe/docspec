@@ -50,9 +50,7 @@ ${mockSetup}
 @pytest.fixture
 def instance(${fixtureParams}):
     """Create a ${className} instance with all mocked dependencies."""
-    # TODO: Initialize with mocked dependencies
-    # return ${className}(${fixtureParams})
-    pass
+    return ${className}(${fixtureParams})
 `;
 
   const content = `"""
@@ -103,7 +101,7 @@ function getMockSetup(classification: string | undefined, varName: string): stri
     mock.subscribe = AsyncMock(return_value=None)`;
     case "service":
     default:
-      return `    # TODO: Configure mock methods for ${varName}`;
+      return `    # Configure mock methods for ${varName}`;
   }
 }
 

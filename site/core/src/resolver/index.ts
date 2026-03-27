@@ -3,6 +3,9 @@ import type { ResolvedArtifact } from "./types.js";
 import { resolveLocal } from "./local.js";
 import { resolveMaven } from "./maven.js";
 import { resolveNpm } from "./npm.js";
+import { resolveCrates } from "./crates.js";
+import { resolvePyPI } from "./pypi.js";
+import { resolveNuGet } from "./nuget.js";
 import { SpecCache } from "./cache.js";
 
 /**
@@ -16,7 +19,9 @@ import { SpecCache } from "./cache.js";
  * | `path`           | Local filesystem |
  * | `groupId`        | Maven repository |
  * | `scope`/`package`| npm registry     |
- * | `crate`          | crates.io (stub) |
+ * | `crate`          | crates.io        |
+ * | `pypiPackage`    | PyPI             |
+ * | `nugetPackage`   | NuGet            |
  *
  * @param artifacts - List of artifact entries from docspec.config.yaml.
  * @param cacheDir  - Directory used for disk caching of remote artifacts.
@@ -42,12 +47,14 @@ export async function resolveArtifacts(
     } else if (entry.scope || entry.package) {
       resolved.push(await resolveNpm(entry, repositories, cache));
     } else if (entry.crate) {
-      console.warn(
-        `[docspec] Crates resolution not yet implemented (crate="${entry.crate}").`,
-      );
+      resolved.push(await resolveCrates(entry, repositories, cache));
+    } else if (entry.pypiPackage) {
+      resolved.push(await resolvePyPI(entry, repositories, cache));
+    } else if (entry.nugetPackage) {
+      resolved.push(await resolveNuGet(entry, repositories, cache));
     } else {
       console.warn(
-        "[docspec] Artifact entry has no recognised source (path, groupId, scope/package, or crate). Skipping.",
+        "[docspec] Artifact entry has no recognised source (path, groupId, scope/package, crate, pypiPackage, or nugetPackage). Skipping.",
       );
     }
   }

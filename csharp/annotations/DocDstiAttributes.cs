@@ -44,6 +44,18 @@ public class DocIdempotentAttribute : Attribute { }
 [AttributeUsage(AttributeTargets.Method)]
 public class DocDeterministicAttribute : Attribute { }
 
+/// <summary>
+/// Mark a method as commutative — the order of its arguments does not affect the result.
+/// Generates property-based tests verifying that f(a, b) == f(b, a) for all valid input pairs.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class DocCommutativeAttribute : Attribute
+{
+    public string? Description { get; }
+    public DocCommutativeAttribute() { }
+    public DocCommutativeAttribute(string description) => Description = description;
+}
+
 /// <summary>Declare a boundary type.</summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class DocBoundaryAttribute : Attribute

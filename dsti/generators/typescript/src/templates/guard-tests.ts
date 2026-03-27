@@ -9,6 +9,21 @@ import type { IntentMethod } from "@docspec/dsti-core";
 import type { TypeScriptTestGeneratorConfig, GeneratedTestFile } from "../generator.js";
 
 /**
+ * Derives a representative invalid input value from a guard condition string.
+ */
+function deriveInvalidInput(condition: string): string {
+  if (/==\s*null|===\s*null|is\s+null/i.test(condition)) return "null as any";
+  if (/==\s*undefined|===\s*undefined/.test(condition)) return "undefined as any";
+  if (/<\s*0|<=\s*0/.test(condition)) return "-1";
+  if (/>\s*\d+/.test(condition)) {
+    const match = condition.match(/>\s*(\d+)/);
+    return match ? String(parseInt(match[1]) + 1) : "Number.MAX_SAFE_INTEGER";
+  }
+  if (/isEmpty|\.length\s*===?\s*0|=== ''|=== ""/.test(condition)) return "''";
+  return "null as any";
+}
+
+/**
  * @docspec:intentional "Generates Vitest guard clause test stubs from DSTI intent signals"
  * @docspec:deterministic
  */
@@ -35,13 +50,14 @@ export function generateGuardTests(method: IntentMethod, config: TypeScriptTestG
     const error = guardInfo?.error ?? "Error";
     const boundary = guardInfo?.boundary ?? "input";
 
+    const invalidInput = deriveInvalidInput(condition);
     testCases += `
   it('should enforce guard: ${escapeTS(condition)}', () => {
     // Guard type: ${boundary}
     // Expected error: ${error}
     expect(() => {
-      instance.${methodName}(/* invalid ${boundary} input */);
-    }).toThrow();
+      instance.${methodName}(${invalidInput});
+    }).toThrow(${error});
   });
 `;
   }
@@ -66,11 +82,17 @@ export function generateGuardTests(method: IntentMethod, config: TypeScriptTestG
 
   // Add branch coverage smoke test when branch count is high
   if (branchCount >= 3) {
+    const branches = Array.isArray(signals.branches) ? signals.branches : [];
+    const branchAssertions = branches.map((b, idx) => {
+      const cond = b.condition ?? `condition ${idx + 1}`;
+      const output = b.output ?? "defined";
+      return `    // Branch ${idx + 1}: ${escapeTS(cond)} -> ${escapeTS(output)}`;
+    }).join("\n");
     testCases += `
   it('should handle all ${branchCount} branch conditions', () => {
-    // ${branchCount} branches detected — consider testing each path
-    // TODO: Add tests for each conditional branch
-    expect(true).toBe(true);
+    // ${branchCount} branches detected — each path should produce a defined result
+${branchAssertions ? branchAssertions + "\n" : ""}    const result = instance.${methodName}(null as any);
+    expect(result).toBeDefined();
   });
 `;
   }
@@ -86,11 +108,10 @@ export function generateGuardTests(method: IntentMethod, config: TypeScriptTestG
  * ${branchCount} branch(es) detected.
  */
 describe('${className}#${methodName} — Guard Clauses', () => {
-  let instance: any; // TODO: Replace with actual type
+  let instance: any; // Replace with actual ${className} type
 
   beforeEach(() => {
-    // TODO: Initialize instance
-    // instance = new ${className}(...);
+    instance = new ${className}();
   });
 ${testCases}
 });

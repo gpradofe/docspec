@@ -213,6 +213,18 @@ type DeterministicMeta struct{}
 //	//docspec:idempotent
 type IdempotentMeta struct{}
 
+// CommutativeMeta marks a method as commutative -- the order of its arguments
+// does not affect the result. Generates property-based tests verifying that
+// f(a, b) == f(b, a) for all valid input pairs.
+// Go equivalent of Java @DocCommutative.
+//
+// @docspec:intentional "Marker type asserting commutativity for a function's arguments"
+//
+//	//docspec:commutative "addition is commutative"
+type CommutativeMeta struct {
+	Description string `json:"description,omitempty"`
+}
+
 // ---------------------------------------------------------------------------
 // Quality / privacy types (Java: @DocTestStrategy, @DocTestSkip, @DocPII
 //                          [already in docspec.go], @DocSensitive)
@@ -380,6 +392,7 @@ type TagsMeta struct {
 //   //docspec:conservation   "conservation law description"
 //   //docspec:deterministic
 //   //docspec:idempotent
+//   //docspec:commutative  "description of the commutative property"
 //   //docspec:invariant      on="Entity" rules="rule1,rule2"
 //   //docspec:monotonic      direction="increasing"
 //

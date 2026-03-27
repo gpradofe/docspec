@@ -1,9 +1,14 @@
 /**
  * Computes "Referenced In" data for member pages.
- * Uses the `member.referencedBy` fields from docspec.json and resolves them to page URLs.
+ *
+ * Two modes:
+ * 1. `computeReferencedInFromSpecs` — pre-generation: walks raw DocSpec[] to build
+ *    a memberQualified → ReferencedBy map (endpoints, flows, contexts).
+ * 2. `computeReferencedIn` — post-generation: resolves an existing ReferencedBy
+ *    to page URLs for rendering.
  */
 
-import type { ReferencedBy } from "../types/docspec.js";
+import type { DocSpec, ReferencedBy } from "../types/docspec.js";
 import type {
   ReferencedInData,
   ReferencedInEntry,
@@ -13,6 +18,74 @@ import type {
   FlowPageData,
 } from "../types/page.js";
 import { PageType } from "../types/page.js";
+
+/* ── Pre-generation: compute from raw specs ─────────────────────────── */
+
+export interface ReferencedInResult {
+  /** Map from member qualified name to what references it */
+  memberReferences: Map<string, ReferencedBy>;
+}
+
+/**
+ * Walk one or more DocSpec objects and compute, for every member, which
+ * endpoints reference it, which flows reference it as an actor, and which
+ * contexts mention it via `attachedTo`.
+ */
+export function computeReferencedInFromSpecs(specs: DocSpec[]): ReferencedInResult {
+  const memberRefs = new Map<string, ReferencedBy>();
+
+  for (const spec of specs) {
+    // 1. Endpoints — each method with an endpointMapping references its owning member
+    for (const mod of spec.modules) {
+      for (const member of mod.members || []) {
+        for (const method of member.methods || []) {
+          if (method.endpointMapping) {
+            const endpoint =
+              `${method.endpointMapping.method ?? "GET"} ${method.endpointMapping.path ?? "/"}`;
+            addRef(memberRefs, member.qualified, "endpoints", endpoint);
+          }
+        }
+      }
+    }
+
+    // 2. Flows — each step whose actorQualified names a member
+    for (const flow of spec.flows || []) {
+      for (const step of flow.steps) {
+        if (step.actorQualified) {
+          addRef(memberRefs, step.actorQualified, "flows", flow.id);
+        }
+      }
+    }
+
+    // 3. Contexts — attachedTo links a context to a member
+    for (const ctx of spec.contexts || []) {
+      if (ctx.attachedTo) {
+        addRef(memberRefs, ctx.attachedTo, "contexts", ctx.id);
+      }
+    }
+  }
+
+  return { memberReferences: memberRefs };
+}
+
+function addRef(
+  map: Map<string, ReferencedBy>,
+  qualified: string,
+  field: keyof ReferencedBy,
+  value: string,
+): void {
+  let refs = map.get(qualified);
+  if (!refs) {
+    refs = {};
+    map.set(qualified, refs);
+  }
+  if (!refs[field]) refs[field] = [];
+  if (!refs[field]!.includes(value)) {
+    refs[field]!.push(value);
+  }
+}
+
+/* ── Post-generation: resolve to page URLs ──────────────────────────── */
 
 export function computeReferencedIn(
   referencedBy: ReferencedBy | undefined,
@@ -31,8 +104,7 @@ export function computeReferencedIn(
   // Resolve flow references
   if (referencedBy.flows) {
     for (const flowRef of referencedBy.flows) {
-      // flowRef format: "flow-id.step-id"
-      const [flowId, stepId] = flowRef.split(".");
+      const [flowId] = flowRef.split(".");
       const flowPage = flowPages.find((p) => p.title.toLowerCase().includes(flowId.replace(/-/g, " ")));
       flows.push({
         label: flowRef,

@@ -48,12 +48,12 @@ ${typeImports}
  * Dependencies detected: ${deps.length}
  */
 ${mockDeclarations}
-let instance: any; // TODO: Replace with ${className}
+let instance: any; // Replace with ${className}
 
 beforeEach(() => {
 ${mockAssignments}
-    // TODO: Initialize instance with mocked dependencies
-    // instance = new ${className}(${deps.slice(0, 10).map(d => {
+    // Initialize instance with mocked dependencies
+    instance = new ${className}(${deps.slice(0, 10).map(d => {
       const name = typeof d === "string" ? d : d.name ?? "unknown";
       return name.split(".").pop()!.charAt(0).toLowerCase() + name.split(".").pop()!.slice(1);
     }).join(", ")});
@@ -117,7 +117,7 @@ function getMockStyle(classification?: string): MockStyle {
       return {
         type: "any",
         factory: `{
-      // TODO: Add mock methods for this service dependency
+      // Add mock methods for this service dependency
     }`,
       };
   }

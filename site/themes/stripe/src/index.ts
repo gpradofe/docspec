@@ -46,3 +46,7 @@ export { ReferencedInPanel } from "./components/ui/ReferencedInPanel.js";
 export { Badge } from "./components/ui/Badge.js";
 export { MethodSignature } from "./components/ui/MethodSignature.js";
 export { TypeLink } from "./components/ui/TypeLink.js";
+export { LanguageTabs } from "./components/ui/LanguageTabs.js";
+
+// Context providers
+export { LanguageProvider, useLanguage } from "./context/LanguageContext.js";

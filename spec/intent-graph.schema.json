@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://docspec.dev/schemas/docspec/3.0.0/intent-graph.schema.json",
   "title": "DocSpec Intent Graph",
-  "description": "DSTI (Deep Structural and Textual Intent) intent graph — extracted intent signals from source code analysis.",
+  "description": "DSTI (Deep Structural and Textual Intent) intent graph — extracted intent signals from source code analysis. This standalone schema defines the full structure for intent graphs produced by DocSpec processors across all supported languages.",
   "type": "object",
   "required": ["docspec", "artifact", "methods"],
   "additionalProperties": false,
@@ -13,20 +13,698 @@
       "description": "The DocSpec specification version."
     },
     "artifact": {
-      "type": "object",
-      "required": ["groupId", "artifactId", "version"],
-      "additionalProperties": false,
-      "properties": {
-        "groupId": { "type": "string" },
-        "artifactId": { "type": "string" },
-        "version": { "type": "string" }
-      },
-      "description": "Artifact coordinates for this intent graph."
+      "$ref": "#/$defs/ArtifactCoordinates",
+      "description": "Artifact coordinates identifying the source of this intent graph."
     },
     "methods": {
       "type": "array",
-      "items": { "$ref": "docspec.schema.json#/$defs/IntentMethod" },
-      "description": "Methods with extracted intent signals."
+      "items": {
+        "$ref": "#/$defs/IntentMethod"
+      },
+      "description": "Array of methods with their extracted intent signals."
+    },
+    "crossChannelVerification": {
+      "$ref": "#/$defs/CrossChannelVerification",
+      "description": "Results of cross-channel consistency verification across all methods."
+    },
+    "gapReport": {
+      "$ref": "#/$defs/GapReport",
+      "description": "Report identifying methods with missing or incomplete intent channels."
+    }
+  },
+  "$defs": {
+    "ArtifactCoordinates": {
+      "type": "object",
+      "description": "Maven-style artifact coordinates identifying the project or module.",
+      "required": ["groupId", "artifactId", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "groupId": {
+          "type": "string",
+          "description": "Group identifier (e.g. 'io.docspec')."
+        },
+        "artifactId": {
+          "type": "string",
+          "description": "Artifact identifier (e.g. 'docspec-processor-java')."
+        },
+        "version": {
+          "type": "string",
+          "description": "Artifact version (e.g. '3.0.0')."
+        }
+      }
+    },
+
+    "IntentMethod": {
+      "type": "object",
+      "description": "A method with its fully qualified name and extracted intent signals from DSTI analysis.",
+      "required": ["qualified"],
+      "additionalProperties": false,
+      "properties": {
+        "qualified": {
+          "type": "string",
+          "description": "Fully qualified method name including class and package (e.g. 'com.example.UserService.findById')."
+        },
+        "intentSignals": {
+          "$ref": "#/$defs/IntentSignals",
+          "description": "Intent signals extracted from this method's source code across all 13 DSTI channels."
+        }
+      }
+    },
+
+    "IntentSignals": {
+      "type": "object",
+      "description": "Intent signals extracted from a method's source code. Contains data from all 13 DSTI channels plus composite scoring.",
+      "additionalProperties": false,
+      "properties": {
+        "nameSemantics": {
+          "$ref": "#/$defs/NameSemanticsSignal",
+          "description": "Channel 1: Semantics extracted from the method name via verb-object decomposition."
+        },
+        "guardClauses": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Simple count of guard clauses detected."
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/GuardClauseSignal"
+              },
+              "description": "Structured guard clause details."
+            }
+          ],
+          "description": "Channel 2: Guard clauses detected at method entry points — either a count or structured objects."
+        },
+        "branches": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Simple count of conditional branches."
+            },
+            {
+              "$ref": "#/$defs/BranchSignal",
+              "description": "Structured branch analysis."
+            }
+          ],
+          "description": "Channel 3: Conditional branches — either a count or a structured analysis object."
+        },
+        "nameBehaviorGap": {
+          "$ref": "#/$defs/NameBehaviorGapSignal",
+          "description": "Channel 4: Detected discrepancy between what the method name implies and what the method body actually does."
+        },
+        "returnType": {
+          "$ref": "#/$defs/ReturnTypeSignal",
+          "description": "Channel 5: Analysis of the method's return type and its implications for intent."
+        },
+        "dataFlow": {
+          "$ref": "#/$defs/DataFlowSignal",
+          "description": "Channel 6: Data flow analysis — what the method reads from and writes to."
+        },
+        "loopProperties": {
+          "$ref": "#/$defs/LoopPropertiesSignal",
+          "description": "Channel 7: Loop and iteration analysis including stream operations."
+        },
+        "errorHandling": {
+          "$ref": "#/$defs/ErrorHandlingSignal",
+          "description": "Channel 8: Error handling patterns detected in the method body."
+        },
+        "constants": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Simple list of constant names referenced."
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ConstantSignal"
+              },
+              "description": "Structured constant details."
+            }
+          ],
+          "description": "Channel 9: Constants referenced in the method — either simple names or structured objects."
+        },
+        "nullChecks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Channel 10: Number of null checks detected in the method body."
+        },
+        "assertions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Channel 11: Number of assertion statements detected (assert, Preconditions, etc.)."
+        },
+        "logStatements": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Channel 12: Number of log statements detected (logger calls, console output, etc.)."
+        },
+        "validationAnnotations": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Channel 13: Number of validation annotations detected (@NotNull, @Valid, @Size, class-validator, Joi, Zod, etc.)."
+        },
+        "dependencies": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Simple list of injected dependency type names."
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DependencySignal"
+              },
+              "description": "Structured dependency details."
+            }
+          ],
+          "description": "Injected dependencies (field types) used by the method."
+        },
+        "contractChecks": {
+          "$ref": "#/$defs/ContractChecksSignal",
+          "description": "Contract method checks indicating whether the method implements standard contracts."
+        },
+        "intentDensityScore": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Composite Intent Signal Density (ISD) score from 0.0 (no signals) to 1.0 (maximum density)."
+        },
+        "isdBreakdown": {
+          "$ref": "#/$defs/ISDBreakdown",
+          "description": "Detailed breakdown of the ISD score showing per-channel contributions and weighted calculation."
+        }
+      }
+    },
+
+    "NameSemanticsSignal": {
+      "type": "object",
+      "description": "Channel 1: Semantics extracted from the method name by decomposing it into verb, object, and inferred intent category.",
+      "additionalProperties": false,
+      "properties": {
+        "verb": {
+          "type": "string",
+          "description": "Primary verb extracted from the method name (e.g. 'find', 'create', 'validate', 'delete')."
+        },
+        "object": {
+          "type": "string",
+          "description": "Object of the verb extracted from the method name (e.g. 'User', 'Order', 'Configuration')."
+        },
+        "intent": {
+          "type": "string",
+          "description": "Inferred intent category based on the verb (e.g. 'query', 'mutation', 'validation', 'transformation')."
+        },
+        "implies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Behavioral implications inferred from the name (e.g. ['returns single result', 'may throw NotFoundException'])."
+        }
+      }
+    },
+
+    "GuardClauseSignal": {
+      "type": "object",
+      "description": "A structured guard clause detected at a method entry point, representing a precondition check.",
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "type": "string",
+          "description": "The guard condition expression (e.g. 'id != null', 'amount > 0')."
+        },
+        "error": {
+          "type": "string",
+          "description": "Error or exception thrown when the guard fails (e.g. 'IllegalArgumentException', 'ValidationError')."
+        },
+        "boundary": {
+          "type": "object",
+          "description": "Numeric boundary extracted from the guard condition.",
+          "additionalProperties": false,
+          "properties": {
+            "below": {
+              "type": "number",
+              "description": "Lower bound value (exclusive)."
+            },
+            "above": {
+              "type": "number",
+              "description": "Upper bound value (exclusive)."
+            },
+            "exact": {
+              "type": "number",
+              "description": "Exact required value."
+            }
+          }
+        }
+      }
+    },
+
+    "BranchSignal": {
+      "type": "object",
+      "description": "Structured analysis of conditional branching within the method.",
+      "additionalProperties": false,
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of branch condition expressions (e.g. ['status == ACTIVE', 'role == ADMIN'])."
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Descriptions of the distinct execution paths (e.g. ['return cached', 'fetch and cache', 'throw error'])."
+        },
+        "exhaustive": {
+          "type": "boolean",
+          "description": "Whether the branching covers all possible cases (e.g. switch with default, if-else chain)."
+        }
+      }
+    },
+
+    "NameBehaviorGapSignal": {
+      "type": "object",
+      "description": "Channel 4: A detected discrepancy between what the method name implies and what the body actually does.",
+      "additionalProperties": false,
+      "properties": {
+        "nameImplies": {
+          "type": "string",
+          "description": "What the method name suggests it does (e.g. 'validates input data')."
+        },
+        "actualBehavior": {
+          "type": "string",
+          "description": "What the method body actually does that differs from the name (e.g. 'also persists to database')."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["warning", "error", "info"],
+          "description": "Severity of the name-behavior gap: 'error' for serious mismatches, 'warning' for notable discrepancies, 'info' for minor observations."
+        }
+      }
+    },
+
+    "ReturnTypeSignal": {
+      "type": "object",
+      "description": "Channel 5: Analysis of the method's return type and what it implies about the method's intent.",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The return type as a string (e.g. 'Optional<User>', 'List<String>', 'void', 'CompletableFuture<Result>')."
+        },
+        "nullable": {
+          "type": "boolean",
+          "description": "Whether the return type can be null (true for Optional, nullable annotations, etc.)."
+        },
+        "collection": {
+          "type": "boolean",
+          "description": "Whether the return type is a collection (List, Set, Map, Stream, array, etc.)."
+        },
+        "wrapper": {
+          "type": "string",
+          "description": "Wrapper type if applicable (e.g. 'Optional', 'CompletableFuture', 'Mono', 'Result')."
+        }
+      }
+    },
+
+    "DataFlowSignal": {
+      "type": "object",
+      "description": "Channel 6: Data flow analysis showing what state the method reads from and writes to.",
+      "additionalProperties": false,
+      "properties": {
+        "reads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields, repositories, or external sources read from (e.g. ['userRepository', 'this.cache', 'configService'])."
+        },
+        "writes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields, repositories, or external targets written to (e.g. ['auditLog', 'this.lastUpdated', 'eventBus'])."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["passthrough", "aggregation", "derived", "generated"],
+          "description": "Classification of the data flow pattern: 'passthrough' passes data through, 'aggregation' combines multiple sources, 'derived' computes new data from existing, 'generated' creates new data."
+        }
+      }
+    },
+
+    "LoopPropertiesSignal": {
+      "type": "object",
+      "description": "Channel 7: Analysis of loops, iterations, and stream operations within the method.",
+      "additionalProperties": false,
+      "properties": {
+        "hasStreams": {
+          "type": "boolean",
+          "description": "Whether Java streams, LINQ, iterators, or equivalent functional pipelines are used."
+        },
+        "hasEnhancedFor": {
+          "type": "boolean",
+          "description": "Whether enhanced for-each loops (for-in, for-of, range-based for) are used."
+        },
+        "streamOps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Stream/pipeline operations used (e.g. ['filter', 'map', 'collect', 'reduce', 'flatMap'])."
+        },
+        "over": {
+          "type": "string",
+          "description": "What collection or data source is being iterated over (e.g. 'users', 'orderItems')."
+        },
+        "operation": {
+          "type": "string",
+          "description": "The primary operation performed in each iteration (e.g. 'transform', 'filter', 'accumulate')."
+        },
+        "implies": {
+          "type": "string",
+          "description": "What the loop pattern implies about the method's intent (e.g. 'batch processing', 'search', 'aggregation')."
+        }
+      }
+    },
+
+    "ErrorHandlingSignal": {
+      "type": "object",
+      "description": "Channel 8: Analysis of error handling patterns in the method body.",
+      "additionalProperties": false,
+      "properties": {
+        "catchBlocks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of catch/except/recover blocks in the method."
+        },
+        "caughtTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Exception or error types caught (e.g. ['IOException', 'NotFoundException', 'TimeoutException'])."
+        },
+        "handling": {
+          "type": "string",
+          "enum": ["wrap_and_throw", "retry", "log_and_continue", "fallback"],
+          "description": "The primary error handling strategy: 'wrap_and_throw' re-throws wrapped, 'retry' attempts again, 'log_and_continue' logs and proceeds, 'fallback' uses alternative logic."
+        }
+      }
+    },
+
+    "ConstantSignal": {
+      "type": "object",
+      "description": "A structured constant reference with its value and implied meaning.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Constant name (e.g. 'MAX_RETRIES', 'DEFAULT_TIMEOUT', 'STATUS_ACTIVE')."
+        },
+        "value": {
+          "type": "string",
+          "description": "Constant value as a string representation (e.g. '3', '30000', 'ACTIVE')."
+        },
+        "type": {
+          "type": "string",
+          "description": "The data type of the constant (e.g. 'int', 'String', 'Duration')."
+        },
+        "implies": {
+          "type": "string",
+          "description": "What this constant implies about the method's intent (e.g. 'retry logic', 'timeout handling', 'status filtering')."
+        }
+      }
+    },
+
+    "DependencySignal": {
+      "type": "object",
+      "description": "A structured dependency reference indicating an injected service or component.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Dependency type or field name (e.g. 'UserRepository', 'EmailService', 'CacheManager')."
+        },
+        "classification": {
+          "type": "string",
+          "description": "Dependency classification (e.g. 'repository', 'service', 'client', 'cache', 'publisher')."
+        }
+      }
+    },
+
+    "ContractChecksSignal": {
+      "type": "object",
+      "description": "Flags indicating whether the method implements standard object contracts.",
+      "additionalProperties": false,
+      "properties": {
+        "hasEquals": {
+          "type": "boolean",
+          "description": "Whether the method implements or calls equals()."
+        },
+        "hasHashCode": {
+          "type": "boolean",
+          "description": "Whether the method implements or calls hashCode()."
+        },
+        "hasCompareTo": {
+          "type": "boolean",
+          "description": "Whether the method implements or calls compareTo()."
+        },
+        "hasToString": {
+          "type": "boolean",
+          "description": "Whether the method implements or calls toString()."
+        }
+      }
+    },
+
+    "ISDBreakdown": {
+      "type": "object",
+      "description": "Detailed breakdown of the Intent Signal Density (ISD) score showing individual channel contributions.",
+      "additionalProperties": false,
+      "properties": {
+        "channelScores": {
+          "type": "object",
+          "description": "Per-channel scores before weighting, each ranging from 0.0 to 1.0.",
+          "additionalProperties": false,
+          "properties": {
+            "naming": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 1 (nameSemantics) — how well the method name conveys intent."
+            },
+            "guardClauses": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 2 (guardClauses) — presence and quality of precondition checks."
+            },
+            "branches": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 3 (branches) — branching complexity and coverage."
+            },
+            "nameBehaviorGap": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 4 (nameBehaviorGap) — alignment between name and behavior (1.0 = no gap)."
+            },
+            "returnType": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 5 (returnType) — how informative the return type is."
+            },
+            "dataFlow": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 6 (dataFlow) — clarity of data read/write patterns."
+            },
+            "loopProperties": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 7 (loopProperties) — iteration pattern documentation."
+            },
+            "errorHandling": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 8 (errorHandling) — error handling strategy clarity."
+            },
+            "constants": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 9 (constants) — meaningful constant usage."
+            },
+            "nullChecks": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 10 (nullChecks) — null safety practices."
+            },
+            "assertions": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 11 (assertions) — presence of assertion statements."
+            },
+            "logStatements": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 12 (logStatements) — observability via logging."
+            },
+            "validationAnnotations": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Score for Channel 13 (validationAnnotations) — declarative validation coverage."
+            }
+          }
+        },
+        "weightedScore": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Final weighted ISD score computed by applying channel weights (sum of weights = 1.0) to individual channel scores."
+        }
+      }
+    },
+
+    "CrossChannelVerification": {
+      "type": "object",
+      "description": "Results of verifying consistency across DSTI channels for all methods. Detects contradictions such as a method named 'find' that writes data, or a method with guard clauses but no validation annotations.",
+      "additionalProperties": false,
+      "required": ["issues", "methodsChecked", "issueCount"],
+      "properties": {
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CrossChannelIssue"
+          },
+          "description": "List of cross-channel consistency issues detected."
+        },
+        "methodsChecked": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of methods analyzed for cross-channel consistency."
+        },
+        "issueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of cross-channel issues found."
+        }
+      }
+    },
+
+    "CrossChannelIssue": {
+      "type": "object",
+      "description": "A single cross-channel consistency issue where two channels provide contradictory or inconsistent signals.",
+      "additionalProperties": false,
+      "required": ["method", "channel1", "channel2", "severity", "message"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "Fully qualified name of the method where the issue was detected."
+        },
+        "channel1": {
+          "type": "string",
+          "description": "First channel involved in the inconsistency (e.g. 'nameSemantics')."
+        },
+        "channel2": {
+          "type": "string",
+          "description": "Second channel involved in the inconsistency (e.g. 'dataFlow')."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["warning", "error", "info"],
+          "description": "Severity of the cross-channel issue: 'error' for direct contradictions, 'warning' for likely inconsistencies, 'info' for observations."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable description of the cross-channel inconsistency (e.g. 'Method named findUser writes to auditLog — name implies read-only query')."
+        }
+      }
+    },
+
+    "GapReport": {
+      "type": "object",
+      "description": "Report identifying methods with missing or incomplete intent channel data, providing recommendations for improving documentation coverage.",
+      "additionalProperties": false,
+      "required": ["gaps", "recommendations", "totalMethods", "methodsWithGaps"],
+      "properties": {
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GapEntry"
+          },
+          "description": "List of methods with identified intent channel gaps."
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Aggregate recommendations for improving intent coverage across the codebase (e.g. 'Add @DocGuard annotations to 12 methods with implicit preconditions')."
+        },
+        "totalMethods": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of methods analyzed in the gap report."
+        },
+        "methodsWithGaps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of methods that have at least one missing channel."
+        }
+      }
+    },
+
+    "GapEntry": {
+      "type": "object",
+      "description": "A single method's gap analysis showing which intent channels are missing and what to do about it.",
+      "additionalProperties": false,
+      "required": ["method", "missingChannels", "recommendation", "severity"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "Fully qualified name of the method with gaps."
+        },
+        "missingChannels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of channel names that are missing or empty for this method (e.g. ['guardClauses', 'errorHandling', 'dataFlow'])."
+        },
+        "recommendation": {
+          "type": "string",
+          "description": "Specific recommendation for addressing the gaps in this method (e.g. 'Add guard clauses for the userId parameter and document the error handling strategy')."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Severity of the gap: 'high' for public API methods missing critical channels, 'medium' for internal methods with notable gaps, 'low' for minor omissions."
+        }
+      }
     }
   }
 }

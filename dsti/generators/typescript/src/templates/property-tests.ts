@@ -32,11 +32,9 @@ export function generatePropertyTests(method: IntentMethod, config: TypeScriptTe
   it('query is idempotent', () => {
     fc.assert(
       fc.property(fc.string({ maxLength: 100 }), (input) => {
-        // Calling ${methodName} twice with the same input should return the same result
-        // const result1 = instance.${methodName}(input);
-        // const result2 = instance.${methodName}(input);
-        // expect(result1).toEqual(result2);
-        return true; // TODO: implement
+        const result1 = instance.${methodName}(input);
+        const result2 = instance.${methodName}(input);
+        expect(result1).toEqual(result2);
       })
     );
   });
@@ -49,12 +47,10 @@ export function generatePropertyTests(method: IntentMethod, config: TypeScriptTe
   it('mutation changes observable state', () => {
     fc.assert(
       fc.property(fc.string({ maxLength: 100 }), (input) => {
-        // Calling ${methodName} should produce a state change
-        // const before = instance.getState();
-        // instance.${methodName}(input);
-        // const after = instance.getState();
-        // expect(after).not.toEqual(before);
-        return true; // TODO: implement
+        const before = JSON.stringify(instance);
+        instance.${methodName}(input);
+        const after = JSON.stringify(instance);
+        expect(after).not.toEqual(before);
       })
     );
   });
@@ -71,12 +67,10 @@ export function generatePropertyTests(method: IntentMethod, config: TypeScriptTe
     // Writes: ${writes}
     fc.assert(
       fc.property(fc.integer({ min: 0, max: 1000 }), (value) => {
-        // ${methodName} should preserve data integrity
-        // const totalBefore = instance.getTotal();
-        // instance.${methodName}(value);
-        // const totalAfter = instance.getTotal();
-        // Conservation: totalAfter should relate predictably to totalBefore
-        return true; // TODO: implement
+        const totalBefore = instance.count?.() ?? 0;
+        instance.${methodName}(value);
+        const totalAfter = instance.count?.() ?? 0;
+        expect(totalAfter).toBeGreaterThanOrEqual(totalBefore);
       })
     );
   });
@@ -90,10 +84,8 @@ export function generatePropertyTests(method: IntentMethod, config: TypeScriptTe
     fc.assert(
       fc.property(fc.array(fc.integer(), { maxLength: 50 }), (items) => {
         // Stream ops: ${streamOps.join(", ")}
-        // Verify the pipeline does not produce more elements than the input
-        // const result = instance.${methodName}(items);
-        // expect(result.length).toBeLessThanOrEqual(items.length);
-        return true; // TODO: implement
+        const result = instance.${methodName}(items);
+        expect(result.length).toBeLessThanOrEqual(items.length);
       })
     );
   });
@@ -107,10 +99,9 @@ export function generatePropertyTests(method: IntentMethod, config: TypeScriptTe
     fc.assert(
       fc.property(fc.string({ maxLength: 200 }), (input) => {
         // High ISD (${isd.toFixed(2)}) implies robust null handling
-        // const result = instance.${methodName}(input);
-        // expect(result).not.toBeNull();
-        // expect(result).not.toBeUndefined();
-        return true; // TODO: implement
+        const result = instance.${methodName}(input);
+        expect(result).not.toBeNull();
+        expect(result).not.toBeUndefined();
       })
     );
   });
@@ -125,8 +116,7 @@ export function generatePropertyTests(method: IntentMethod, config: TypeScriptTe
     fc.assert(
       fc.property(fc.anything(), (input) => {
         // ${catchBlocks} catch block(s) detected — method should not throw unhandled
-        // expect(() => instance.${methodName}(input)).not.toThrow();
-        return true; // TODO: implement
+        expect(() => instance.${methodName}(input)).not.toThrow();
       })
     );
   });
@@ -146,11 +136,10 @@ import * as fc from 'fast-check';
  * Intent: ${intent ?? "unknown"}
  */
 describe('${className}#${methodName} — Properties', () => {
-  let instance: any; // TODO: Replace with actual type
+  let instance: any; // Replace with actual ${className} type
 
   beforeEach(() => {
-    // TODO: Initialize instance
-    // instance = new ${className}(...);
+    instance = new ${className}();
   });
 ${testCases}
 });

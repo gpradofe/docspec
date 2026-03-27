@@ -653,9 +653,39 @@ function renderOperations(data: OperationsPageData): string {
 // ---------------------------------------------------------------------------
 
 function renderChangelog(data: ChangelogPageData): string {
+  const lines: string[] = [];
+
+  // Render structured diffs if available
+  if (data.diffs && data.diffs.length > 0) {
+    for (const diff of data.diffs) {
+      lines.push("");
+      lines.push(`### v${diff.version.to} (from v${diff.version.from})`);
+      lines.push("");
+      lines.push(`**${diff.summary.totalChanges} changes** — ${diff.summary.added} added, ${diff.summary.removed} removed, ${diff.summary.modified} modified`);
+      lines.push("");
+      for (const m of diff.members || []) {
+        lines.push(`- **${m.status.toUpperCase()}** member \`${m.name}\`${m.changes ? ` (${m.changes.join(", ")})` : ""}`);
+      }
+      for (const m of diff.methods || []) {
+        lines.push(`- **${m.status.toUpperCase()}** method \`${m.memberName}.${m.name}\`${m.changes ? ` (${m.changes.join(", ")})` : ""}`);
+      }
+      for (const f of diff.flows || []) {
+        lines.push(`- **${f.status.toUpperCase()}** flow \`${f.name}\`${f.stepsAdded ? ` (+${f.stepsAdded} steps)` : ""}`);
+      }
+      for (const e of diff.errors || []) {
+        lines.push(`- **${e.status.toUpperCase()}** error \`${e.name}\``);
+      }
+      for (const e of diff.events || []) {
+        lines.push(`- **${e.status.toUpperCase()}** event \`${e.name}\``);
+      }
+    }
+    lines.push("");
+    return lines.join("\n");
+  }
+
+  // Fall back to legacy entries
   if (data.entries.length === 0) return "\n*No changelog entries.*\n";
 
-  const lines: string[] = [];
   lines.push("");
   for (const entry of data.entries) {
     lines.push(`- ${JSON.stringify(entry)}`);

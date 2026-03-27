@@ -9,6 +9,37 @@ import type { IntentMethod } from "@docspec/dsti-core";
 import type { JavaTestGeneratorConfig, GeneratedTestFile } from "../generator.js";
 
 /**
+ * Derives a representative invalid input value from a guard condition string.
+ * Parses common patterns like null checks, range violations, and emptiness tests.
+ */
+function deriveInvalidInput(condition: string, _methodName: string): string {
+  // "param == null" or "param is null" → pass null
+  if (/==\s*null|is\s+null/i.test(condition)) {
+    return "null";
+  }
+  // "x < 0" or "x <= 0" → pass -1
+  if (/<\s*0|<=\s*0/.test(condition)) {
+    return "-1";
+  }
+  // "x > N" → pass N+1
+  if (/>\s*\d+/.test(condition)) {
+    const match = condition.match(/>\s*(\d+)/);
+    return match ? String(parseInt(match[1]) + 1) : "Integer.MAX_VALUE";
+  }
+  // "x < N" (but not < 0) → pass N-1 (below the minimum)
+  if (/<\s*\d+/.test(condition)) {
+    const match = condition.match(/<\s*(\d+)/);
+    return match ? String(parseInt(match[1]) - 1) : "-1";
+  }
+  // isEmpty / isBlank / length == 0
+  if (/isEmpty|isBlank|\.length\s*==\s*0/.test(condition)) {
+    return '""';
+  }
+  // Default: null is a reasonable invalid input for most guard clauses
+  return "null";
+}
+
+/**
  * @docspec:intentional "Generates JUnit 5 guard clause test stubs from DSTI intent signals"
  * @docspec:deterministic
  */
@@ -29,6 +60,7 @@ export function generateGuardTests(method: IntentMethod, config: JavaTestGenerat
     const condition = guardInfo?.condition ?? `guard condition ${i + 1}`;
     const error = guardInfo?.error ?? "IllegalArgumentException";
 
+    const invalidInput = deriveInvalidInput(condition, methodName);
     testMethods += `
     @Test
     @DisplayName("Should enforce guard: ${escapeJava(condition)}")
@@ -36,7 +68,7 @@ export function generateGuardTests(method: IntentMethod, config: JavaTestGenerat
         // Given: input that violates ${escapeJava(condition)}
         // When/Then: expect ${error}
         assertThrows(${error}.class, () -> {
-            // TODO: Call ${methodName} with invalid input
+            sut.${methodName}(${invalidInput});
         });
     }
 `;
@@ -49,7 +81,7 @@ export function generateGuardTests(method: IntentMethod, config: JavaTestGenerat
     @DisplayName("Should reject null input")
     void shouldRejectNullInput() {
         assertThrows(NullPointerException.class, () -> {
-            // TODO: Call ${methodName} with null
+            sut.${methodName}(null);
         });
     }
 `;

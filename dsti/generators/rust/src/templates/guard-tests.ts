@@ -9,6 +9,20 @@ import type { IntentMethod } from "@docspec/dsti-core";
 import type { RustTestGeneratorConfig, GeneratedTestFile } from "../generator.js";
 
 /**
+ * Derives a representative invalid input expression for Rust from a guard condition string.
+ */
+function deriveInvalidInputRust(condition: string): string {
+  if (/==\s*null|is\s*None|\.is_none\(\)/i.test(condition)) return "None";
+  if (/<\s*0|<=\s*0/.test(condition)) return "-1";
+  if (/>\s*\d+/.test(condition)) {
+    const match = condition.match(/>\s*(\d+)/);
+    return match ? String(parseInt(match[1]) + 1) : "i32::MAX";
+  }
+  if (/is_empty|\.len\(\)\s*==\s*0/.test(condition)) return '""';
+  return "Default::default()";
+}
+
+/**
  * @docspec:intentional "Generates Rust guard clause test stubs from DSTI intent signals"
  * @docspec:deterministic
  */
@@ -40,13 +54,13 @@ export function generateGuardTests(method: IntentMethod, config: RustTestGenerat
     // Determine if the function returns Result or panics
     const usesResult = error.includes("Error") || error.includes("Err");
 
+    const invalidInput = deriveInvalidInputRust(condition);
     if (usesResult) {
       testFunctions += `
     #[test]
     fn test_${snakeFn}_enforces_guard_${i + 1}() {
         // Guard: ${escapeRust(condition)} (${boundary})
-        // Expected: Err variant
-        let result = ${snakeFn}(/* invalid ${boundary} input */);
+        let result = ${snakeFn}(${invalidInput});
         assert!(
             result.is_err(),
             "Expected Err for guard violation: ${escapeRust(condition)}"
@@ -59,7 +73,7 @@ export function generateGuardTests(method: IntentMethod, config: RustTestGenerat
     #[should_panic(expected = "${escapeRust(error)}")]
     fn test_${snakeFn}_enforces_guard_${i + 1}() {
         // Guard: ${escapeRust(condition)} (${boundary})
-        ${snakeFn}(/* invalid ${boundary} input */);
+        ${snakeFn}(${invalidInput});
     }
 `;
     }
@@ -85,7 +99,7 @@ export function generateGuardTests(method: IntentMethod, config: RustTestGenerat
     #[test]
     fn test_${snakeFn}_accepts_valid_input() {
         // Smoke test: valid input should not panic
-        let result = ${snakeFn}(/* valid input */);
+        let result = ${snakeFn}(Default::default());
         assert!(result.is_ok(), "Valid input should produce Ok result");
     }
 `;
@@ -95,9 +109,9 @@ export function generateGuardTests(method: IntentMethod, config: RustTestGenerat
     testFunctions += `
     #[test]
     fn test_${snakeFn}_covers_${branchCount}_branches() {
-        // ${branchCount} branches detected
-        // TODO: Add tests for each conditional branch using match/if-let patterns
-        assert!(true);
+        // ${branchCount} branches detected — verify function handles varied inputs
+        let result = std::panic::catch_unwind(|| ${snakeFn}(Default::default()));
+        assert!(result.is_ok(), "Function should not panic on default input");
     }
 `;
   }

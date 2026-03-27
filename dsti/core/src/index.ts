@@ -45,6 +45,10 @@ export {
 export type { InvariantRule } from "./property-dsl-parser.js";
 export { PropertyDSLParser } from "./property-dsl-parser.js";
 
+// DSL-to-assertion mapper
+export type { DslAssertion } from "./dsl-assertion-mapper.js";
+export { mapDslToAssertions, mapRuleToAssertions, mapAllDslToAssertions } from "./dsl-assertion-mapper.js";
+
 // Cross-channel verifier
 export type {
   VerificationResult,

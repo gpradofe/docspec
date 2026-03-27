@@ -1,9 +1,10 @@
 /**
- * Changelog page generator (placeholder).
+ * Changelog page generator.
  *
- * Produces a GeneratedPage with an empty entries array.
- * Actual changelog content will be populated in a future step
- * (e.g. from CHANGELOG.md or git history).
+ * Produces a GeneratedPage with an empty entries/diffs array.
+ * Diffs are populated by the CLI `diff` command which calls
+ * `computeDiff()` from the diff engine and injects the results
+ * into the ChangelogPageData.diffs field.
  */
 
 import type { GeneratedPage, ChangelogPageData } from "../../types/page.js";

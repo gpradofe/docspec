@@ -90,6 +90,8 @@ export interface IntentSignals {
   assertions?: number;
   logStatements?: number;
   validationAnnotations?: number;
+  /** Invariant rules from @DocInvariant, expressed as Property DSL expressions. */
+  invariantRules?: string[];
 }
 
 // ---------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 // }
 
 import type { IntentMethod } from "@docspec/dsti-core";
+import { mapDslToAssertions } from "@docspec/dsti-core";
 import type { TSTestGeneratorConfig, GeneratedTestFile } from "../generator.js";
 
 /**
@@ -51,6 +52,20 @@ export function generatePropertyTests(method: IntentMethod, config: TSTestGenera
     // expect(result1).toBe(result2);
   });
 `;
+  }
+
+  // Generate invariant rule tests from @DocInvariant Property DSL expressions
+  if (signals.invariantRules) {
+    for (const rule of signals.invariantRules) {
+      const assertions = mapDslToAssertions(rule);
+      const safeRuleName = rule.replace(/[^a-zA-Z0-9]/g, " ").replace(/\s+/g, " ").trim();
+      tests += `
+  it("invariant: ${safeRuleName}", () => {
+    const result = sut.${methodName}(/* input */);
+    ${assertions.typescriptAssertion}
+  });
+`;
+    }
   }
 
   if (!tests) return [];

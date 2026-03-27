@@ -222,6 +222,21 @@ def doc_deterministic(func=None):
     return decorator
 
 
+# @docspec:intentional "Mark a function as commutative (argument order does not affect result)"
+def doc_commutative(func_or_desc=None):
+    """Mark a method as commutative -- the order of its arguments does not affect the result.
+
+    Generates property-based tests verifying that f(a, b) == f(b, a)
+    for all valid input pairs. Used by DSTI test generators.
+    """
+    def decorator(f):
+        set_metadata(f, "commutative", func_or_desc if isinstance(func_or_desc, str) else True)
+        return f
+    if callable(func_or_desc):
+        return decorator(func_or_desc)
+    return decorator
+
+
 # @docspec:intentional "Attach an intentional description to a function for DSTI analysis"
 def doc_intentional(intent: str):
     def decorator(func):
