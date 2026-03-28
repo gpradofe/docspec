@@ -1,0 +1,8 @@
+packages:
+  - packages/site/*
+  - packages/site/themes/*
+  - packages/dsti/core
+  - packages/annotations/typescript
+  - packages/processor/typescript
+  - packages/build-plugins/npm
+  - packages/test-generator/*

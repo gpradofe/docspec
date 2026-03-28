@@ -11,15 +11,18 @@ interface GuidePageProps {
 }
 
 const components: Record<string, React.FC<any>> = {
-  Heading: ({ id, level, children }) => {
-    const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+  Heading: ({ id, level, children }: { id: string; level: number; children: React.ReactNode }) => {
     const styles: Record<number, React.CSSProperties> = {
       1: { fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", marginTop: 0, marginBottom: 16, color: "var(--ds-text-primary)" },
       2: { fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em", marginTop: 40, marginBottom: 12, color: "var(--ds-text-primary)", paddingBottom: 8, borderBottom: "1px solid var(--ds-border, #e2e8f0)" },
       3: { fontSize: 18, fontWeight: 600, marginTop: 32, marginBottom: 8, color: "var(--ds-text-primary)" },
       4: { fontSize: 15, fontWeight: 600, marginTop: 24, marginBottom: 8, color: "var(--ds-text-secondary)" },
     };
-    return <Tag id={id} style={styles[level] || styles[4]}>{children}</Tag>;
+    const style = styles[level] || styles[4];
+    if (level === 1) return <h1 id={id} style={style}>{children}</h1>;
+    if (level === 2) return <h2 id={id} style={style}>{children}</h2>;
+    if (level === 3) return <h3 id={id} style={style}>{children}</h3>;
+    return <h4 id={id} style={style}>{children}</h4>;
   },
 
   Callout: ({ type, title, children }) => {
@@ -72,9 +75,9 @@ export function GuidePage({ data }: GuidePageProps) {
           {title}
         </h1>
 
-        {frontmatter.description && (
+        {typeof frontmatter.description === "string" && (
           <p style={{ fontSize: 17, color: "var(--ds-text-tertiary)", marginBottom: 32 }}>
-            {frontmatter.description as string}
+            {frontmatter.description}
           </p>
         )}
 

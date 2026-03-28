@@ -5,8 +5,8 @@
   "description": "Universal documentation specification and toolchain — generates structured, machine-readable documentation from any codebase",
   "scripts": {
     "build:java": "cd java && mvn install -DskipTests",
-    "build:site": "cd site && pnpm install && pnpm -r build",
-    "build:ts": "cd typescript/processor && npm install && npm run build",
+    "build:site": "pnpm -r --filter './packages/site/**' build",
+    "build:ts": "cd packages/processor/typescript && npm install && npm run build",
     "build:python": "cd python/processor && pip install -e .",
     "build:rust": "cd rust/processor && cargo build",
     "build:csharp": "cd csharp/processor && dotnet build",
@@ -15,7 +15,7 @@
     "test:gates": "bash tests/gates/run-all-gates.sh",
     "test:e2e": "bash tests/e2e/java-pipeline.test.sh && bash tests/e2e/tier-matrix.test.sh",
     "test:all": "npm run test:gates && npm run test:e2e",
-    "lint:all": "cd site && pnpm -r lint"
+    "lint:all": "pnpm -r lint"
   },
   "license": "MIT",
   "author": "Gustavo Aniceto",

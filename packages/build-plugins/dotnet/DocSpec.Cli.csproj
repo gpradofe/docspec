@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\csharp\processor\DocSpec.Analyzer.csproj" />
+    <ProjectReference Include="..\..\processor\csharp\DocSpec.Analyzer.csproj" />
   </ItemGroup>
 
   <!-- Bundle the schema as an embedded resource -->

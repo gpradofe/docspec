@@ -2,12 +2,12 @@
   "name": "docspec-site",
   "private": true,
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "pnpm -r --filter './packages/site/**' build",
     "dev": "pnpm --filter @docspec/app dev",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "pnpm -r lint",
-    "clean": "pnpm -r exec rm -rf dist .next out"
+    "lint": "pnpm -r --filter './packages/site/**' lint",
+    "clean": "pnpm -r --filter './packages/site/**' exec rm -rf dist .next out"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
