@@ -1,0 +1,44 @@
+# DocSpec Self-Documentation
+# DocSpec documenting itself — the meta-dogfooding goal
+
+site:
+  name: "DocSpec"
+  description: "Universal documentation specification & toolchain — documenting itself"
+  theme: "@docspec/theme-stripe"
+  baseUrl: http://localhost:3000
+
+artifacts:
+  - path: ./docspec-processor.json
+    label: "DocSpec Processor"
+    color: "#6366f1"
+
+  - path: ./docspec-maven-plugin.json
+    label: "Maven Plugin"
+    color: "#22c55e"
+
+navigation:
+  - section: API Reference
+    items: [endpoints/auto]
+  - section: Libraries & SDKs
+    items: [modules/auto]
+  - section: Architecture
+    items:
+      - flows/auto
+      - data-models/auto
+      - data-stores/auto
+  - section: Testing
+    items:
+      - test-overview/auto
+      - intent-graph/auto
+
+build:
+  outputDir: ./out
+  cacheDir: ./.docspec-cache
+  search: true
+
+dsti:
+  enabled: true
+  channels: all
+
+ai:
+  llmsTxt: true

@@ -6,3 +6,4 @@ packages:
   - packages/processor/typescript
   - packages/build-plugins/npm
   - packages/test-generator/*
+  - docspec-docs

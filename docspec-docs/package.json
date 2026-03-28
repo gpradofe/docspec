@@ -1,0 +1,16 @@
+{
+  "name": "docspec-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "docspec dev",
+    "build": "docspec build",
+    "resolve": "docspec resolve"
+  },
+  "dependencies": {
+    "docspec": "workspace:*",
+    "@docspec/core": "workspace:*",
+    "@docspec/theme-stripe": "workspace:*"
+  }
+}
