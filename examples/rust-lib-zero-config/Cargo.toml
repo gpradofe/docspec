@@ -1,9 +1,0 @@
-[package]
-name = "rust-lib-zero-config"
-version = "1.0.0"
-edition = "2021"
-description = "Tier 0: Rust library with zero DocSpec annotations"
-
-[lib]
-name = "calculator"
-path = "src/lib.rs"

@@ -57,7 +57,9 @@ bin/
 obj/
 *.suo
 *.user
-packages/
+# NuGet packages (exclude nested, not our top-level packages/ dir)
+!packages/
+**/nuget-packages/
 
 # Claude
 .claude/
