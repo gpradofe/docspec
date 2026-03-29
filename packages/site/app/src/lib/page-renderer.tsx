@@ -1,6 +1,6 @@
 import React from "react";
-import { PageType } from "@docspec/core";
 import type { GeneratedPage } from "@docspec/core";
+// Use string literals instead of PageType enum — @docspec/core has Node.js deps that break in client components
 import {
   LandingPage,
   ModulePage,
@@ -30,55 +30,60 @@ import {
 interface PageRendererProps {
   page: GeneratedPage;
   referenceIndex: Record<string, string>;
+  lens?: "docs" | "tests";
 }
 
-export function PageRenderer({ page, referenceIndex }: PageRendererProps) {
+export function PageRenderer({ page, referenceIndex, lens }: PageRendererProps) {
   switch (page.type) {
-    case PageType.MODULE:
-      return <ModulePage data={page.data as any} />;
-    case PageType.MEMBER:
-      return <MemberPage data={page.data as any} referenceIndex={referenceIndex} />;
-    case PageType.ENDPOINT:
-      return <EndpointPage data={page.data as any} referenceIndex={referenceIndex} />;
-    case PageType.FLOW:
-      return <FlowPage data={page.data as any} referenceIndex={referenceIndex} />;
-    case PageType.DATA_MODEL:
-      return <DataModelPage data={page.data as any} referenceIndex={referenceIndex} />;
-    case PageType.ERROR_CATALOG:
-      return <ErrorCatalogPage data={page.data as any} />;
-    case PageType.EVENT_CATALOG:
-      return <EventCatalogPage data={page.data as any} />;
-    case PageType.GRAPH:
-      return <GraphPage data={page.data as any} />;
-    case PageType.OPERATIONS:
-      return <OperationsPage data={page.data as any} />;
-    case PageType.GUIDE:
-      return <GuidePage data={page.data as any} />;
-    case PageType.CHANGELOG:
-      return <ChangelogPage data={page.data as any} />;
-    case PageType.LANDING:
+    case "landing":
+      if (lens === "tests") {
+        // In tests lens, show the test dashboard on the landing page
+        return <TestDashboardPage data={page.data as any} />;
+      }
       return <LandingPage data={page.data as any} />;
-    case PageType.DATA_STORE:
+    case "module":
+      return <ModulePage data={page.data as any} />;
+    case "member":
+      return <MemberPage data={page.data as any} referenceIndex={referenceIndex} lens={lens} />;
+    case "endpoint":
+      return <EndpointPage data={page.data as any} referenceIndex={referenceIndex} />;
+    case "flow":
+      return <FlowPage data={page.data as any} referenceIndex={referenceIndex} />;
+    case "data_model":
+      return <DataModelPage data={page.data as any} referenceIndex={referenceIndex} />;
+    case "error_catalog":
+      return <ErrorCatalogPage data={page.data as any} />;
+    case "event_catalog":
+      return <EventCatalogPage data={page.data as any} />;
+    case "graph":
+      return <GraphPage data={page.data as any} />;
+    case "operations":
+      return <OperationsPage data={page.data as any} />;
+    case "guide":
+      return <GuidePage data={page.data as any} />;
+    case "changelog":
+      return <ChangelogPage data={page.data as any} />;
+    case "data_store":
       return <DataStorePage data={page.data as any} />;
-    case PageType.CONFIGURATION:
+    case "configuration":
       return <ConfigurationPage data={page.data as any} />;
-    case PageType.SECURITY:
+    case "security":
       return <SecurityPage data={page.data as any} />;
-    case PageType.DEPENDENCY_MAP:
+    case "dependency_map":
       return <DependencyMapPage data={page.data as any} />;
-    case PageType.PRIVACY:
+    case "privacy":
       return <PrivacyPage data={page.data as any} />;
-    case PageType.TEST_OVERVIEW:
+    case "test_overview":
       return <TestOverviewPage data={page.data as any} />;
-    case PageType.INTENT_GRAPH:
+    case "intent_graph":
       return <IntentGraphPage data={page.data as any} />;
-    case PageType.FLOW_TEST:
+    case "flow_test":
       return <FlowTestPage data={page.data as any} />;
-    case PageType.GAP_REPORT:
+    case "gap_report":
       return <GapReportPage data={page.data as any} />;
-    case PageType.OBSERVABILITY:
+    case "observability":
       return <ObservabilityPage data={page.data as any} />;
-    case PageType.TEST_DASHBOARD:
+    case "test_dashboard":
       return <TestDashboardPage data={page.data as any} />;
     default:
       return <div>Unknown page type: {page.type}</div>;

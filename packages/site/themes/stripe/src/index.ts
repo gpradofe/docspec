@@ -55,3 +55,4 @@ export { ChTag } from "./components/ui/ChTag.js";
 
 // Context providers
 export { LanguageProvider, useLanguage } from "./context/LanguageContext.js";
+export { LensProvider, useLens, type Lens } from "./context/LensContext.js";
