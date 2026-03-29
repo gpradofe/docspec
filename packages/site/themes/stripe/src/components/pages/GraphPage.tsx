@@ -34,131 +34,142 @@ function getGroupColor(group: string): string {
 }
 
 /**
- * Force-directed layout simulation.
- * Runs N iterations of: repulsion between all node pairs + attraction along edges + centering.
+ * Hierarchical (Sugiyama-style) layout.
+ * 1. Assign layers via longest-path from roots (top = orchestrators, bottom = leaves)
+ * 2. Order nodes within layers to minimize edge crossings (barycenter heuristic)
+ * 3. Position with even spacing
  */
-function forceLayout(
+function hierarchicalLayout(
   nodes: GraphNode[],
   edges: GraphEdge[],
   width: number,
-  height: number,
-): LayoutNode[] {
-  if (nodes.length === 0) return [];
+): { layout: LayoutNode[]; height: number } {
+  if (nodes.length === 0) return { layout: [], height: 200 };
 
-  // Initialize positions: spread in a grid to avoid overlap
-  const cols = Math.ceil(Math.sqrt(nodes.length));
-  const cellW = width / (cols + 1);
-  const cellH = height / (Math.ceil(nodes.length / cols) + 1);
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const children = new Map<string, string[]>();
+  const parents = new Map<string, string[]>();
+  const inDegree = new Map<string, number>();
 
-  const positions: Array<{ x: number; y: number; vx: number; vy: number }> = nodes.map((_, i) => ({
-    x: cellW * ((i % cols) + 1) + (Math.random() - 0.5) * 20,
-    y: cellH * (Math.floor(i / cols) + 1) + (Math.random() - 0.5) * 20,
-    vx: 0,
-    vy: 0,
-  }));
+  for (const n of nodes) {
+    children.set(n.id, []);
+    parents.set(n.id, []);
+    inDegree.set(n.id, 0);
+  }
+  for (const e of edges) {
+    children.get(e.source)?.push(e.target);
+    parents.get(e.target)?.push(e.source);
+    inDegree.set(e.target, (inDegree.get(e.target) || 0) + 1);
+  }
 
-  const nodeIndex = new Map(nodes.map((n, i) => [n.id, i]));
+  // --- Step 1: Assign layers via BFS from roots ---
+  const layerOf = new Map<string, number>();
+  const roots = nodes.filter((n) => (inDegree.get(n.id) || 0) === 0).map((n) => n.id);
+  if (roots.length === 0) roots.push(nodes[0].id);
 
-  // Simulation parameters
-  const repulsion = 8000;
-  const attraction = 0.005;
-  const damping = 0.85;
-  const centerForce = 0.01;
-  const iterations = 200;
-  const padding = 60;
-  const centerX = width / 2;
-  const centerY = height / 2;
-
-  for (let iter = 0; iter < iterations; iter++) {
-    // Repulsion: every pair pushes apart
-    for (let i = 0; i < positions.length; i++) {
-      for (let j = i + 1; j < positions.length; j++) {
-        let dx = positions[j].x - positions[i].x;
-        let dy = positions[j].y - positions[i].y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = repulsion / (dist * dist);
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        positions[i].vx -= fx;
-        positions[i].vy -= fy;
-        positions[j].vx += fx;
-        positions[j].vy += fy;
-      }
+  const queue = roots.map((id) => ({ id, layer: 0 }));
+  const visited = new Set<string>();
+  while (queue.length > 0) {
+    const { id, layer } = queue.shift()!;
+    if (visited.has(id)) {
+      // Update to deeper layer if reached via longer path
+      layerOf.set(id, Math.max(layerOf.get(id) || 0, layer));
+    } else {
+      visited.add(id);
+      layerOf.set(id, layer);
     }
-
-    // Attraction: connected nodes pull together
-    for (const edge of edges) {
-      const si = nodeIndex.get(edge.source);
-      const ti = nodeIndex.get(edge.target);
-      if (si === undefined || ti === undefined) continue;
-      const dx = positions[ti].x - positions[si].x;
-      const dy = positions[ti].y - positions[si].y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const force = dist * attraction;
-      const fx = (dx / dist) * force;
-      const fy = (dy / dist) * force;
-      positions[si].vx += fx;
-      positions[si].vy += fy;
-      positions[ti].vx -= fx;
-      positions[ti].vy -= fy;
+    for (const child of children.get(id) || []) {
+      queue.push({ id: child, layer: layer + 1 });
     }
-
-    // Centering force
-    for (const p of positions) {
-      p.vx += (centerX - p.x) * centerForce;
-      p.vy += (centerY - p.y) * centerForce;
-    }
-
-    // Apply velocity + damping
-    for (const p of positions) {
-      p.vx *= damping;
-      p.vy *= damping;
-      p.x += p.vx;
-      p.y += p.vy;
-      // Clamp to bounds
-      p.x = Math.max(padding, Math.min(width - padding, p.x));
-      p.y = Math.max(padding, Math.min(height - padding, p.y));
+  }
+  // Place unvisited nodes in the last layer
+  for (const n of nodes) {
+    if (!layerOf.has(n.id)) {
+      layerOf.set(n.id, (Math.max(...layerOf.values()) || 0) + 1);
     }
   }
 
-  return nodes.map((n, i) => {
-    // Derive group from the node's label or artifact type
-    const label = n.label.toLowerCase();
-    let group = "core";
-    if (label.includes("channel") || label.includes("naming") || label.includes("guard") || label.includes("branch") || label.includes("loop") || label.includes("error") || label.includes("constant") || label.includes("assignment") || label.includes("exception") || label.includes("logging") || label.includes("equality") || label.includes("return")) group = "channel";
-    else if (label.includes("intent") || label.includes("isd") || label.includes("density") || label.includes("dsti")) group = "dsti";
-    else if (label.includes("extractor") || label.includes("privacy") || label.includes("security") || label.includes("config") || label.includes("observ") || label.includes("datastore") || label.includes("external")) group = "extractor";
-    else if (label.includes("spring") || label.includes("jpa") || label.includes("jackson")) group = "framework";
-    else if (label.includes("serial") || label.includes("output")) group = "output";
-    else if (label.includes("reader") || label.includes("javadoc") || label.includes("inferrer")) group = "reader";
-    else if (label.includes("scanner") || label.includes("filter") || label.includes("discovery")) group = "scanner";
-    else if (label.includes("coverage") || label.includes("metric")) group = "metrics";
-    else if (label.includes("model")) group = "model";
-    else if (label.includes("mojo") || label.includes("maven") || label.includes("generate") || label.includes("validate") || label.includes("publish") || label.includes("schema") || label.includes("aggregate") || label.includes("check")) group = "maven";
-    else if (label.includes("processor")) group = "core";
+  // Group by layer
+  const layers: string[][] = [];
+  for (const [id, layer] of layerOf) {
+    while (layers.length <= layer) layers.push([]);
+    layers[layer].push(id);
+  }
 
-    const color = getGroupColor(group);
+  // --- Step 2: Order within layers to reduce crossings (barycenter, 4 passes) ---
+  for (let pass = 0; pass < 4; pass++) {
+    for (let li = 1; li < layers.length; li++) {
+      const layer = layers[li];
+      const prevLayer = layers[li - 1];
+      const prevIndex = new Map(prevLayer.map((id, i) => [id, i]));
 
-    return {
-      id: n.id,
-      label: n.label,
-      x: Math.round(positions[i].x),
-      y: Math.round(positions[i].y),
-      color,
-      isd: 0, // Will be enriched if data available
-      tests: 0,
-      group,
-    };
-  });
+      layer.sort((a, b) => {
+        const aParents = parents.get(a) || [];
+        const bParents = parents.get(b) || [];
+        const aAvg = aParents.length > 0 ? aParents.reduce((s, p) => s + (prevIndex.get(p) ?? 0), 0) / aParents.length : 0;
+        const bAvg = bParents.length > 0 ? bParents.reduce((s, p) => s + (prevIndex.get(p) ?? 0), 0) / bParents.length : 0;
+        return aAvg - bAvg;
+      });
+    }
+  }
+
+  // --- Step 3: Position nodes ---
+  const layerGap = 100;
+  const minNodeSpacing = 100;
+  const topPadding = 50;
+
+  const result: LayoutNode[] = [];
+
+  for (let li = 0; li < layers.length; li++) {
+    const layer = layers[li];
+    const layerWidth = layer.length * minNodeSpacing;
+    const startX = (width - layerWidth) / 2 + minNodeSpacing / 2;
+    const y = topPadding + li * layerGap;
+
+    for (let ni = 0; ni < layer.length; ni++) {
+      const id = layer[ni];
+      const gn = nodeMap.get(id);
+      if (!gn) continue;
+
+      const x = startX + ni * minNodeSpacing;
+      const label = gn.label.toLowerCase();
+
+      // Derive group from class name
+      let group = "core";
+      if (/channel|naming|guard|branch|loop|errorhandling|constant|assignment|exception|logging|equality|return/i.test(label)) group = "channel";
+      else if (/intent|isd|density|dsti/i.test(label)) group = "dsti";
+      else if (/extractor|privacy|security(?!model)|configur|observ|datastore|external/i.test(label)) group = "extractor";
+      else if (/spring|jpa|jackson/i.test(label)) group = "framework";
+      else if (/serial|output/i.test(label)) group = "output";
+      else if (/reader|javadoc|inferrer/i.test(label)) group = "reader";
+      else if (/scanner|filter|discovery/i.test(label)) group = "scanner";
+      else if (/coverage|metric/i.test(label)) group = "metrics";
+      else if (/model/i.test(label)) group = "model";
+      else if (/mojo|maven|generate(?!d)|validate|publish|schema|aggregate|check/i.test(label)) group = "maven";
+
+      result.push({
+        id: gn.id,
+        label: gn.label,
+        x: Math.round(x),
+        y: Math.round(y),
+        color: getGroupColor(group),
+        isd: 0,
+        tests: 0,
+        group,
+      });
+    }
+  }
+
+  const totalHeight = topPadding + layers.length * layerGap + 40;
+  return { layout: result, height: totalHeight };
 }
 
 export function GraphPage({ data }: GraphPageProps) {
-  const svgWidth = 900;
-  const svgHeight = Math.max(500, Math.ceil(data.nodes.length / 3) * 80 + 100);
+  const svgWidth = 960;
 
-  const layoutData = useMemo(
-    () => forceLayout(data.nodes, data.edges, svgWidth, svgHeight),
-    [data.nodes, data.edges, svgWidth, svgHeight],
+  const { layout: layoutData, height: svgHeight } = useMemo(
+    () => hierarchicalLayout(data.nodes, data.edges, svgWidth),
+    [data.nodes, data.edges, svgWidth],
   );
 
   const [hovered, setHovered] = useState<string | null>(null);
@@ -186,7 +197,7 @@ export function GraphPage({ data }: GraphPageProps) {
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ maxWidth: 960, margin: "0 auto" }}>
       <h1 style={{ fontSize: 24, fontWeight: 750, color: T.text, letterSpacing: "-0.025em", margin: "0 0 6px" }}>
         Dependency Graph
       </h1>
