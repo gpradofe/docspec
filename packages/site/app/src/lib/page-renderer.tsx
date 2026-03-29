@@ -1,6 +1,5 @@
 import React from "react";
 import type { GeneratedPage } from "@docspec/core";
-// Use string literals instead of PageType enum — @docspec/core has Node.js deps that break in client components
 import {
   LandingPage,
   ModulePage,
@@ -37,7 +36,6 @@ export function PageRenderer({ page, referenceIndex, lens }: PageRendererProps) 
   switch (page.type) {
     case "landing":
       if (lens === "tests") {
-        // In tests lens, show the test dashboard on the landing page
         return <TestDashboardPage data={page.data as any} />;
       }
       return <LandingPage data={page.data as any} />;
@@ -49,11 +47,11 @@ export function PageRenderer({ page, referenceIndex, lens }: PageRendererProps) 
       return <EndpointPage data={page.data as any} referenceIndex={referenceIndex} />;
     case "flow":
       return <FlowPage data={page.data as any} referenceIndex={referenceIndex} />;
-    case "data_model":
+    case "data-model":
       return <DataModelPage data={page.data as any} referenceIndex={referenceIndex} />;
-    case "error_catalog":
+    case "error-catalog":
       return <ErrorCatalogPage data={page.data as any} />;
-    case "event_catalog":
+    case "event-catalog":
       return <EventCatalogPage data={page.data as any} />;
     case "graph":
       return <GraphPage data={page.data as any} />;
@@ -63,29 +61,29 @@ export function PageRenderer({ page, referenceIndex, lens }: PageRendererProps) 
       return <GuidePage data={page.data as any} />;
     case "changelog":
       return <ChangelogPage data={page.data as any} />;
-    case "data_store":
+    case "data-store-page":
       return <DataStorePage data={page.data as any} />;
     case "configuration":
       return <ConfigurationPage data={page.data as any} />;
     case "security":
       return <SecurityPage data={page.data as any} />;
-    case "dependency_map":
+    case "dependency-map":
       return <DependencyMapPage data={page.data as any} />;
     case "privacy":
       return <PrivacyPage data={page.data as any} />;
-    case "test_overview":
+    case "test-overview":
       return <TestOverviewPage data={page.data as any} />;
-    case "intent_graph":
+    case "intent-graph":
       return <IntentGraphPage data={page.data as any} />;
-    case "flow_test":
+    case "flow-test":
       return <FlowTestPage data={page.data as any} />;
-    case "gap_report":
+    case "gap-report":
       return <GapReportPage data={page.data as any} />;
     case "observability":
       return <ObservabilityPage data={page.data as any} />;
-    case "test_dashboard":
+    case "test-dashboard":
       return <TestDashboardPage data={page.data as any} />;
     default:
-      return <div>Unknown page type: {page.type}</div>;
+      return <div style={{ color: "#f87171", padding: 40 }}>Unknown page type: {page.type}</div>;
   }
 }

@@ -13,6 +13,9 @@ interface ClientAppProps {
 }
 
 export function ClientApp({ siteData, initialSlug }: ClientAppProps) {
+  // Infer initial lens from URL — /tests/* pages should start in tests lens
+  const inferredLens = initialSlug?.startsWith("tests") ? "tests" : "docs";
+
   // Find the current page based on slug
   const currentPage = initialSlug
     ? siteData.pages.find(
@@ -29,9 +32,10 @@ export function ClientApp({ siteData, initialSlug }: ClientAppProps) {
   return (
     <Layout
       navigation={siteData.navigation}
-      siteName={siteData.config.siteName}
+      siteName={siteData.config.siteName || "DocSpec"}
       logo={siteData.config.logo}
       currentSlug={initialSlug}
+      lens={inferredLens as any}
       artifacts={artifacts.map((a) => ({
         label: a.label,
         color: a.color,
