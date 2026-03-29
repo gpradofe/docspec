@@ -56,12 +56,13 @@ describe('buildNavigation', () => {
 
     const nav = buildNavigation(undefined, artifacts, pages);
 
-    expect(nav.sections).toHaveLength(4);
+    expect(nav.sections).toHaveLength(5);
     expect(nav.sections.map((s) => s.title)).toEqual([
       'Libraries',
       'API',
       'Architecture',
       'Learn',
+      'Tests',
     ]);
   });
 
