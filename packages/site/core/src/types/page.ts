@@ -131,6 +131,7 @@ export interface MemberPageData {
   artifact: { label: string; color?: string };
   referencedIn?: ReferencedInData;
   examples?: Record<string, string>;
+  intentData?: Record<string, { isd: number; signals: any; qualified: string }>;
 }
 
 export interface EndpointPageData {
@@ -260,6 +261,8 @@ export interface NavigationNode {
   children?: NavigationNode[];
   section?: string;
   icon?: string;
+  testCount?: number;
+  isdScore?: number;
 }
 
 export interface NavigationTree {

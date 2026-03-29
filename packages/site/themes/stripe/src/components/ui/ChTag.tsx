@@ -23,7 +23,7 @@ export function ChTag({ ch }: ChTagProps) {
         border: `1px solid ${c.c}30`,
       }}
     >
-      {c.i} {c.l}
+      {c.l}
     </span>
   );
 }

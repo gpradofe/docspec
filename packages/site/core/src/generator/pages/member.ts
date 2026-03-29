@@ -6,7 +6,7 @@
  * reference this member).
  */
 
-import type { Member, Flow, Context } from "../../types/docspec.js";
+import type { Member, Flow, Context, IntentGraph } from "../../types/docspec.js";
 import type {
   GeneratedPage,
   MemberPageData,
@@ -23,6 +23,7 @@ export interface MemberPageInput {
   artifactColor?: string;
   flows?: Flow[];
   contexts?: Context[];
+  intentGraph?: IntentGraph;
 }
 
 /**
@@ -98,9 +99,25 @@ export function generateMemberPage(input: MemberPageInput): GeneratedPage {
     artifactColor,
     flows = [],
     contexts = [],
+    intentGraph,
   } = input;
 
   const referencedIn = buildReferencedIn(member, artifactLabel, flows, contexts);
+
+  // Compute intent data per method
+  const methodIntentMap: Record<string, { isd: number; signals: any; qualified: string }> = {};
+  if (intentGraph?.methods) {
+    for (const im of intentGraph.methods) {
+      const methodName = im.qualified.split(".").pop();
+      if (im.qualified.startsWith(member.qualified + ".") && methodName) {
+        methodIntentMap[methodName] = {
+          isd: im.intentSignals?.intentDensityScore ?? 0,
+          signals: im.intentSignals,
+          qualified: im.qualified,
+        };
+      }
+    }
+  }
 
   const data: MemberPageData = {
     type: PageType.MEMBER,
@@ -108,6 +125,7 @@ export function generateMemberPage(input: MemberPageInput): GeneratedPage {
     moduleId,
     artifact: { label: artifactLabel, color: artifactColor },
     referencedIn,
+    intentData: Object.keys(methodIntentMap).length > 0 ? methodIntentMap : undefined,
   };
 
   return {

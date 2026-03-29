@@ -65,6 +65,7 @@ export function generateArtifactPages(artifact: ResolvedArtifact): GeneratedPage
           artifactColor: color,
           flows,
           contexts,
+          intentGraph: spec.intentGraph,
         }),
       );
 

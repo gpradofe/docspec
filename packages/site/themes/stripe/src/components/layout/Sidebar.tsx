@@ -67,9 +67,9 @@ function kindBadgeLetter(kind: string): string {
 }
 
 function testStatusIcon(status?: "pass" | "warn" | "fail"): string {
-  if (status === "pass") return "\u2713";
-  if (status === "warn") return "\u26A0";
-  if (status === "fail") return "\u2715";
+  if (status === "pass") return "OK";
+  if (status === "warn") return "!!";
+  if (status === "fail") return "X";
   return "";
 }
 
@@ -347,12 +347,8 @@ export function Sidebar({
   );
 }
 
-/** Map icon identifier strings to emoji */
-const ICON_MAP: Record<string, string> = {
-  flow: "\u{1F500}", alert: "\u26A0\uFE0F", event: "\u{1F4E1}", graph: "\u{1F578}\uFE0F",
-  data: "\u{1F4CA}", config: "\u2699\uFE0F", security: "\u{1F512}", privacy: "\u{1F510}",
-  test: "\u{1F9EA}", dashboard: "\u{1F4CA}", changelog: "\u{1F4CB}",
-};
+/** Map icon identifier strings to short text labels */
+const ICON_MAP: Record<string, string> = {};
 
 function SidebarSection({
   title,

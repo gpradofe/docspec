@@ -7,14 +7,14 @@ interface FlowDiagramProps {
 }
 
 const STEP_TYPE_COLORS: Record<string, { bg: string; border: string; icon: string }> = {
-  process: { bg: "#eef2ff", border: "#818cf8", icon: "\u2699\uFE0F" },
-  ai: { bg: "#faf5ff", border: "#a855f7", icon: "\uD83E\uDDE0" },
-  storage: { bg: "#f0fdf4", border: "#22c55e", icon: "\uD83D\uDCBE" },
-  trigger: { bg: "#fff7ed", border: "#f97316", icon: "\u26A1" },
-  retry: { bg: "#fef2f2", border: "#ef4444", icon: "\uD83D\uDD04" },
-  external: { bg: "#f0f9ff", border: "#0ea5e9", icon: "\uD83C\uDF10" },
-  bridge: { bg: "#fefce8", border: "#eab308", icon: "\uD83C\uDF09" },
-  observability: { bg: "#f5f3ff", border: "#8b5cf6", icon: "\uD83D\uDCCA" },
+  process: { bg: "#eef2ff", border: "#818cf8", icon: "PROC" },
+  ai: { bg: "#faf5ff", border: "#a855f7", icon: "AI" },
+  storage: { bg: "#f0fdf4", border: "#22c55e", icon: "DB" },
+  trigger: { bg: "#fff7ed", border: "#f97316", icon: "TRIG" },
+  retry: { bg: "#fef2f2", border: "#ef4444", icon: "RETRY" },
+  external: { bg: "#f0f9ff", border: "#0ea5e9", icon: "EXT" },
+  bridge: { bg: "#fefce8", border: "#eab308", icon: "BRIDGE" },
+  observability: { bg: "#f5f3ff", border: "#8b5cf6", icon: "OBS" },
 };
 
 const PROJECT_PALETTE = ["#818cf8", "#3b82f6", "#f97316", "#22c55e", "#a855f7", "#ef4444"];
@@ -208,7 +208,7 @@ export function FlowDiagram({ steps, referenceIndex }: FlowDiagramProps) {
                   fontSize="10"
                   fill="#22c55e"
                 >
-                  {"\uD83D\uDCBE"} {step.dataStoreOps!.length} data store op{step.dataStoreOps!.length > 1 ? "s" : ""}
+                  DB: {step.dataStoreOps!.length} data store op{step.dataStoreOps!.length > 1 ? "s" : ""}
                 </text>
               )}
 
@@ -232,7 +232,7 @@ export function FlowDiagram({ steps, referenceIndex }: FlowDiagramProps) {
                     textAnchor="middle"
                     dominantBaseline="central"
                   >
-                    {"\uD83D\uDCBE"}
+                    DB
                   </text>
                 </>
               )}

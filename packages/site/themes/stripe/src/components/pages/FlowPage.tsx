@@ -162,7 +162,7 @@ export function FlowPage({ data, referenceIndex }: FlowPageProps) {
                           key={opIdx}
                           style={{ fontSize: 10.5, color: T.green }}
                         >
-                          {"\uD83D\uDCBE"} {op.operation.toUpperCase()} {op.store}{op.tables ? ` (${op.tables.join(", ")})` : ""}
+                          DB: {op.operation.toUpperCase()} {op.store}{op.tables ? ` (${op.tables.join(", ")})` : ""}
                         </div>
                       ))}
                     </div>

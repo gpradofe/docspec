@@ -20,35 +20,6 @@ importers:
         specifier: workspace:*
         version: link:..
 
-  packages/annotations/typescript:
-    dependencies:
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
-    devDependencies:
-      tsup:
-        specifier: ^8.3.0
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(typescript@5.7.3)
-      typescript:
-        specifier: ^5.7.0
-        version: 5.7.3
-
-  packages/build-plugins/npm:
-    dependencies:
-      '@docspec/processor-ts':
-        specifier: workspace:*
-        version: link:../../processor/typescript
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.15
-      tsup:
-        specifier: ^8.3.0
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(typescript@5.7.3)
-      typescript:
-        specifier: ^5.7.0
-        version: 5.7.3
-
   packages/dsti/core:
     devDependencies:
       tsup:
@@ -60,22 +31,6 @@ importers:
       vitest:
         specifier: ^4.1.0
         version: 4.1.2(@types/node@25.5.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1))
-
-  packages/processor/typescript:
-    dependencies:
-      '@docspec/ts':
-        specifier: workspace:*
-        version: link:../../annotations/typescript
-      typescript:
-        specifier: ^5.7.0
-        version: 5.7.3
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.15
-      tsup:
-        specifier: ^8.3.0
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(typescript@5.7.3)
 
   packages/site/app:
     dependencies:
@@ -135,6 +90,9 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.7.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.2(@types/node@25.5.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1))
 
   packages/site/core:
     dependencies:
@@ -160,6 +118,9 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.7.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.2(@types/node@25.5.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1))
 
   packages/site/create-docspec-site:
     dependencies:
@@ -286,19 +247,6 @@ importers:
         version: 4.1.2(@types/node@25.5.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1))
 
   packages/test-generator/java:
-    dependencies:
-      '@docspec/dsti-core':
-        specifier: workspace:*
-        version: link:../../dsti/core
-    devDependencies:
-      tsup:
-        specifier: ^8.3.0
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(typescript@5.7.3)
-      typescript:
-        specifier: ^5.7.0
-        version: 5.7.3
-
-  packages/test-generator/typescript:
     dependencies:
       '@docspec/dsti-core':
         specifier: workspace:*
@@ -1173,9 +1121,6 @@ packages:
   '@types/mdurl@2.0.0':
     resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
 
-  '@types/node@22.19.15':
-    resolution: {integrity: sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg==}
-
   '@types/node@25.5.0':
     resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
 
@@ -1747,9 +1692,6 @@ packages:
     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==}
     engines: {node: '>=8'}
 
-  reflect-metadata@0.2.2:
-    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
-
   regex-recursion@6.0.2:
     resolution: {integrity: sha512-0YCaSCq2VRIebiaUviZNs0cBz1kg5kVS2UKUfNIx8YVs1cN3AV7NTctO5FOKBA+UT2BPJIWZauYHPqJODG50cg==}
 
@@ -1953,9 +1895,6 @@ packages:
 
   ufo@1.6.3:
     resolution: {integrity: sha512-yDJTmhydvl5lJzBmy/hyOAA0d+aqCBuwl818haVdYCRrWV84o7YyeVm4QlVHStqNrrJSTb6jKuFAVqAFsr+K3Q==}
-
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
@@ -2723,10 +2662,6 @@ snapshots:
   '@types/mdurl@2.0.0':
     optional: true
 
-  '@types/node@22.19.15':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@25.5.0':
     dependencies:
       undici-types: 7.18.2
@@ -3269,8 +3204,6 @@ snapshots:
       indent-string: 4.0.0
       strip-indent: 3.0.0
 
-  reflect-metadata@0.2.2: {}
-
   regex-recursion@6.0.2:
     dependencies:
       regex-utilities: 2.3.0
@@ -3526,8 +3459,6 @@ snapshots:
   typescript@5.7.3: {}
 
   ufo@1.6.3: {}
-
-  undici-types@6.21.0: {}
 
   undici-types@7.18.2: {}
 

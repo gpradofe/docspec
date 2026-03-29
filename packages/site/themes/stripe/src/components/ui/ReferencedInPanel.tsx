@@ -21,13 +21,13 @@ export function ReferencedInPanel({ data }: ReferencedInPanelProps) {
       </div>
       <div className="divide-y divide-border/50">
         {hasFlows && (
-          <ReferenceSection title="Flows" icon="🔄" entries={data.flows} />
+          <ReferenceSection title="Flows" icon="" entries={data.flows} />
         )}
         {hasEndpoints && (
-          <ReferenceSection title="Endpoints" icon="🔌" entries={data.endpoints} />
+          <ReferenceSection title="Endpoints" icon="" entries={data.endpoints} />
         )}
         {hasContexts && (
-          <ReferenceSection title="Contexts" icon="📋" entries={data.contexts} />
+          <ReferenceSection title="Contexts" icon="" entries={data.contexts} />
         )}
       </div>
     </div>

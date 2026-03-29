@@ -142,7 +142,7 @@ export function Header({
               fontFamily: T.sans,
             }}
           >
-            {t === "tests" ? "\uD83E\uDDEA Tests" : "\uD83D\uDCD6 Docs"}
+            {t === "tests" ? "Tests" : "Docs"}
           </button>
         ))}
       </div>

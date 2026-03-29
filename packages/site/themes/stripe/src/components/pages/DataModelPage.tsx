@@ -62,7 +62,7 @@ export function DataModelPage({ data, referenceIndex }: DataModelPageProps) {
                 {dataModel.fields.map((field) => (
                   <tr key={field.name} style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
                     <td style={{ padding: "8px 12px 8px 0" }}>
-                      <code style={{ fontFamily: T.mono, color: T.text }}>{field.primaryKey ? "\uD83D\uDD11 " : ""}{field.name}</code>
+                      <code style={{ fontFamily: T.mono, color: T.text }}>{field.primaryKey ? "PK " : ""}{field.name}</code>
                     </td>
                     <td style={{ padding: "8px 12px 8px 0" }}>
                       <code style={{ fontFamily: T.mono, color: T.accent }}>{field.type}</code>

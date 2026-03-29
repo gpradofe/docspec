@@ -28,10 +28,10 @@ const components: Record<string, React.FC<any>> = {
 
   Callout: ({ type, title, children }) => {
     const colors: Record<string, { bg: string; border: string; icon: string }> = {
-      note: { bg: T.blueBg, border: T.blue, icon: "\u2139" },
-      warning: { bg: T.yellowBg, border: T.yellow, icon: "\u26A0" },
-      tip: { bg: T.greenBg, border: T.green, icon: "\uD83D\uDCA1" },
-      danger: { bg: T.redBg, border: T.red, icon: "\uD83D\uDEA8" },
+      note: { bg: T.blueBg, border: T.blue, icon: "i" },
+      warning: { bg: T.yellowBg, border: T.yellow, icon: "!!" },
+      tip: { bg: T.greenBg, border: T.green, icon: "TIP" },
+      danger: { bg: T.redBg, border: T.red, icon: "ERR" },
     };
     const c = colors[type] || colors.note;
     return (

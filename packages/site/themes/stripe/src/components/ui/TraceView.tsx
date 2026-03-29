@@ -6,14 +6,14 @@ interface TraceViewProps {
 }
 
 const TYPE_ICONS: Record<string, string> = {
-  process: "⚙️",
-  ai: "🧠",
-  storage: "💾",
-  trigger: "⚡",
-  retry: "🔄",
-  external: "🌐",
-  bridge: "🌉",
-  observability: "📊",
+  process: "PROC",
+  ai: "AI",
+  storage: "DB",
+  trigger: "TRIG",
+  retry: "RETRY",
+  external: "EXT",
+  bridge: "BRIDGE",
+  observability: "OBS",
 };
 
 export function TraceView({ entries }: TraceViewProps) {
@@ -49,7 +49,7 @@ export function TraceView({ entries }: TraceViewProps) {
               {entry.project && (
                 <span className="text-gray-600"> [{entry.project}]</span>
               )}
-              {entry.ai && <span className="ml-1">🧠</span>}
+              {entry.ai && <span className="ml-1">[AI]</span>}
               {entry.description && (
                 <span className="text-gray-500 ml-2">// {entry.description}</span>
               )}

@@ -135,7 +135,7 @@ export function ERDiagram({ models, referenceIndex }: ERDiagramProps) {
                   fontSize="10"
                   fill={field.primaryKey ? "#4f46e5" : "#374151"}
                 >
-                  {field.primaryKey ? "🔑 " : ""}{field.name}
+                  {field.primaryKey ? "PK " : ""}{field.name}
                 </text>
                 <text
                   x={pos.x + BOX_WIDTH - 10}

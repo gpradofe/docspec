@@ -19,6 +19,7 @@ import {
   slugify,
   artifactLandingSlug,
   modulePageSlug,
+  memberPageSlug,
   intentGraphPageSlug,
   testOverviewPageSlug,
   errorCatalogSlug,
@@ -190,19 +191,51 @@ function autoGenerateItems(
 // ---------------------------------------------------------------------------
 
 /**
- * Libraries section: one entry per artifact, with child entries for each module
- * plus intent graph and test overview pages when available.
+ * Libraries section: one entry per artifact, with child entries for each module.
+ * Each module node has child entries for its members, enriched with intent data
+ * (testCount and isdScore) when available from the spec's intentGraph.
  */
 function autoLibraries(
   artifacts: ResolvedArtifact[],
-  pages: GeneratedPage[],
+  _pages: GeneratedPage[],
 ): NavigationNode[] {
   return artifacts.map((art) => {
-    const children: NavigationNode[] = art.spec.modules.map((mod) => ({
-      label: mod.name ?? mod.id,
-      slug: modulePageSlug(art.label, mod.id),
-      type: PageType.MODULE,
-    }));
+    const intentMethods = art.spec.intentGraph?.methods ?? [];
+
+    const children: NavigationNode[] = art.spec.modules.map((mod) => {
+      // Build member children with intent data
+      const memberChildren: NavigationNode[] = (mod.members ?? []).map((member) => {
+        const memberMethods = intentMethods.filter(
+          (m) => m.qualified.startsWith(member.qualified + "."),
+        );
+        const avgIsd =
+          memberMethods.length > 0
+            ? memberMethods.reduce(
+                (s, m) => s + (m.intentSignals?.intentDensityScore || 0),
+                0,
+              ) / memberMethods.length
+            : 0;
+        const testCount = memberMethods.length;
+
+        const node: NavigationNode = {
+          label: member.name,
+          slug: memberPageSlug(art.label, member.qualified),
+          type: PageType.MEMBER,
+        };
+        if (testCount > 0) {
+          node.testCount = testCount;
+          node.isdScore = avgIsd;
+        }
+        return node;
+      });
+
+      return {
+        label: mod.name ?? mod.id,
+        slug: modulePageSlug(art.label, mod.id),
+        type: PageType.MODULE,
+        children: memberChildren.length > 0 ? memberChildren : undefined,
+      };
+    });
 
     return {
       label: art.label,

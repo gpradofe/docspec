@@ -51,32 +51,32 @@ export const MC: Record<string, { bg: string; text: string; border: string }> = 
 };
 
 /** DSTI channel metadata */
-export const CH: Record<string, { i: string; l: string; c: string }> = {
-  naming: { i: "\u{1F524}", l: "Naming", c: "#818cf8" },
-  guards: { i: "\u{1F6E1}\uFE0F", l: "Guards", c: "#34d399" },
-  branches: { i: "\u{1F33F}", l: "Branches", c: "#38bdf8" },
-  gap: { i: "\u26A0\uFE0F", l: "Gap", c: "#fbbf24" },
-  dataflow: { i: "\u{1F500}", l: "Data Flow", c: "#06b6d4" },
-  loops: { i: "\u{1F504}", l: "Loops", c: "#60a5fa" },
-  errors: { i: "\u{1F4A5}", l: "Errors", c: "#f87171" },
-  constants: { i: "\u{1F4CC}", l: "Constants", c: "#c084fc" },
-  messages: { i: "\u{1F4AC}", l: "Messages", c: "#fb923c" },
-  types: { i: "\u{1F4D0}", l: "Types", c: "#a78bfa" },
-  nullchecks: { i: "\u2753", l: "Null Checks", c: "#94a3b8" },
-  assertions: { i: "\u2714\uFE0F", l: "Assertions", c: "#22d3ee" },
-  logging: { i: "\u{1F4DD}", l: "Logging", c: "#a3e635" },
+export const CH: Record<string, { l: string; c: string }> = {
+  naming: { l: "Naming", c: "#818cf8" },
+  guards: { l: "Guards", c: "#34d399" },
+  branches: { l: "Branches", c: "#38bdf8" },
+  gap: { l: "Gap", c: "#fbbf24" },
+  dataflow: { l: "Data Flow", c: "#06b6d4" },
+  loops: { l: "Loops", c: "#60a5fa" },
+  errors: { l: "Errors", c: "#f87171" },
+  constants: { l: "Constants", c: "#c084fc" },
+  messages: { l: "Messages", c: "#fb923c" },
+  types: { l: "Types", c: "#a78bfa" },
+  nullchecks: { l: "Null Checks", c: "#94a3b8" },
+  assertions: { l: "Assertions", c: "#22d3ee" },
+  logging: { l: "Logging", c: "#a3e635" },
 };
 
 /** Flow step type colors */
 export const SC: Record<string, { bg: string; bd: string; i: string }> = {
-  process: { bg: "rgba(129,140,248,0.08)", bd: "#818cf8", i: "\u2699\uFE0F" },
-  ai: { bg: "rgba(168,85,247,0.08)", bd: "#a855f7", i: "\u{1F9E0}" },
-  storage: { bg: "rgba(52,211,153,0.08)", bd: "#34d399", i: "\u{1F4BE}" },
-  trigger: { bg: "rgba(251,191,36,0.08)", bd: "#fbbf24", i: "\u26A1" },
-  retry: { bg: "rgba(248,113,113,0.08)", bd: "#f87171", i: "\u{1F504}" },
-  external: { bg: "rgba(56,189,248,0.08)", bd: "#38bdf8", i: "\u{1F310}" },
-  merge: { bg: "rgba(251,146,60,0.08)", bd: "#fb923c", i: "\u{1F500}" },
-  observability: { bg: "rgba(139,92,246,0.08)", bd: "#8b5cf6", i: "\u{1F4CA}" },
+  process: { bg: "rgba(129,140,248,0.08)", bd: "#818cf8", i: "PROC" },
+  ai: { bg: "rgba(168,85,247,0.08)", bd: "#a855f7", i: "AI" },
+  storage: { bg: "rgba(52,211,153,0.08)", bd: "#34d399", i: "DB" },
+  trigger: { bg: "rgba(251,191,36,0.08)", bd: "#fbbf24", i: "TRIG" },
+  retry: { bg: "rgba(248,113,113,0.08)", bd: "#f87171", i: "RETRY" },
+  external: { bg: "rgba(56,189,248,0.08)", bd: "#38bdf8", i: "EXT" },
+  merge: { bg: "rgba(251,146,60,0.08)", bd: "#fb923c", i: "MERGE" },
+  observability: { bg: "rgba(139,92,246,0.08)", bd: "#8b5cf6", i: "OBS" },
 };
 
 /** Kind badge colors */

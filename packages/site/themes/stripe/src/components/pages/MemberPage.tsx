@@ -64,7 +64,7 @@ function ChTag({ ch }: { ch: string }) {
         border: `1px solid ${c.c}30`,
       }}
     >
-      {c.i} {c.l}
+      {c.l}
     </span>
   );
 }
@@ -999,9 +999,17 @@ function TestsLens({
                       <span
                         key={ch}
                         title={info.l}
-                        style={{ fontSize: 10, cursor: "default" }}
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 600,
+                          padding: "1px 4px",
+                          borderRadius: 3,
+                          background: info.c + "14",
+                          color: info.c,
+                          cursor: "default",
+                        }}
                       >
-                        {info.i}
+                        {info.l}
                       </span>
                     ) : null;
                   })}
@@ -1029,7 +1037,7 @@ function TestsLens({
                       color: testCount > 0 ? T.green : T.yellow,
                     }}
                   >
-                    {testCount > 0 ? "\u2713" : "\u26A0"}
+                    {testCount > 0 ? "OK" : "!!"}
                   </span>
                 </div>
               </button>
@@ -1523,7 +1531,7 @@ function renderGeneratedTests(
           <span
             style={{ fontSize: 12, fontWeight: 700, color: statusColor }}
           >
-            {isGap ? "\u26A0" : "\u2713"}
+            {isGap ? "!!" : "OK"}
           </span>
           <code
             style={{
