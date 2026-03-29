@@ -347,6 +347,13 @@ export function Sidebar({
   );
 }
 
+/** Map icon identifier strings to emoji */
+const ICON_MAP: Record<string, string> = {
+  flow: "\u{1F500}", alert: "\u26A0\uFE0F", event: "\u{1F4E1}", graph: "\u{1F578}\uFE0F",
+  data: "\u{1F4CA}", config: "\u2699\uFE0F", security: "\u{1F512}", privacy: "\u{1F510}",
+  test: "\u{1F9EA}", dashboard: "\u{1F4CA}", changelog: "\u{1F4CB}",
+};
+
 function SidebarSection({
   title,
   items,
@@ -358,6 +365,9 @@ function SidebarSection({
   currentSlug?: string;
   lens: "docs" | "tests";
 }) {
+  // Hide empty sections
+  if (!items || items.length === 0) return null;
+
   return (
     <div style={{ marginBottom: 16 }}>
       <div
@@ -484,7 +494,7 @@ function SidebarItem({
             ) : (
               item.icon && (
                 <span style={{ fontSize: 12, flexShrink: 0 }}>
-                  {item.icon}
+                  {ICON_MAP[item.icon] || ""}
                 </span>
               )
             )}
