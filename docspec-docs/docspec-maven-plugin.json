@@ -1,0 +1,1654 @@
+{
+  "docspec" : "3.0.0",
+  "artifact" : {
+    "language" : "java",
+    "buildTool" : "maven",
+    "frameworks" : [ "jackson" ]
+  },
+  "project" : { },
+  "modules" : [ {
+    "id" : "maven",
+    "name" : "Maven",
+    "audience" : "public",
+    "discoveredFrom" : "auto",
+    "members" : [ {
+      "kind" : "class",
+      "name" : "SchemaSyncMojo",
+      "qualified" : "io.docspec.maven.SchemaSyncMojo",
+      "description" : "Compares JPA entity fields from {@code docspec.json} against Flyway SQL\n migration files to detect schema mismatches.\n\n <p>This goal reads the generated {@code docspec.json} to extract data model\n fields and compares them against {@code CREATE TABLE} and {@code ALTER TABLE}\n statements found in Flyway migration files.</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "VerifyExamplesMojo",
+      "qualified" : "io.docspec.maven.VerifyExamplesMojo",
+      "description" : "Verifies that example source files annotated with {@code @DocSpecExample}\n compile successfully against the project's test classpath.\n\n <p>This is a Phase 1 implementation that performs compilation verification\n only. Future phases may also extract example source code and attach it to\n the corresponding documented elements in the specification.</p>\n\n <p>Example files are expected to live under the configured examples\n directory (default: {@code src/test/examples}) and contain methods\n annotated with io.docspec.annotation.DocSpecExample.</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "DstiCheckMojo",
+      "qualified" : "io.docspec.maven.DstiCheckMojo",
+      "description" : "Checks that all methods meet a minimum Intent Signal Density (ISD) threshold.\n Fails the build if any public method's ISD score falls below the configured threshold.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "CoverageMojo",
+      "qualified" : "io.docspec.maven.CoverageMojo",
+      "description" : "Reads the generated {@code docspec.json} and enforces a minimum\n documentation coverage threshold.\n\n <p>The coverage percentage is expected to be present at\n {@code discovery.coveragePercent} inside the specification file (as\n written by the DocSpec annotation processor). This mojo compares that\n value against the configured minimum and optionally fails the build.</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "GenerateTestsMojo",
+      "qualified" : "io.docspec.maven.GenerateTestsMojo",
+      "description" : "Reads {@code intent-graph.json} and generates JUnit 5 test class stubs\n into {@code target/generated-test-sources/docspec-tests/}.\n\n <p>Each method in the intent graph gets a test class with skeleton tests\n derived from its intent signals (guard clauses, error handling, branches).</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "CheckDeprecationsMojo",
+      "qualified" : "io.docspec.maven.CheckDeprecationsMojo",
+      "description" : "Reports deprecated members and methods that lack a replacement or migration path.\n Helps ensure that deprecations are documented with proper guidance.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "ValidateMojo",
+      "qualified" : "io.docspec.maven.ValidateMojo",
+      "description" : "Validates the generated {@code docspec.json} against the DocSpec JSON Schema.\n\n <p>The schema ({@code docspec.schema.json}) is expected to be bundled inside\n the {@code docspec-processor-java} JAR on the plugin classpath. Validation\n uses the <a href=\"https://github.com/networknt/json-schema-validator\">networknt\n json-schema-validator</a> library.</p>\n\n <p>If the specification file does not exist, the mojo fails with a clear\n error message. If schema validation errors are found, each violation is\n logged individually and the build is failed.</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "CheckRefsMojo",
+      "qualified" : "io.docspec.maven.CheckRefsMojo",
+      "description" : "Verifies that all cross-references in the DocSpec specification resolve to valid targets.\n Checks that sourceQualified, targetArtifact, targetFlow, targetStep, and targetMember\n references point to entities that exist in the spec.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "PublishMojo",
+      "qualified" : "io.docspec.maven.PublishMojo",
+      "description" : "Attaches the generated {@code docspec.json} as a classified artifact to\n the Maven project so it is deployed alongside the main JAR.\n\n <p>After this mojo runs, the specification file can be resolved from a\n Maven repository using the configured classifier (default\n {@code \"docspec\"}) and type {@code \"json\"}. For example:</p>\n\n <pre>\n   com.example:my-service:1.0.0:json:docspec\n </pre>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "AggregateMojo",
+      "qualified" : "io.docspec.maven.AggregateMojo",
+      "description" : "Aggregates {@code docspec.json} files from all reactor modules into a single\n {@code docspec-aggregate.json} specification file.\n\n <p>This mojo iterates over every module collected by the reactor, looks for\n a {@code docspec.json} in each module's build output directory, and merges\n the top-level arrays ({@code modules}, {@code flows}, {@code errors},\n {@code events}, {@code dataModels}, {@code contexts}, {@code crossRefs},\n {@code dataStores}, {@code configuration}, {@code externalDependencies},\n {@code privacy}) into one unified document.</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "CheckLinksMojo",
+      "qualified" : "io.docspec.maven.CheckLinksMojo",
+      "description" : "Verifies that all internal links (e.g. references to other members, flows, endpoints)\n within description fields resolve to valid targets in the specification.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    }, {
+      "kind" : "class",
+      "name" : "GenerateMojo",
+      "qualified" : "io.docspec.maven.GenerateMojo",
+      "description" : "Runs the DocSpec annotation processor against the project source code to\n generate a {@code docspec.json} specification file.\n\n <p>This mojo programmatically invokes {@code javac} with {@code -proc:only}\n so that only annotation processing is performed (no class file output).\n All discovery and framework settings are forwarded to the processor as\n {@code -A} compiler options.</p>",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "execute",
+        "description" : "Execute.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "throws" : [ {
+          "type" : "MojoExecutionException"
+        }, {
+          "type" : "MojoFailureException"
+        } ]
+      } ],
+      "extends" : "AbstractMojo"
+    } ]
+  }, {
+    "id" : "config",
+    "name" : "Config",
+    "audience" : "public",
+    "discoveredFrom" : "auto",
+    "members" : [ {
+      "kind" : "class",
+      "name" : "CoverageConfig",
+      "qualified" : "io.docspec.maven.config.CoverageConfig",
+      "description" : "Configuration POJO for coverage enforcement settings in the DocSpec Maven plugin.\n Maps to the {@code <coverage>} element in the plugin configuration.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "getMinimumPercent",
+        "description" : "Gets a minimum percent.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "int"
+        }
+      }, {
+        "name" : "setMinimumPercent",
+        "description" : "Sets the minimum percent.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "minimumPercent",
+          "type" : "int",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isFailOnBelowThreshold",
+        "description" : "Returns whether fail on below threshold.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setFailOnBelowThreshold",
+        "description" : "Sets the fail on below threshold.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "failOnBelowThreshold",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getExcludes",
+        "description" : "Gets an excludes.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "List<String>"
+        }
+      }, {
+        "name" : "setExcludes",
+        "description" : "Sets the excludes.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "excludes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ]
+      } ],
+      "kindCategory" : "config"
+    }, {
+      "kind" : "class",
+      "name" : "DiscoveryConfig",
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig",
+      "description" : "Configuration POJO for discovery settings in the DocSpec Maven plugin.\n Maps to the {@code <discovery>} element in the plugin configuration.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      } ],
+      "methods" : [ {
+        "name" : "getMode",
+        "description" : "Gets a mode.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "setMode",
+        "description" : "Sets the mode.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "mode",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getIncludes",
+        "description" : "Gets an includes.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "List<String>"
+        }
+      }, {
+        "name" : "setIncludes",
+        "description" : "Sets the includes.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "includes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getExcludes",
+        "description" : "Gets an excludes.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "List<String>"
+        }
+      }, {
+        "name" : "setExcludes",
+        "description" : "Sets the excludes.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "excludes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getFrameworks",
+        "description" : "Gets a frameworks.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "FrameworksConfig"
+        }
+      }, {
+        "name" : "setFrameworks",
+        "description" : "Sets the frameworks.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "frameworks",
+          "type" : "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isInferDescriptions",
+        "description" : "Returns whether infer descriptions.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setInferDescriptions",
+        "description" : "Sets the infer descriptions.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "inferDescriptions",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getGroupBy",
+        "description" : "Gets a group by.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "setGroupBy",
+        "description" : "Sets the group by.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "groupBy",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isIncludeDeprecated",
+        "description" : "Returns whether include deprecated.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setIncludeDeprecated",
+        "description" : "Sets the include deprecated.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "includeDeprecated",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isIncludeProtected",
+        "description" : "Returns whether include protected.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setIncludeProtected",
+        "description" : "Sets the include protected.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "includeProtected",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getDatabase",
+        "description" : "Gets a database.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "DatabaseConfig"
+        }
+      }, {
+        "name" : "setDatabase",
+        "description" : "Sets the database.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "database",
+          "type" : "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getDsti",
+        "description" : "Gets a dsti.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "DstiConfig"
+        }
+      }, {
+        "name" : "setDsti",
+        "description" : "Sets the dsti.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "dsti",
+          "type" : "io.docspec.maven.config.DiscoveryConfig.DstiConfig",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isSecurityEnabled",
+        "description" : "Returns whether security enabled.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setSecurityEnabled",
+        "description" : "Sets the security enabled.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "securityEnabled",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isPrivacyEnabled",
+        "description" : "Returns whether privacy enabled.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setPrivacyEnabled",
+        "description" : "Sets the privacy enabled.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "privacyEnabled",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      }, {
+        "name" : "isObservabilityEnabled",
+        "description" : "Returns whether observability enabled.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "setObservabilityEnabled",
+        "description" : "Sets the observability enabled.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "observabilityEnabled",
+          "type" : "boolean",
+          "required" : true
+        } ]
+      } ],
+      "kindCategory" : "config"
+    } ]
+  } ],
+  "intentGraph" : {
+    "methods" : [ {
+      "qualified" : "io.docspec.maven.SchemaSyncMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:File", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "constants" : [ "JPA", "CREATE" ],
+        "nullChecks" : 6,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.17500000000000002
+      }
+    }, {
+      "qualified" : "io.docspec.maven.SchemaSyncMojo.parseMigrations",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "parse",
+          "object" : "migrations",
+          "intent" : "transformation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ]
+        },
+        "constants" : [ "CREATE", "TABLE", "NOT", "EXISTS", "CASE_INSENSITIVE", "DOTALL", "ALTER", "ADD", "COLUMN", "PRIMARY", "CONSTRAINT", "UNIQUE", "INDEX", "FOREIGN", "CHECK" ],
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.VerifyExamplesMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoExecutionException", "new:File", "new:MojoFailureException" ]
+        },
+        "constants" : [ "JDK", "JRE", "ERROR", "WARNING", "MANDATORY_WARNING", "NOTE", "FAILED" ],
+        "nullChecks" : 2,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.165
+      }
+    }, {
+      "qualified" : "io.docspec.maven.VerifyExamplesMojo.collectExampleFiles",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "collectExampleFiles",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ],
+          "writes" : [ "new:MojoExecutionException" ]
+        },
+        "constants" : [ "CONTINUE" ],
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.09
+      }
+    }, {
+      "qualified" : "io.docspec.maven.VerifyExamplesMojo.buildTestClasspath",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "build",
+          "object" : "test classpath",
+          "intent" : "creation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ],
+          "writes" : [ "new:File" ]
+        },
+        "nullChecks" : 4,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.34500000000000003
+      }
+    }, {
+      "qualified" : "io.docspec.maven.VerifyExamplesMojo.buildSourcePath",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "build",
+          "object" : "source path",
+          "intent" : "creation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ],
+          "writes" : [ "new:File" ]
+        },
+        "loopProperties" : {
+          "hasStreams" : true,
+          "streamOps" : [ "filter", "collect" ]
+        },
+        "nullChecks" : 2,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.363
+      }
+    }, {
+      "qualified" : "io.docspec.maven.DstiCheckMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoFailureException", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "constants" : [ "DSTI", "ISD" ],
+        "nullChecks" : 2,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.12
+      }
+    }, {
+      "qualified" : "io.docspec.maven.CoverageMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:CoverageConfig", "new:MojoFailureException", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "constants" : [ "PASSED", "FAILED" ],
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.CoverageConfig" ],
+        "intentDensityScore" : 0.125
+      }
+    }, {
+      "qualified" : "io.docspec.maven.CoverageMojo.printCoverageReport",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "printCoverageReport",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "builder:String", "new:StringBuilder" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.CoverageConfig" ],
+        "intentDensityScore" : 0.07500000000000001
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateTestsMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:File", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "nullChecks" : 4,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.14500000000000002
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateTestsMojo.generateTestClass",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "generate",
+          "object" : "test class",
+          "intent" : "creation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ],
+          "writes" : [ "builder:String", "new:StringBuilder" ]
+        },
+        "constants" : [ "DSTI", "TODO" ],
+        "nullChecks" : 3,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.36500000000000005
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateTestsMojo.appendVerbBasedAssertions",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "appendVerbBasedAssertions",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "constants" : [ "TODO" ],
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.08499999999999999
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateTestsMojo.writeTestFile",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "writeTestFile",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.05
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateTestsMojo.capitalize",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "capitalize",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.07
+      }
+    }, {
+      "qualified" : "io.docspec.maven.CheckDeprecationsMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoFailureException", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "nullChecks" : 5,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.12000000000000001
+      }
+    }, {
+      "qualified" : "io.docspec.maven.ValidateMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoFailureException", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.07
+      }
+    }, {
+      "qualified" : "io.docspec.maven.ValidateMojo.loadSchema",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "load",
+          "object" : "schema",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:object" ],
+          "writes" : [ "new:MojoExecutionException", "new:ObjectMapper" ]
+        },
+        "loopProperties" : {
+          "hasStreams" : true
+        },
+        "constants" : [ "SCHEMA_CLASSPATH", "JSON", "V202012" ],
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.363
+      }
+    }, {
+      "qualified" : "io.docspec.maven.CheckRefsMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoFailureException", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "nullChecks" : 11,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.12000000000000001
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.CoverageConfig.getMinimumPercent",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "minimum percent",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.22499999999999998
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.CoverageConfig.setMinimumPercent",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "minimum percent",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.175
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.CoverageConfig.isFailOnBelowThreshold",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "fail on below threshold",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.22499999999999998
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.CoverageConfig.setFailOnBelowThreshold",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "fail on below threshold",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.175
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.CoverageConfig.getExcludes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "excludes",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.22499999999999998
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.CoverageConfig.setExcludes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "excludes",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.175
+      }
+    }, {
+      "qualified" : "io.docspec.maven.PublishMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoFailureException" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject", "org.apache.maven.project.MavenProjectHelper" ],
+        "intentDensityScore" : 0.1
+      }
+    }, {
+      "qualified" : "io.docspec.maven.AggregateMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:File", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "constants" : [ "INDENT_OUTPUT" ],
+        "nullChecks" : 3,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.15
+      }
+    }, {
+      "qualified" : "io.docspec.maven.AggregateMojo.mergeArray",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "merge",
+          "object" : "array",
+          "intent" : "merge"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject" ],
+        "intentDensityScore" : 0.21999999999999997
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getMode",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "mode",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setMode",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "mode",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getIncludes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "includes",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setIncludes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "includes",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getExcludes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "excludes",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setExcludes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "excludes",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getFrameworks",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "frameworks",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:object" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setFrameworks",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "frameworks",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.isInferDescriptions",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "infer descriptions",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setInferDescriptions",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "infer descriptions",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getGroupBy",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "group by",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setGroupBy",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "group by",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.isIncludeDeprecated",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "include deprecated",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setIncludeDeprecated",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "include deprecated",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.isIncludeProtected",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "include protected",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setIncludeProtected",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "include protected",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getDatabase",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "database",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:object" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setDatabase",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "database",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.getDsti",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "dsti",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:object" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setDsti",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "dsti",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.isSecurityEnabled",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "security enabled",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setSecurityEnabled",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "security enabled",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.isPrivacyEnabled",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "privacy enabled",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setPrivacyEnabled",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "privacy enabled",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.isObservabilityEnabled",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "is",
+          "object" : "observability enabled",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.3
+      }
+    }, {
+      "qualified" : "io.docspec.maven.config.DiscoveryConfig.setObservabilityEnabled",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "observability enabled",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.maven.config.DiscoveryConfig.FrameworksConfig", "io.docspec.maven.config.DiscoveryConfig.DatabaseConfig", "io.docspec.maven.config.DiscoveryConfig.DstiConfig" ],
+        "intentDensityScore" : 0.25
+      }
+    }, {
+      "qualified" : "io.docspec.maven.CheckLinksMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoFailureException", "new:ObjectMapper", "new:MojoExecutionException" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.05
+      }
+    }, {
+      "qualified" : "io.docspec.maven.CheckLinksMojo.scanForLinks",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "scanForLinks",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 0.025
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateMojo.execute",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "execute",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:MojoExecutionException", "new:MojoFailureException", "new:File" ]
+        },
+        "loopProperties" : {
+          "hasStreams" : true,
+          "streamOps" : [ "collect", "forEach" ]
+        },
+        "constants" : [ "JDK", "JRE", "ERROR", "WARNING", "MANDATORY_WARNING", "NOTE" ],
+        "nullChecks" : 1,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject", "io.docspec.maven.config.DiscoveryConfig" ],
+        "intentDensityScore" : 0.21800000000000003
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateMojo.collectSourceFiles",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "collectSourceFiles",
+          "intent" : "unknown"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ],
+          "writes" : [ "new:MojoExecutionException" ]
+        },
+        "constants" : [ "CONTINUE" ],
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject", "io.docspec.maven.config.DiscoveryConfig" ],
+        "intentDensityScore" : 0.115
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateMojo.buildClasspath",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "build",
+          "object" : "classpath",
+          "intent" : "creation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ],
+          "writes" : [ "new:File" ]
+        },
+        "nullChecks" : 3,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject", "io.docspec.maven.config.DiscoveryConfig" ],
+        "intentDensityScore" : 0.36
+      }
+    }, {
+      "qualified" : "io.docspec.maven.GenerateMojo.buildProcessorOptions",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "build",
+          "object" : "processor options",
+          "intent" : "creation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ]
+        },
+        "nullChecks" : 10,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "org.apache.maven.project.MavenProject", "io.docspec.maven.config.DiscoveryConfig" ],
+        "intentDensityScore" : 0.345
+      }
+    } ]
+  },
+  "discovery" : {
+    "mode" : "hybrid",
+    "frameworks" : [ "jackson" ],
+    "totalClasses" : 14,
+    "documentedClasses" : 14,
+    "autoDiscoveredClasses" : 14,
+    "annotatedClasses" : 0,
+    "inferredDescriptions" : 44,
+    "totalMethods" : 44,
+    "documentedMethods" : 44,
+    "totalParams" : 16,
+    "documentedParams" : 0,
+    "coveragePercent" : 100.0
+  }
+}

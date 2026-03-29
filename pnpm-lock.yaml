@@ -8,6 +8,18 @@ importers:
 
   .: {}
 
+  docspec-docs:
+    dependencies:
+      '@docspec/core':
+        specifier: workspace:*
+        version: link:../packages/site/core
+      '@docspec/theme-stripe':
+        specifier: workspace:*
+        version: link:../packages/site/themes/stripe
+      docspec:
+        specifier: workspace:*
+        version: link:..
+
   packages/annotations/typescript:
     dependencies:
       reflect-metadata:
