@@ -1,850 +1,216 @@
 "use client";
 
-import React from "react";
-import type { MemberPageData, Method, Constructor, Field } from "@docspec/core";
-import { Badge } from "../ui/Badge.js";
-import { Breadcrumb } from "../layout/Breadcrumb.js";
-import { MethodSignature } from "../ui/MethodSignature.js";
-import { TypeLink } from "../ui/TypeLink.js";
-import { ReferencedInPanel } from "../ui/ReferencedInPanel.js";
-import { LanguageTabs } from "../ui/LanguageTabs.js";
+import React, { useState } from "react";
+import type {
+  MemberPageData,
+  Method,
+  Constructor,
+  Field,
+  MemberDependency,
+  IntentSignals,
+  IntentMethod,
+} from "@docspec/core";
+import { T, CH, SC, KIND_COLORS } from "../../lib/tokens.js";
 
+/* ------------------------------------------------------------------ */
+/*  Props                                                              */
+/* ------------------------------------------------------------------ */
 interface MemberPageProps {
   data: MemberPageData;
   referenceIndex?: Record<string, string>;
+  lens?: "docs" | "tests";
 }
 
-const KIND_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  class: { bg: "#dbeafe", text: "#1d4ed8", border: "#93c5fd" },
-  interface: { bg: "#ede9fe", text: "#6d28d9", border: "#c4b5fd" },
-  enum: { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" },
-  record: { bg: "#dcfce7", text: "#166534", border: "#86efac" },
-  annotation: { bg: "#fce7f3", text: "#9d174d", border: "#f9a8d4" },
-  struct: { bg: "#ffedd5", text: "#9a3412", border: "#fdba74" },
-  trait: { bg: "#e0e7ff", text: "#3730a3", border: "#a5b4fc" },
-  function: { bg: "#ecfdf5", text: "#065f46", border: "#6ee7b7" },
-  type_alias: { bg: "#f0fdfa", text: "#115e59", border: "#5eead4" },
-  tagged_union: { bg: "#fdf4ff", text: "#86198f", border: "#e879f9" },
-  module: { bg: "#f1f5f9", text: "#334155", border: "#cbd5e1" },
-  constant: { bg: "#fff7ed", text: "#c2410c", border: "#fb923c" },
-};
-
-/** Section header matching EndpointPage style: 11px uppercase, 0.08em letter-spacing */
-function SectionHeader({ children, id }: { children: React.ReactNode; id?: string }) {
+/* ------------------------------------------------------------------ */
+/*  Shared primitives: Tag, ChTag, SectionLabel, Code                  */
+/* ------------------------------------------------------------------ */
+function Tag({ children, color = T.accent }: { children: React.ReactNode; color?: string }) {
   return (
-    <h3
-      id={id}
+    <span
       style={{
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: 600,
-        textTransform: "uppercase",
-        letterSpacing: "0.08em",
-        color: "var(--ds-text-tertiary, #94a3b8)",
-        marginBottom: 16,
-        paddingBottom: 8,
-        borderBottom: "1px solid var(--ds-border, #e2e8f0)",
+        padding: "2px 7px",
+        borderRadius: 4,
+        background: color + "14",
+        color,
+        border: `1px solid ${color}30`,
+        fontFamily: T.mono,
+        letterSpacing: "0.02em",
+        lineHeight: "16px",
+        display: "inline-block",
       }}
     >
       {children}
-    </h3>
+    </span>
   );
 }
 
-export function MemberPage({ data, referenceIndex }: MemberPageProps) {
-  const { member, artifact, referencedIn, examples } = data;
-  const kindColors = KIND_COLORS[member.kind] || KIND_COLORS.class;
-
+function ChTag({ ch }: { ch: string }) {
+  const c = CH[ch];
+  if (!c) return null;
   return (
-    <div>
-      {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { label: "Libraries", href: "/libraries" },
-          { label: artifact.label, href: `/libraries/${slugify(artifact.label)}` },
-          { label: member.name },
-        ]}
-      />
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 3,
+        fontSize: 10,
+        fontWeight: 600,
+        padding: "2px 7px",
+        borderRadius: 4,
+        background: c.c + "14",
+        color: c.c,
+        border: `1px solid ${c.c}30`,
+      }}
+    >
+      {c.i} {c.l}
+    </span>
+  );
+}
 
-      {/* Member header -- full width */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginBottom: 8,
-          paddingBottom: 16,
-          borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-        }}
-      >
-        <span
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        fontWeight: 700,
+        color: T.textDim,
+        textTransform: "uppercase",
+        letterSpacing: "0.06em",
+        marginBottom: 10,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function InlineCode({ code, title, lang }: { code: string; title?: string; lang?: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div
+      style={{
+        borderRadius: 9,
+        overflow: "hidden",
+        border: `1px solid ${T.codeBorder}`,
+        background: T.codeBg,
+      }}
+    >
+      {title && (
+        <div
           style={{
-            display: "inline-flex",
+            padding: "8px 14px",
+            borderBottom: `1px solid ${T.codeBorder}`,
+            display: "flex",
             alignItems: "center",
-            padding: "4px 10px",
-            borderRadius: 4,
-            fontSize: 13,
-            fontWeight: 600,
-            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-            background: kindColors.bg,
-            color: kindColors.text,
-            border: `1px solid ${kindColors.border}`,
-            letterSpacing: "0.03em",
+            justifyContent: "space-between",
           }}
         >
-          {member.kind}
-        </span>
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: 600,
-            color: "var(--ds-text-primary, #0f172a)",
-            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-          }}
-        >
-          {member.name}
-        </span>
-        {member.deprecated && (
-          <span
-            style={{
-              fontSize: 11,
-              padding: "2px 8px",
-              borderRadius: 4,
-              background: "#fef3c7",
-              color: "#92400e",
-              border: "1px solid #fcd34d",
-              fontWeight: 500,
-            }}
-          >
-            deprecated
+          <span style={{ fontSize: 11, color: T.textDim, fontFamily: T.mono }}>
+            {title}
           </span>
-        )}
-        {member.since && (
-          <span
-            style={{
-              fontSize: 11,
-              padding: "2px 8px",
-              borderRadius: 4,
-              background: "var(--ds-surface-tertiary, #f1f5f9)",
-              color: "var(--ds-text-tertiary, #94a3b8)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            since {member.since}
-          </span>
-        )}
-      </div>
-
-      {/* Qualified name */}
-      <div
-        style={{
-          fontSize: 12,
-          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-          color: "var(--ds-text-tertiary, #94a3b8)",
-          marginBottom: 16,
-          marginTop: 8,
-        }}
-      >
-        {member.qualified}
-      </div>
-
-      {/* Type hierarchy (extends / implements) */}
-      {(member.extends || (member.implements && member.implements.length > 0)) && (
-        <div
-          style={{
-            marginBottom: 20,
-            padding: "10px 14px",
-            borderRadius: 6,
-            border: "1px solid var(--ds-border, #e2e8f0)",
-            background: "var(--ds-surface-secondary, #f8fafc)",
-            display: "flex",
-            gap: 20,
-            flexWrap: "wrap",
-            fontSize: 13,
-          }}
-        >
-          {member.extends && (
-            <div>
-              <span style={{ color: "var(--ds-text-tertiary, #94a3b8)", marginRight: 6 }}>extends</span>
-              <TypeLink type={member.extends} referenceIndex={referenceIndex} />
-            </div>
-          )}
-          {member.implements && member.implements.length > 0 && (
-            <div>
-              <span style={{ color: "var(--ds-text-tertiary, #94a3b8)", marginRight: 6 }}>implements</span>
-              {member.implements.map((impl, i) => (
-                <React.Fragment key={impl}>
-                  {i > 0 && <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>, </span>}
-                  <TypeLink type={impl} referenceIndex={referenceIndex} />
-                </React.Fragment>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Badges row: visibility, kindCategory, modifiers, tags */}
-      {(member.visibility || member.kindCategory || member.modifiers?.length || member.tags?.length) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 24 }}>
-          {member.visibility && <Badge>{member.visibility}</Badge>}
-          {member.kindCategory && <Badge variant="primary">{member.kindCategory}</Badge>}
-          {member.modifiers?.map((m) => <Badge key={m}>{m}</Badge>)}
-          {member.tags?.map((t) => <Badge key={t} variant="info">{t}</Badge>)}
-        </div>
-      )}
-
-      {/* ══════ Two-column split layout ══════ */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 360px",
-          gap: 0,
-          marginTop: 8,
-        }}
-      >
-        {/* ══════ LEFT PANEL ══════ */}
-        <div style={{ paddingRight: 40 }}>
-          {/* Description */}
-          {member.description && (
-            <p
-              style={{
-                fontSize: 15,
-                lineHeight: 1.7,
-                color: "var(--ds-text-secondary, #475569)",
-                marginBottom: 32,
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {lang && (
+              <span style={{ fontSize: 10, color: T.textFaint, fontFamily: T.mono }}>
+                {lang}
+              </span>
+            )}
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(code);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
               }}
-            >
-              {member.description}
-            </p>
-          )}
-
-          {/* Type parameters */}
-          {member.typeParams && member.typeParams.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="type-parameters">Type Parameters</SectionHeader>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {member.typeParams.map((tp) => (
-                  <code
-                    key={tp}
-                    style={{
-                      display: "inline-block",
-                      fontSize: 13,
-                      fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                      color: "var(--ds-text-primary, #0f172a)",
-                      background: "var(--ds-surface-tertiary, #f1f5f9)",
-                      padding: "4px 10px",
-                      borderRadius: 4,
-                    }}
-                  >
-                    {tp}
-                  </code>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Constructors */}
-          {member.constructors && member.constructors.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="constructors">Constructors</SectionHeader>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {member.constructors.map((ctor, i) => (
-                  <ConstructorBlock key={i} ctor={ctor} memberName={member.name} referenceIndex={referenceIndex} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Methods */}
-          {member.methods && member.methods.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="methods">Methods ({member.methods.length})</SectionHeader>
-              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {member.methods.map((method) => (
-                  <MethodBlock key={method.name} method={method} referenceIndex={referenceIndex} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Fields */}
-          {member.fields && member.fields.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="fields">Fields ({member.fields.length})</SectionHeader>
-              <FieldsTable fields={member.fields} referenceIndex={referenceIndex} />
-            </section>
-          )}
-
-          {/* Enum values */}
-          {member.values && member.values.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="values">Enum Values ({member.values.length})</SectionHeader>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {member.values.map((v) => (
-                  <code
-                    key={v}
-                    style={{
-                      fontSize: 13,
-                      fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                      color: "var(--ds-text-primary, #0f172a)",
-                      background: "var(--ds-surface-tertiary, #f1f5f9)",
-                      padding: "4px 10px",
-                      borderRadius: 4,
-                      border: "1px solid var(--ds-border, #e2e8f0)",
-                    }}
-                  >
-                    {v}
-                  </code>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Dependencies */}
-          {member.dependencies && member.dependencies.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="dependencies">Dependencies ({member.dependencies.length})</SectionHeader>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      {["Name", "Type", "Classification", "Injection", "Required"].map((h) => (
-                        <th
-                          key={h}
-                          style={{
-                            textAlign: "left",
-                            padding: "8px 12px 8px 0",
-                            fontSize: 11,
-                            fontWeight: 600,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.08em",
-                            color: "var(--ds-text-tertiary, #94a3b8)",
-                            borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {member.dependencies.map((dep) => (
-                      <tr key={dep.name} style={{ borderBottom: "1px solid var(--ds-border-light, #f1f5f9)" }}>
-                        <td style={{ padding: "8px 12px 8px 0", fontFamily: "var(--font-mono)", color: "var(--ds-text-primary)" }}>
-                          {dep.name}
-                        </td>
-                        <td style={{ padding: "8px 12px 8px 0" }}>
-                          {dep.type ? (
-                            <TypeLink type={dep.type} referenceIndex={referenceIndex} />
-                          ) : (
-                            <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>--</span>
-                          )}
-                        </td>
-                        <td style={{ padding: "8px 12px 8px 0" }}>
-                          {dep.classification ? (
-                            <Badge variant="info">{dep.classification}</Badge>
-                          ) : (
-                            <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>--</span>
-                          )}
-                        </td>
-                        <td style={{ padding: "8px 12px 8px 0" }}>
-                          {dep.injectionMechanism ? (
-                            <Badge>{dep.injectionMechanism}</Badge>
-                          ) : (
-                            <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>--</span>
-                          )}
-                        </td>
-                        <td style={{ padding: "8px 12px 8px 0" }}>
-                          {dep.required !== undefined ? (
-                            dep.required ? (
-                              <Badge variant="error">required</Badge>
-                            ) : (
-                              <Badge variant="success">optional</Badge>
-                            )
-                          ) : (
-                            <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>--</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-
-          {/* Inline examples (from member.examples) */}
-          {member.examples && member.examples.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <SectionHeader id="examples">Examples</SectionHeader>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {member.examples.map((ex, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      borderRadius: 8,
-                      overflow: "hidden",
-                      border: "1px solid var(--ds-border, #e2e8f0)",
-                    }}
-                  >
-                    {ex.title && (
-                      <div
-                        style={{
-                          padding: "8px 14px",
-                          background: "var(--ds-surface-secondary, #f8fafc)",
-                          borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-                          fontSize: 12,
-                          fontWeight: 500,
-                          color: "var(--ds-text-secondary, #475569)",
-                        }}
-                      >
-                        {ex.title}
-                      </div>
-                    )}
-                    <pre
-                      style={{
-                        margin: 0,
-                        padding: 14,
-                        background: "var(--ds-code-bg, #0f172a)",
-                        overflowX: "auto",
-                      }}
-                    >
-                      <code
-                        style={{
-                          fontSize: 12.5,
-                          lineHeight: 1.65,
-                          color: "var(--ds-code-text, #e2e8f0)",
-                          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                        }}
-                      >
-                        {ex.code}
-                      </code>
-                    </pre>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        {/* ══════ RIGHT PANEL (sticky) ══════ */}
-        <div
-          style={{
-            position: "sticky",
-            top: 68,
-            alignSelf: "start",
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-            maxHeight: "calc(100vh - 84px)",
-            overflowY: "auto",
-          }}
-        >
-          {/* Import / usage snippet */}
-          <div
-            style={{
-              background: "var(--ds-code-bg, #0f172a)",
-              borderRadius: 8,
-              padding: 16,
-              overflow: "hidden",
-            }}
-          >
-            <div
               style={{
-                fontSize: 11,
-                fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                color: "var(--ds-text-tertiary, #64748b)",
-                letterSpacing: "0.02em",
-                marginBottom: 10,
-              }}
-            >
-              Import
-            </div>
-            <pre style={{ margin: 0 }}>
-              <code
-                style={{
-                  fontSize: 12.5,
-                  lineHeight: 1.65,
-                  color: "var(--ds-code-text, #e2e8f0)",
-                  fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                }}
-              >
-                {`import ${member.name};`}
-                {"\n"}
-                {`// ${member.qualified}`}
-              </code>
-            </pre>
-          </div>
-
-          {/* Language-tabbed examples from data.examples */}
-          {examples && Object.keys(examples).length > 0 && (
-            <LanguageTabs examples={examples} title="Usage" />
-          )}
-
-          {/* ReferencedIn panel */}
-          {referencedIn && <ReferencedInPanel data={referencedIn} />}
-
-          {/* Quick nav: Methods list */}
-          {member.methods && member.methods.length > 0 && (
-            <div
-              style={{
-                border: "1px solid var(--ds-border, #e2e8f0)",
-                borderRadius: 8,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  padding: "8px 14px",
-                  background: "var(--ds-surface-secondary, #f8fafc)",
-                  borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    color: "var(--ds-text-tertiary, #94a3b8)",
-                  }}
-                >
-                  Methods
-                </span>
-              </div>
-              <div style={{ padding: "8px 0" }}>
-                {member.methods.map((m) => (
-                  <a
-                    key={m.name}
-                    href={`#${m.name}`}
-                    style={{
-                      display: "block",
-                      padding: "4px 14px",
-                      fontSize: 12,
-                      fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                      color: "var(--ds-primary, #6366f1)",
-                      textDecoration: "none",
-                      transition: "background 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "var(--ds-surface-secondary, #f8fafc)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "transparent";
-                    }}
-                  >
-                    {m.name}()
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** A single constructor block */
-function ConstructorBlock({
-  ctor,
-  memberName,
-  referenceIndex,
-}: {
-  ctor: Constructor;
-  memberName: string;
-  referenceIndex?: Record<string, string>;
-}) {
-  const params = ctor.params || [];
-  return (
-    <div
-      style={{
-        padding: "14px 16px",
-        borderRadius: 6,
-        border: "1px solid var(--ds-border, #e2e8f0)",
-        transition: "border-color 0.15s ease",
-      }}
-    >
-      {/* Signature */}
-      <code
-        style={{
-          fontSize: 13,
-          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-        }}
-      >
-        {ctor.visibility && (
-          <span style={{ color: "#9333ea" }}>{ctor.visibility} </span>
-        )}
-        <span style={{ fontWeight: 600, color: "var(--ds-text-primary, #0f172a)" }}>{memberName}</span>
-        <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>(</span>
-        {params.map((p, i) => (
-          <React.Fragment key={p.name}>
-            {i > 0 && <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>, </span>}
-            <span style={{ color: "#059669" }}>{p.type}</span>{" "}
-            <span style={{ color: "var(--ds-text-secondary, #475569)" }}>{p.name}</span>
-          </React.Fragment>
-        ))}
-        <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>)</span>
-      </code>
-
-      {ctor.description && (
-        <p style={{ fontSize: 13, color: "var(--ds-text-secondary, #475569)", marginTop: 8 }}>
-          {ctor.description}
-        </p>
-      )}
-
-      {/* Inline parameters table */}
-      {params.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <InlineParamsTable params={params} referenceIndex={referenceIndex} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** A single method block with anchor link */
-function MethodBlock({
-  method,
-  referenceIndex,
-}: {
-  method: Method;
-  referenceIndex?: Record<string, string>;
-}) {
-  const params = method.params || [];
-  return (
-    <div
-      id={method.name}
-      style={{
-        padding: "14px 16px",
-        borderRadius: 6,
-        border: "1px solid var(--ds-border, #e2e8f0)",
-        transition: "border-color 0.15s ease",
-      }}
-    >
-      {/* Method signature */}
-      <div style={{ marginBottom: 6 }}>
-        <MethodSignature method={method} />
-      </div>
-
-      {/* Endpoint mapping if present */}
-      {method.endpointMapping && (
-        <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
-          <Badge httpMethod={method.endpointMapping.method}>{method.endpointMapping.method}</Badge>
-          <code
-            style={{
-              fontSize: 12,
-              fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-              color: "var(--ds-text-secondary, #475569)",
-            }}
-          >
-            {method.endpointMapping.path}
-          </code>
-        </div>
-      )}
-
-      {/* Description */}
-      {method.description && (
-        <p style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ds-text-secondary, #475569)", marginBottom: 10 }}>
-          {method.description}
-        </p>
-      )}
-
-      {/* Inline parameters table */}
-      {params.length > 0 && (
-        <div style={{ marginBottom: 10 }}>
-          <InlineParamsTable params={params} referenceIndex={referenceIndex} />
-        </div>
-      )}
-
-      {/* Return type */}
-      {method.returns && method.returns.type && method.returns.type !== "void" && (
-        <div style={{ fontSize: 13, marginBottom: 6 }}>
-          <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>Returns: </span>
-          <TypeLink type={method.returns.type} referenceIndex={referenceIndex} />
-          {method.returns.description && (
-            <span style={{ color: "var(--ds-text-secondary, #475569)", marginLeft: 8 }}>
-              -- {method.returns.description}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Throws list */}
-      {method.throws && method.throws.length > 0 && (
-        <div style={{ fontSize: 13, marginBottom: 6 }}>
-          <span style={{ color: "var(--ds-text-tertiary, #94a3b8)" }}>Throws: </span>
-          {method.throws.map((t, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && <span style={{ color: "var(--ds-text-tertiary)" }}>, </span>}
-              <TypeLink type={t.type || "Exception"} referenceIndex={referenceIndex} />
-              {t.description && (
-                <span style={{ color: "var(--ds-text-secondary, #475569)" }}> -- {t.description}</span>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      )}
-
-      {/* Since / Deprecated badges */}
-      {(method.since || method.deprecated) && (
-        <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-          {method.since && (
-            <span
-              style={{
-                fontSize: 11,
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: "var(--ds-surface-tertiary, #f1f5f9)",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              since {method.since}
-            </span>
-          )}
-          {method.deprecated && (
-            <span
-              style={{
-                fontSize: 11,
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: "#fef3c7",
-                color: "#92400e",
-                border: "1px solid #fcd34d",
-                fontWeight: 500,
-              }}
-            >
-              deprecated
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Inline parameters table rendered directly inside method/constructor blocks */
-function InlineParamsTable({
-  params,
-  referenceIndex,
-}: {
-  params: { name: string; type: string; required?: boolean; description?: string; default?: string | null }[];
-  referenceIndex?: Record<string, string>;
-}) {
-  return (
-    <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
-      <thead>
-        <tr>
-          {["Parameter", "Type", "Description"].map((h) => (
-            <th
-              key={h}
-              style={{
-                textAlign: "left",
-                padding: "6px 10px 6px 0",
                 fontSize: 10,
                 fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-                borderBottom: "1px solid var(--ds-border, #e2e8f0)",
+                padding: "2px 8px",
+                borderRadius: 4,
+                border: `1px solid ${T.surfaceBorder}`,
+                background: copied ? "rgba(52,211,153,0.12)" : "transparent",
+                color: copied ? T.green : T.textDim,
+                cursor: "pointer",
+                transition: "all 0.15s",
+                fontFamily: T.mono,
               }}
             >
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {params.map((p) => (
-          <tr key={p.name} style={{ borderBottom: "1px solid var(--ds-border-light, #f1f5f9)" }}>
-            <td
-              style={{
-                padding: "6px 10px 6px 0",
-                fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                color: "var(--ds-text-primary, #0f172a)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {p.name}
-              {p.required && (
-                <span style={{ color: "var(--ds-error, #ef4444)", marginLeft: 2 }}>*</span>
-              )}
-            </td>
-            <td style={{ padding: "6px 10px 6px 0" }}>
-              <TypeLink type={p.type} referenceIndex={referenceIndex} />
-            </td>
-            <td style={{ padding: "6px 10px 6px 0", color: "var(--ds-text-secondary, #475569)" }}>
-              {p.description || "--"}
-              {p.default !== undefined && p.default !== null && (
-                <span style={{ color: "var(--ds-text-tertiary, #94a3b8)", marginLeft: 6 }}>
-                  (default: <code style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{p.default}</code>)
-                </span>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+        </div>
+      )}
+      <pre
+        style={{
+          padding: "14px 16px",
+          margin: 0,
+          overflowX: "auto",
+          fontSize: 12.5,
+          lineHeight: 1.7,
+          fontFamily: T.mono,
+        }}
+      >
+        {code.split("\n").map((ln, i) => {
+          let c: string = T.text;
+          if (/^\s*(\/\/|#|<!--|--)/.test(ln)) c = T.textDim;
+          else if (/^\s*@/.test(ln)) c = "#93c5fd";
+          else if (/\b(assert\w+)\b/.test(ln)) c = T.yellow;
+          else if (
+            /\b(import|from|const|var|let|def|class|public|private|void|return|new|await|async|if|else|for|try|catch|throw|throws|package|interface|extends|implements|static|final)\b/.test(ln)
+          ) c = T.accentText;
+          else if (/["']/.test(ln)) c = T.green;
+          return (
+            <div key={i} style={{ color: c, minHeight: 18 }}>
+              {ln || " "}
+            </div>
+          );
+        })}
+      </pre>
+    </div>
   );
 }
 
-/** Fields table for the Fields section */
-function FieldsTable({
-  fields,
-  referenceIndex,
-}: {
-  fields: Field[];
-  referenceIndex?: Record<string, string>;
-}) {
-  return (
-    <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            {["Name", "Type", "Description"].map((h) => (
-              <th
-                key={h}
-                style={{
-                  textAlign: "left",
-                  padding: "8px 12px 8px 0",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--ds-text-tertiary, #94a3b8)",
-                  borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-                }}
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {fields.map((field) => (
-            <tr key={field.name} style={{ borderBottom: "1px solid var(--ds-border-light, #f1f5f9)" }}>
-              <td
-                style={{
-                  padding: "8px 12px 8px 0",
-                  fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                  fontSize: 13,
-                  color: "var(--ds-text-primary, #0f172a)",
-                }}
-              >
-                {field.name}
-              </td>
-              <td style={{ padding: "8px 12px 8px 0" }}>
-                <TypeLink type={field.type} referenceIndex={referenceIndex} />
-              </td>
-              <td style={{ padding: "8px 12px 8px 0", color: "var(--ds-text-secondary, #475569)" }}>
-                {field.description || "--"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+/* ------------------------------------------------------------------ */
+/*  Helper: compute ISD for a method from IntentSignals                */
+/* ------------------------------------------------------------------ */
+function getIsd(signals?: IntentSignals): number {
+  return signals?.intentDensityScore ?? 0;
+}
+
+function getChannelCount(signals?: IntentSignals): number {
+  if (!signals) return 0;
+  let count = 0;
+  if (signals.nameSemantics) count++;
+  if (signals.guardClauses) count++;
+  if (signals.branches) count++;
+  if (signals.dataFlow) count++;
+  if (signals.loopProperties) count++;
+  if (signals.errorHandling) count++;
+  if (signals.constants) count++;
+  if (signals.dependencies) count++;
+  if (signals.nullChecks) count++;
+  if (signals.assertions) count++;
+  if (signals.logStatements) count++;
+  if (signals.validationAnnotations) count++;
+  return count;
+}
+
+function getActiveChannels(signals?: IntentSignals): string[] {
+  if (!signals) return [];
+  const channels: string[] = [];
+  if (signals.nameSemantics) channels.push("naming");
+  if (signals.guardClauses) channels.push("guards");
+  if (signals.branches) channels.push("branches");
+  if (signals.dataFlow) channels.push("dataflow");
+  if (signals.loopProperties) channels.push("loops");
+  if (signals.errorHandling) channels.push("errors");
+  if (signals.constants) channels.push("constants");
+  if (signals.dependencies) channels.push("messages");
+  if (signals.nullChecks) channels.push("nullchecks");
+  if (signals.assertions) channels.push("assertions");
+  if (signals.logStatements) channels.push("logging");
+  if (signals.validationAnnotations) channels.push("types");
+  return channels;
 }
 
 function slugify(str: string): string {
@@ -852,4 +218,1454 @@ function slugify(str: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main component                                                     */
+/* ------------------------------------------------------------------ */
+export function MemberPage({ data, referenceIndex, lens = "docs" }: MemberPageProps) {
+  const { member, artifact, referencedIn, examples } = data;
+  const kindColor = KIND_COLORS[member.kind] || T.accent;
+
+  if (lens === "tests") {
+    return <TestsLens data={data} referenceIndex={referenceIndex} />;
+  }
+
+  return <DocsLens data={data} referenceIndex={referenceIndex} />;
+}
+
+/* ================================================================== */
+/*  DOCS LENS                                                          */
+/* ================================================================== */
+function DocsLens({
+  data,
+  referenceIndex,
+}: {
+  data: MemberPageData;
+  referenceIndex?: Record<string, string>;
+}) {
+  const { member, artifact, referencedIn } = data;
+  const kindColor = KIND_COLORS[member.kind] || T.accent;
+  const [expandedMethod, setExpandedMethod] = useState<string | null>(
+    member.methods?.[0]?.name ?? null
+  );
+
+  return (
+    <div style={{ maxWidth: 780, margin: "0 auto" }}>
+      {/* Header: kind badge, tag badges, since */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 6,
+        }}
+      >
+        <Tag color={kindColor}>{member.kind}</Tag>
+        {member.tags?.map((t) => (
+          <Tag key={t} color={T.textDim}>
+            {t}
+          </Tag>
+        ))}
+        {member.since && (
+          <span
+            style={{
+              fontSize: 10.5,
+              color: T.textDim,
+              fontFamily: T.mono,
+              marginLeft: "auto",
+            }}
+          >
+            since {member.since}
+          </span>
+        )}
+      </div>
+
+      {/* Class name */}
+      <h2
+        style={{
+          fontSize: 24,
+          fontWeight: 740,
+          color: T.text,
+          letterSpacing: "-0.025em",
+          margin: "0 0 4px",
+        }}
+      >
+        {member.name}
+      </h2>
+
+      {/* Qualified name */}
+      <code
+        style={{
+          fontSize: 12,
+          color: T.textDim,
+          fontFamily: T.mono,
+          display: "block",
+          marginBottom: 14,
+        }}
+      >
+        {member.qualified}
+      </code>
+
+      {/* Description */}
+      {member.description && (
+        <p
+          style={{
+            fontSize: 14,
+            lineHeight: 1.7,
+            color: T.textMuted,
+            margin: "0 0 28px",
+            maxWidth: 620,
+          }}
+        >
+          {member.description}
+        </p>
+      )}
+
+      {/* CLASS TEST HEALTH box */}
+      {member.methods && member.methods.length > 0 && (
+        <div
+          style={{
+            padding: "16px 18px",
+            borderRadius: 10,
+            background: T.surface,
+            border: `1px solid ${T.surfaceBorder}`,
+            marginBottom: 28,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              color: T.textDim,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              marginBottom: 12,
+            }}
+          >
+            Class Test Health
+          </div>
+          {member.methods.map((m) => {
+            const coverage = Math.min(100, Math.round(getIsd(findMethodSignals(data, m.name)) * 10));
+            return (
+              <div
+                key={m.name}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 6,
+                }}
+              >
+                <code
+                  style={{
+                    fontSize: 11,
+                    fontFamily: T.mono,
+                    color: T.text,
+                    minWidth: 140,
+                  }}
+                >
+                  {m.name}()
+                </code>
+                <div
+                  style={{
+                    flex: 1,
+                    height: 6,
+                    borderRadius: 3,
+                    background: T.surfaceBorder,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${coverage}%`,
+                      height: "100%",
+                      borderRadius: 3,
+                      background: coverage >= 70 ? T.green : coverage >= 40 ? T.yellow : T.red,
+                      transition: "width 0.3s ease",
+                    }}
+                  />
+                </div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 650,
+                    color: coverage >= 70 ? T.green : coverage >= 40 ? T.yellow : T.red,
+                    minWidth: 30,
+                    textAlign: "right",
+                  }}
+                >
+                  {coverage}%
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Fields section */}
+      {member.fields && member.fields.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionLabel>Fields</SectionLabel>
+          {member.fields.map((f) => (
+            <FieldCard key={f.name} field={f} />
+          ))}
+        </div>
+      )}
+
+      {/* Dependencies section */}
+      {member.dependencies && member.dependencies.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionLabel>Dependencies</SectionLabel>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {member.dependencies.map((dep) => (
+              <DependencyCard key={dep.name} dep={dep} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Methods section */}
+      {member.methods && member.methods.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionLabel>Methods</SectionLabel>
+          {member.methods.map((m) => {
+            const expanded = expandedMethod === m.name;
+            const signals = findMethodSignals(data, m.name);
+            const isd = getIsd(signals);
+            return (
+              <div
+                key={m.name}
+                style={{
+                  marginBottom: 16,
+                  borderRadius: 10,
+                  border: `1px solid ${expanded ? T.accent + "40" : T.surfaceBorder}`,
+                  background: T.cardBg,
+                  overflow: "hidden",
+                  transition: "border-color 0.2s",
+                }}
+              >
+                {/* Method header button */}
+                <button
+                  onClick={() => setExpandedMethod(expanded ? null : m.name)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    width: "100%",
+                    padding: "16px 18px",
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <Tag color={T.accent}>method</Tag>
+                  <code
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 650,
+                      color: T.accent,
+                      fontFamily: T.mono,
+                    }}
+                  >
+                    {m.name}
+                  </code>
+                  {m.since && (
+                    <span
+                      style={{ fontSize: 10, color: T.textDim, fontFamily: T.mono }}
+                    >
+                      since {m.since}
+                    </span>
+                  )}
+                  {isd > 0 && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                        background: T.orangeBg,
+                        color: T.orange,
+                        fontWeight: 650,
+                        fontFamily: T.mono,
+                      }}
+                    >
+                      ISD {isd.toFixed(1)}
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      fontSize: 10,
+                      transform: expanded ? "rotate(90deg)" : "none",
+                      transition: "transform 0.15s",
+                      color: T.textDim,
+                    }}
+                  >
+                    {"\u25B6"}
+                  </span>
+                </button>
+
+                {/* Expanded method content */}
+                {expanded && (
+                  <div
+                    style={{
+                      padding: "0 18px 18px",
+                      borderTop: `1px solid ${T.surfaceBorder}`,
+                    }}
+                  >
+                    {/* Description */}
+                    {m.description && (
+                      <p
+                        style={{
+                          fontSize: 13.5,
+                          lineHeight: 1.7,
+                          color: T.textMuted,
+                          margin: "14px 0",
+                        }}
+                      >
+                        {m.description}
+                      </p>
+                    )}
+
+                    {/* Parameters */}
+                    {m.params && m.params.length > 0 && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div
+                          style={{
+                            fontSize: 10.5,
+                            fontWeight: 650,
+                            color: T.textDim,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            marginBottom: 6,
+                          }}
+                        >
+                          Parameters
+                        </div>
+                        {m.params.map((p) => (
+                          <div
+                            key={p.name}
+                            style={{
+                              display: "flex",
+                              alignItems: "baseline",
+                              gap: 8,
+                              padding: "5px 0",
+                              fontSize: 12.5,
+                            }}
+                          >
+                            <code
+                              style={{
+                                color: T.text,
+                                fontFamily: T.mono,
+                                fontWeight: 550,
+                              }}
+                            >
+                              {p.name}
+                            </code>
+                            <span
+                              style={{
+                                color: T.textDim,
+                                fontFamily: T.mono,
+                                fontSize: 11,
+                              }}
+                            >
+                              {p.type}
+                            </span>
+                            {p.required && (
+                              <span
+                                style={{
+                                  fontSize: 9,
+                                  color: T.red,
+                                  fontWeight: 650,
+                                }}
+                              >
+                                REQUIRED
+                              </span>
+                            )}
+                            {p.description && (
+                              <span style={{ color: T.textMuted }}>
+                                {"\u2014"} {p.description}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Returns */}
+                    {m.returns && m.returns.type && m.returns.type !== "void" && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div
+                          style={{
+                            fontSize: 10.5,
+                            fontWeight: 650,
+                            color: T.textDim,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            marginBottom: 4,
+                          }}
+                        >
+                          Returns
+                        </div>
+                        <div style={{ fontSize: 12.5 }}>
+                          <code style={{ color: T.green, fontFamily: T.mono }}>
+                            {m.returns.type}
+                          </code>
+                          {m.returns.description && (
+                            <span style={{ color: T.textMuted }}>
+                              {" "}{"\u2014"} {m.returns.description}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Throws */}
+                    {m.throws && m.throws.length > 0 && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div
+                          style={{
+                            fontSize: 10.5,
+                            fontWeight: 650,
+                            color: T.textDim,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            marginBottom: 4,
+                          }}
+                        >
+                          Throws
+                        </div>
+                        {m.throws.map((t, idx) => (
+                          <div
+                            key={idx}
+                            style={{ fontSize: 12.5, padding: "2px 0" }}
+                          >
+                            <code style={{ color: T.red, fontFamily: T.mono }}>
+                              {t.type || "Exception"}
+                            </code>
+                            {t.description && (
+                              <span style={{ color: T.textMuted }}>
+                                {" "}{"\u2014"} {t.description}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Example */}
+                    {m.examples && m.examples.length > 0 && (
+                      <InlineCode
+                        code={m.examples[0].code}
+                        lang={m.examples[0].language || "java"}
+                        title="Example"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Enum values */}
+      {member.values && member.values.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionLabel>Enum Values ({member.values.length})</SectionLabel>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {member.values.map((v) => (
+              <code
+                key={v}
+                style={{
+                  fontSize: 12,
+                  fontFamily: T.mono,
+                  color: T.text,
+                  background: T.surfaceBorder + "60",
+                  padding: "4px 10px",
+                  borderRadius: 4,
+                  border: `1px solid ${T.surfaceBorder}`,
+                }}
+              >
+                {v}
+              </code>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Constructors */}
+      {member.constructors && member.constructors.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionLabel>Constructors</SectionLabel>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {member.constructors.map((ctor, i) => (
+              <ConstructorCard key={i} ctor={ctor} memberName={member.name} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Annotation Source */}
+      <div style={{ marginTop: 28 }}>
+        <SectionLabel>Annotation Source</SectionLabel>
+        <div
+          style={{
+            padding: "16px 18px",
+            borderRadius: 10,
+            background: T.accentBg,
+            border: `1px solid ${T.accentBorder}`,
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.accent,
+              marginBottom: 8,
+            }}
+          >
+            How DocSpec extracts this {member.kind}
+          </div>
+          <div style={{ fontSize: 13, lineHeight: 1.7, color: T.textMuted }}>
+            The processor reads{" "}
+            <code
+              style={{ color: T.accentText, fontFamily: T.mono, fontSize: 12 }}
+            >
+              @DocModule
+            </code>{" "}
+            to create the module entry, then scans each public method for{" "}
+            <code
+              style={{ color: T.accentText, fontFamily: T.mono, fontSize: 12 }}
+            >
+              @DocMethod
+            </code>{" "}
+            metadata.
+            {member.kind === "class" &&
+              " DSTI runs 13 intent channels on each method body via AST analysis."}
+          </div>
+        </div>
+        <InlineCode
+          code={generateAnnotationSource(member)}
+          lang="java"
+          title={`${member.name}.java \u2014 annotated source`}
+        />
+      </div>
+
+      {/* Referenced In */}
+      {referencedIn && hasReferencedIn(referencedIn) && (
+        <div style={{ marginTop: 28 }}>
+          <SectionLabel>Referenced In</SectionLabel>
+          <div
+            style={{
+              padding: "14px 18px",
+              borderRadius: 8,
+              background: T.surface,
+              border: `1px solid ${T.surfaceBorder}`,
+              fontSize: 12.5,
+              lineHeight: 2,
+            }}
+          >
+            {referencedIn.endpoints.length > 0 && (
+              <div>
+                <span style={{ color: T.textDim }}>Endpoints:</span>{" "}
+                <span style={{ color: T.accent, fontWeight: 550 }}>
+                  {referencedIn.endpoints.map((e) => e.label).join(", ")}
+                </span>
+              </div>
+            )}
+            {referencedIn.flows.length > 0 && (
+              <div>
+                <span style={{ color: T.textDim }}>Flows:</span>{" "}
+                <span style={{ color: T.accent, fontWeight: 550 }}>
+                  {referencedIn.flows.map((f) => f.label).join(", ")}
+                </span>
+              </div>
+            )}
+            {referencedIn.contexts.length > 0 && (
+              <div>
+                <span style={{ color: T.textDim }}>Contexts:</span>{" "}
+                <span style={{ color: T.accent, fontWeight: 550 }}>
+                  {referencedIn.contexts.map((c) => c.label).join(", ")}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  TESTS LENS                                                         */
+/* ================================================================== */
+function TestsLens({
+  data,
+  referenceIndex,
+}: {
+  data: MemberPageData;
+  referenceIndex?: Record<string, string>;
+}) {
+  const { member, artifact } = data;
+  const [expandedMethod, setExpandedMethod] = useState<string | null>(null);
+  const [expandedTest, setExpandedTest] = useState<string | null>(null);
+
+  const intentMethods = getIntentMethods(data);
+  const totalTests = intentMethods.reduce(
+    (sum, im) => sum + getChannelCount(im.intentSignals),
+    0
+  );
+  const totalGaps = intentMethods.reduce((sum, im) => {
+    const channels = getActiveChannels(im.intentSignals);
+    return sum + (13 - channels.length);
+  }, 0);
+  const avgIsd =
+    intentMethods.length > 0
+      ? intentMethods.reduce((sum, im) => sum + getIsd(im.intentSignals), 0) /
+        intentMethods.length
+      : 0;
+
+  return (
+    <div style={{ maxWidth: 780, margin: "0 auto" }}>
+      {/* Header with DSTI badge, ISD score, gap count */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <Tag color={T.orange}>DSTI</Tag>
+        <span
+          style={{
+            fontSize: 11,
+            padding: "2px 8px",
+            borderRadius: 4,
+            background: T.greenBg,
+            border: `1px solid ${T.greenBorder}`,
+            color: T.green,
+            fontWeight: 650,
+          }}
+        >
+          ISD {avgIsd.toFixed(1)}
+        </span>
+        {totalGaps > 0 && (
+          <span
+            style={{
+              fontSize: 11,
+              padding: "2px 8px",
+              borderRadius: 4,
+              background: T.yellowBg,
+              border: `1px solid ${T.yellowBorder}`,
+              color: T.yellow,
+              fontWeight: 650,
+            }}
+          >
+            {totalGaps} gaps
+          </span>
+        )}
+        <a
+          href="#"
+          onClick={(e) => e.preventDefault()}
+          style={{
+            marginLeft: "auto",
+            fontSize: 11,
+            color: T.accent,
+            textDecoration: "none",
+            fontWeight: 550,
+          }}
+        >
+          {"\u2190"} View Docs
+        </a>
+      </div>
+
+      {/* Class name */}
+      <h1
+        style={{
+          fontSize: 20,
+          fontWeight: 750,
+          color: T.text,
+          letterSpacing: "-0.02em",
+          margin: "0 0 4px",
+          fontFamily: T.mono,
+        }}
+      >
+        {member.name}
+      </h1>
+      <p style={{ fontSize: 13, color: T.textMuted, margin: "0 0 24px" }}>
+        {totalTests} tests from {intentMethods.length} methods
+      </p>
+
+      {/* Method table */}
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: T.textDim,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          marginBottom: 12,
+        }}
+      >
+        Method Overview
+      </div>
+      <div
+        style={{
+          borderRadius: 10,
+          border: `1px solid ${T.surfaceBorder}`,
+          overflow: "hidden",
+          marginBottom: 28,
+        }}
+      >
+        {/* Table header */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr 60px 1fr 60px 60px",
+            padding: "8px 14px",
+            background: T.surface,
+            borderBottom: `1px solid ${T.surfaceBorder}`,
+            fontSize: 9,
+            fontWeight: 700,
+            color: T.textFaint,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+          }}
+        >
+          <div>Method</div>
+          <div style={{ textAlign: "center" }}>ISD</div>
+          <div>Channels</div>
+          <div style={{ textAlign: "center" }}>Tests</div>
+          <div style={{ textAlign: "center" }}>Status</div>
+        </div>
+
+        {/* Table rows */}
+        {intentMethods.map((im) => {
+          const name = im.qualified.split(".").pop() || im.qualified;
+          const isd = getIsd(im.intentSignals);
+          const channels = getActiveChannels(im.intentSignals);
+          const testCount = getChannelCount(im.intentSignals);
+          const expanded = expandedMethod === im.qualified;
+
+          return (
+            <div key={im.qualified}>
+              <button
+                onClick={() =>
+                  setExpandedMethod(expanded ? null : im.qualified)
+                }
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2fr 60px 1fr 60px 60px",
+                  padding: "10px 14px",
+                  width: "100%",
+                  border: "none",
+                  borderBottom: `1px solid ${T.surfaceBorder}`,
+                  background: expanded ? T.surfaceHover : "transparent",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  alignItems: "center",
+                  transition: "background 0.15s",
+                }}
+              >
+                <code
+                  style={{
+                    fontSize: 12,
+                    fontFamily: T.mono,
+                    color: T.text,
+                    fontWeight: 550,
+                  }}
+                >
+                  {name}()
+                </code>
+                <div style={{ textAlign: "center" }}>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: isd >= 8 ? T.green : isd >= 4 ? T.yellow : T.red,
+                    }}
+                  >
+                    {isd.toFixed(1)}
+                  </span>
+                </div>
+                <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+                  {channels.slice(0, 5).map((ch) => {
+                    const info = CH[ch];
+                    return info ? (
+                      <span
+                        key={ch}
+                        title={info.l}
+                        style={{ fontSize: 10, cursor: "default" }}
+                      >
+                        {info.i}
+                      </span>
+                    ) : null;
+                  })}
+                  {channels.length > 5 && (
+                    <span style={{ fontSize: 10, color: T.textDim }}>
+                      +{channels.length - 5}
+                    </span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    textAlign: "center",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: T.accent,
+                  }}
+                >
+                  {testCount}
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: testCount > 0 ? T.green : T.yellow,
+                    }}
+                  >
+                    {testCount > 0 ? "\u2713" : "\u26A0"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Expanded: channel signals + generated tests */}
+              {expanded && (
+                <div
+                  style={{
+                    padding: "16px 18px",
+                    borderBottom: `1px solid ${T.surfaceBorder}`,
+                    background: T.cardBg,
+                  }}
+                >
+                  {/* Channel signals */}
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: T.textDim,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      marginBottom: 12,
+                    }}
+                  >
+                    Extracted Intent Signals
+                  </div>
+                  {renderChannelSignals(im.intentSignals)}
+
+                  {/* Generated tests */}
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: T.textDim,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      marginTop: 20,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Generated Tests
+                  </div>
+                  {renderGeneratedTests(
+                    im,
+                    name,
+                    expandedTest,
+                    setExpandedTest
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sub-components: FieldCard, DependencyCard, ConstructorCard          */
+/* ------------------------------------------------------------------ */
+function FieldCard({ field }: { field: Field }) {
+  return (
+    <div
+      style={{
+        padding: "10px 14px",
+        borderRadius: 8,
+        border: `1px solid ${T.surfaceBorder}`,
+        background: T.cardBg,
+        marginBottom: 6,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 4,
+        }}
+      >
+        <code
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: T.text,
+            fontFamily: T.mono,
+          }}
+        >
+          {field.name}
+        </code>
+        <span style={{ fontSize: 11, color: T.textDim, fontFamily: T.mono }}>
+          {field.type}
+        </span>
+        {field.modifiers?.map((m) => (
+          <Tag key={m} color={T.textDim}>
+            {m}
+          </Tag>
+        ))}
+      </div>
+      {field.description && (
+        <div style={{ fontSize: 12.5, color: T.textMuted, lineHeight: 1.5 }}>
+          {field.description}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DependencyCard({ dep }: { dep: MemberDependency }) {
+  const classColor =
+    dep.classification === "file_system"
+      ? T.yellow
+      : dep.classification === "database"
+      ? T.green
+      : dep.classification === "message_broker"
+      ? T.orange
+      : dep.classification === "cache"
+      ? T.red
+      : T.blue;
+
+  return (
+    <div
+      style={{
+        padding: "8px 12px",
+        borderRadius: 8,
+        border: `1px solid ${T.surfaceBorder}`,
+        background: T.cardBg,
+        fontSize: 12,
+        cursor: "pointer",
+        transition: "border-color 0.15s",
+      }}
+    >
+      <code style={{ fontWeight: 600, fontFamily: T.mono, color: T.text }}>
+        {dep.name}
+      </code>
+      {dep.classification && (
+        <span
+          style={{
+            fontSize: 10,
+            marginLeft: 6,
+            padding: "1px 5px",
+            borderRadius: 3,
+            background: classColor + "14",
+            color: classColor,
+            fontWeight: 600,
+            fontFamily: T.mono,
+          }}
+        >
+          {dep.classification}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ConstructorCard({
+  ctor,
+  memberName,
+}: {
+  ctor: Constructor;
+  memberName: string;
+}) {
+  const params = ctor.params || [];
+  return (
+    <div
+      style={{
+        padding: "12px 14px",
+        borderRadius: 8,
+        border: `1px solid ${T.surfaceBorder}`,
+        background: T.cardBg,
+      }}
+    >
+      <code style={{ fontSize: 13, fontFamily: T.mono }}>
+        {ctor.visibility && (
+          <span style={{ color: T.accentText }}>{ctor.visibility} </span>
+        )}
+        <span style={{ fontWeight: 600, color: T.text }}>{memberName}</span>
+        <span style={{ color: T.textDim }}>(</span>
+        {params.map((p, i) => (
+          <React.Fragment key={p.name}>
+            {i > 0 && <span style={{ color: T.textDim }}>, </span>}
+            <span style={{ color: T.green }}>{p.type}</span>{" "}
+            <span style={{ color: T.textMuted }}>{p.name}</span>
+          </React.Fragment>
+        ))}
+        <span style={{ color: T.textDim }}>)</span>
+      </code>
+      {ctor.description && (
+        <p
+          style={{
+            fontSize: 12.5,
+            color: T.textMuted,
+            marginTop: 6,
+            marginBottom: 0,
+            lineHeight: 1.5,
+          }}
+        >
+          {ctor.description}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tests lens helpers                                                  */
+/* ------------------------------------------------------------------ */
+function findMethodSignals(
+  data: MemberPageData,
+  methodName: string
+): IntentSignals | undefined {
+  return undefined;
+}
+
+function getIntentMethods(data: MemberPageData): IntentMethod[] {
+  const methods = data.member.methods || [];
+  return methods.map((m) => ({
+    qualified: `${data.member.qualified}.${m.name}`,
+    intentSignals: undefined,
+  }));
+}
+
+function hasReferencedIn(ref: { flows: any[]; endpoints: any[]; contexts: any[] }): boolean {
+  return ref.flows.length > 0 || ref.endpoints.length > 0 || ref.contexts.length > 0;
+}
+
+function generateAnnotationSource(member: { kind: string; name: string; qualified: string; tags?: string[]; since?: string; methods?: Method[] }): string {
+  const tags = member.tags?.length ? `@DocTags({${member.tags.map((t) => `"${t}"`).join(", ")}})` : "";
+  const pkg = member.qualified.substring(0, member.qualified.lastIndexOf("."));
+  const methods = (member.methods || [])
+    .map(
+      (m) =>
+        `    @DocMethod(since = "${m.since || ""}")
+    public ${m.returns?.type || "void"} ${m.name}(${(m.params || []).map((p) => `${p.type} ${p.name}`).join(", ")}) {
+        // ...
+    }`
+    )
+    .join("\n\n");
+
+  return `@DocModule(id = "${slugify(member.name)}",
+    name = "${member.name}",
+    since = "${member.since || ""}")
+${tags ? tags + "\n" : ""}public ${member.kind} ${member.name} {
+
+${methods}
+}`;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Render channel signals for Tests lens                              */
+/* ------------------------------------------------------------------ */
+function renderChannelSignals(signals?: IntentSignals) {
+  if (!signals) {
+    return (
+      <div style={{ fontSize: 12.5, color: T.textDim, padding: "8px 0" }}>
+        No intent signals extracted for this method.
+      </div>
+    );
+  }
+
+  const entries: { ch: string; description: string; evidence?: string[] }[] = [];
+
+  if (signals.nameSemantics) {
+    entries.push({
+      ch: "naming",
+      description: `Verb "${signals.nameSemantics.verb || "unknown"}" implies ${signals.nameSemantics.intent || "action"}`,
+    });
+  }
+  if (signals.guardClauses) {
+    const count = typeof signals.guardClauses === "number" ? signals.guardClauses : signals.guardClauses.length;
+    entries.push({
+      ch: "guards",
+      description: `${count} guard clause${count !== 1 ? "s" : ""} detected`,
+      evidence: Array.isArray(signals.guardClauses)
+        ? signals.guardClauses.map((g) => g.condition || "guard")
+        : undefined,
+    });
+  }
+  if (signals.branches) {
+    const count = typeof signals.branches === "number" ? signals.branches : signals.branches.length;
+    entries.push({
+      ch: "branches",
+      description: `${count} branch${count !== 1 ? "es" : ""} in control flow`,
+    });
+  }
+  if (signals.dataFlow) {
+    const reads = signals.dataFlow.reads?.length ?? 0;
+    const writes = signals.dataFlow.writes?.length ?? 0;
+    entries.push({
+      ch: "dataflow",
+      description: `${reads} reads, ${writes} writes detected`,
+    });
+  }
+  if (signals.loopProperties) {
+    const parts: string[] = [];
+    if (signals.loopProperties.hasStreams) parts.push("streams");
+    if (signals.loopProperties.hasEnhancedFor) parts.push("enhanced for");
+    if (signals.loopProperties.streamOps?.length) parts.push(signals.loopProperties.streamOps.join(", "));
+    entries.push({
+      ch: "loops",
+      description: parts.length > 0 ? `Loop patterns: ${parts.join(", ")}` : "Loop structures detected",
+    });
+  }
+  if (signals.errorHandling) {
+    entries.push({
+      ch: "errors",
+      description: `${signals.errorHandling.catchBlocks ?? 0} catch block${(signals.errorHandling.catchBlocks ?? 0) !== 1 ? "s" : ""}${signals.errorHandling.caughtTypes?.length ? ": " + signals.errorHandling.caughtTypes.join(", ") : ""}`,
+    });
+  }
+  if (signals.constants) {
+    const count = Array.isArray(signals.constants) ? signals.constants.length : 0;
+    entries.push({
+      ch: "constants",
+      description: `${count} constant${count !== 1 ? "s" : ""} referenced`,
+    });
+  }
+  if (signals.nullChecks) {
+    entries.push({
+      ch: "nullchecks",
+      description: `${signals.nullChecks} null check${signals.nullChecks !== 1 ? "s" : ""}`,
+    });
+  }
+  if (signals.assertions) {
+    entries.push({
+      ch: "assertions",
+      description: `${signals.assertions} assertion${signals.assertions !== 1 ? "s" : ""}`,
+    });
+  }
+  if (signals.logStatements) {
+    entries.push({
+      ch: "logging",
+      description: `${signals.logStatements} log statement${signals.logStatements !== 1 ? "s" : ""}`,
+    });
+  }
+  if (signals.validationAnnotations) {
+    entries.push({
+      ch: "types",
+      description: `${signals.validationAnnotations} validation annotation${signals.validationAnnotations !== 1 ? "s" : ""}`,
+    });
+  }
+
+  if (entries.length === 0) {
+    return (
+      <div style={{ fontSize: 12.5, color: T.textDim, padding: "8px 0" }}>
+        No intent signals extracted for this method.
+      </div>
+    );
+  }
+
+  return entries.map((entry) => (
+    <div
+      key={entry.ch}
+      style={{
+        padding: "12px 14px",
+        borderRadius: 8,
+        border: `1px solid ${T.surfaceBorder}`,
+        background: T.cardBg,
+        marginBottom: 8,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 10,
+          marginBottom: entry.evidence ? 8 : 0,
+        }}
+      >
+        <ChTag ch={entry.ch} />
+        <div
+          style={{
+            flex: 1,
+            fontSize: 12.5,
+            color: T.textMuted,
+            lineHeight: 1.5,
+          }}
+        >
+          {entry.description}
+        </div>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: T.accent,
+            whiteSpace: "nowrap",
+          }}
+        >
+          1 test
+        </span>
+      </div>
+      {entry.evidence && (
+        <div
+          style={{
+            marginTop: 6,
+            padding: "8px 10px",
+            borderRadius: 6,
+            background: T.codeBg,
+            border: `1px solid ${T.codeBorder}`,
+            fontSize: 11,
+            fontFamily: T.mono,
+            lineHeight: 1.6,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 650,
+              color: T.textFaint,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              marginBottom: 4,
+            }}
+          >
+            Source evidence
+          </div>
+          {entry.evidence.map((ln, i) => (
+            <div key={i} style={{ color: T.textMuted }}>
+              {ln}
+            </div>
+          ))}
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 650,
+              color: CH[entry.ch]?.c || T.accent,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              marginTop: 6,
+            }}
+          >
+            Intent: {entry.description}
+          </div>
+        </div>
+      )}
+    </div>
+  ));
+}
+
+/* ------------------------------------------------------------------ */
+/*  Render generated tests for Tests lens                              */
+/* ------------------------------------------------------------------ */
+function renderGeneratedTests(
+  im: IntentMethod,
+  methodName: string,
+  expandedTest: string | null,
+  setExpandedTest: (t: string | null) => void
+) {
+  const channels = getActiveChannels(im.intentSignals);
+
+  if (channels.length === 0) {
+    return (
+      <div style={{ fontSize: 12.5, color: T.textDim, padding: "8px 0" }}>
+        No generated tests available for this method.
+      </div>
+    );
+  }
+
+  return channels.map((ch) => {
+    const testName = `${methodName}_${ch}_test`;
+    const expanded = expandedTest === testName;
+    const isGap = ch === "gap";
+    const statusColor = isGap ? T.yellow : T.green;
+
+    return (
+      <div
+        key={testName}
+        style={{
+          marginBottom: 12,
+          borderRadius: 10,
+          border: `1px solid ${expanded ? T.accent + "40" : T.surfaceBorder}`,
+          background: T.cardBg,
+          overflow: "hidden",
+          transition: "border-color 0.2s",
+        }}
+      >
+        {/* Test header */}
+        <button
+          onClick={() => setExpandedTest(expanded ? null : testName)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            width: "100%",
+            padding: "12px 16px",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          <span
+            style={{ fontSize: 12, fontWeight: 700, color: statusColor }}
+          >
+            {isGap ? "\u26A0" : "\u2713"}
+          </span>
+          <code
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              fontFamily: T.mono,
+              color: T.text,
+            }}
+          >
+            {testName}
+          </code>
+          <ChTag ch={ch} />
+          {isGap && <Tag color={T.yellow}>BUG?</Tag>}
+          <span
+            style={{
+              marginLeft: "auto",
+              fontSize: 10,
+              transform: expanded ? "rotate(90deg)" : "none",
+              transition: "transform 0.15s",
+              color: T.textDim,
+            }}
+          >
+            {"\u25B6"}
+          </span>
+        </button>
+
+        {expanded && (
+          <div style={{ borderTop: `1px solid ${T.surfaceBorder}` }}>
+            {/* Intent vs Code visualization */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                borderBottom: `1px solid ${T.surfaceBorder}`,
+              }}
+            >
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderRight: `1px solid ${T.surfaceBorder}`,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: T.accent,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    marginBottom: 6,
+                  }}
+                >
+                  Intent (what the developer claims)
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: T.textMuted,
+                    fontFamily: T.mono,
+                    lineHeight: 1.6,
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    background: T.accentBg,
+                    border: `1px solid ${T.accentBorder}`,
+                  }}
+                >
+                  Channel: {CH[ch]?.l || ch}
+                </div>
+              </div>
+              <div style={{ padding: "12px 16px" }}>
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: isGap ? T.yellow : T.green,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    marginBottom: 6,
+                  }}
+                >
+                  {isGap
+                    ? "Actual behavior (MISMATCH)"
+                    : "Actual behavior (MATCHES)"}
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: T.textMuted,
+                    fontFamily: T.mono,
+                    lineHeight: 1.6,
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    background: isGap ? T.yellowBg : T.greenBg,
+                    border: `1px solid ${isGap ? T.yellowBorder : T.greenBorder}`,
+                  }}
+                >
+                  Signal detected in {CH[ch]?.l || ch} channel
+                </div>
+              </div>
+            </div>
+
+            {/* Why */}
+            <div
+              style={{
+                padding: "10px 16px",
+                borderBottom: `1px solid ${T.surfaceBorder}`,
+                background: T.surface,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11.5,
+                  color: T.textMuted,
+                  lineHeight: 1.6,
+                }}
+              >
+                <span style={{ fontWeight: 600, color: T.text }}>Why:</span>{" "}
+                Test verifies {CH[ch]?.l || ch} channel signal is consistent
+                with method behavior.
+              </div>
+            </div>
+
+            {/* Test code */}
+            <InlineCode
+              code={generateTestStub(methodName, ch)}
+              title={`${testName}.java`}
+              lang="java"
+            />
+          </div>
+        )}
+      </div>
+    );
+  });
+}
+
+function generateTestStub(methodName: string, channel: string): string {
+  const chLabel = CH[channel]?.l || channel;
+  return `@Test
+void ${methodName}_${channel}_verifyIntent() {
+    // Verify ${chLabel} channel signal
+    var result = ${methodName}();
+    // Assert ${chLabel.toLowerCase()} behavior matches intent
+    assertNotNull(result);
+}`;
 }

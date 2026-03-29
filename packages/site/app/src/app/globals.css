@@ -1,103 +1,33 @@
-/* DocSpec Design System — Stripe-matched palette */
-:root {
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+/* DocSpec Design System — Dark theme matching docspec-poc.jsx */
 
-  /* Primary */
-  --ds-primary: #6366f1;
-  --ds-primary-hover: #4f46e5;
-  --ds-primary-light: #eef2ff;
-
-  /* Surfaces */
-  --ds-surface-primary: #ffffff;
-  --ds-surface-secondary: #f8fafc;
-  --ds-surface-tertiary: #f1f5f9;
-
-  /* Borders */
-  --ds-border: #e2e8f0;
-  --ds-border-strong: #cbd5e1;
-
-  /* Text */
-  --ds-text-primary: #0f172a;
-  --ds-text-secondary: #475569;
-  --ds-text-tertiary: #94a3b8;
-
-  /* Code */
-  --ds-code-bg: #0f172a;
-  --ds-code-surface: #0c1222;
-  --ds-code-border: #1e293b;
-  --ds-code-text: #e2e8f0;
-
-  /* HTTP Method Colors */
-  --ds-method-get: #3b82f6;
-  --ds-method-post: #22c55e;
-  --ds-method-put: #f59e0b;
-  --ds-method-patch: #f97316;
-  --ds-method-delete: #ef4444;
-
-  /* Status */
-  --ds-success: #22c55e;
-  --ds-warning: #f59e0b;
-  --ds-error: #ef4444;
-  --ds-info: #3b82f6;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: var(--font-body);
-  color: var(--ds-text-primary);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: #e2e8f0;
+  background: #0a0e17;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code, pre, kbd, samp {
-  font-family: var(--font-mono);
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
 }
 
-/* Shiki overrides — remove default background so our container controls it */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Shiki overrides */
 .shiki-container pre { background: transparent !important; margin: 0; padding: 0; }
-.shiki-container code { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65; }
+.shiki-container code { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 12.5px; line-height: 1.65; }
 
-@import "tailwindcss";
-
-/* Tell Tailwind to scan theme component source files for utility classes.
-   Paths are relative to this CSS file (site/app/src/app/globals.css). */
-@source "../../../themes/stripe/src";
-@source "../../../themes/stripe/dist";
-
-/* Theme custom color tokens */
-@theme {
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-
-  --color-surface: #f1f5f9;
-  --color-surface-secondary: #e8edf5;
-  --color-surface-tertiary: #dce3ee;
-  --color-surface-card: #ffffff;
-  --color-border: #cbd5e1;
-  --color-border-secondary: #94a3b8;
-
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-tertiary: #94a3b8;
-
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-error: #dc2626;
-  --color-info: #2563eb;
-
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-}
-
-/* Scrollbar styling */
+/* Scrollbar — dark theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -106,9 +36,9 @@ code, pre, kbd, samp {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-secondary);
+  background: #1e2430;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-tertiary);
+  background: #374151;
 }

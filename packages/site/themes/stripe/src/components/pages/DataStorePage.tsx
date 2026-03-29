@@ -1,41 +1,50 @@
 import React from "react";
 import type { DataStorePageData, DataStore, DataStoreMigration } from "@docspec/core";
-import { Badge } from "../ui/Badge.js";
-import { Breadcrumb } from "../layout/Breadcrumb.js";
+import { T } from "../../lib/tokens.js";
+import { Tag } from "../ui/Tag.js";
 
 interface DataStorePageProps {
   data: DataStorePageData;
 }
 
-const STORE_TYPE_VARIANTS: Record<string, "primary" | "info" | "success" | "warning"> = {
-  relational: "primary",
-  document: "info",
-  "key-value": "success",
-  "message-queue": "warning",
-  cache: "success",
-  search: "info",
-  graph: "primary",
+const STORE_TYPE_COLORS: Record<string, string> = {
+  relational: T.accent,
+  document: T.blue,
+  "key-value": T.green,
+  "message-queue": T.yellow,
+  cache: T.green,
+  search: T.blue,
+  graph: T.accent,
 };
 
 export function DataStorePage({ data }: DataStorePageProps) {
   const { dataStores, artifact } = data;
 
   return (
-    <div>
-      <Breadcrumb
-        items={[
-          { label: "Architecture", href: "/architecture" },
-          { label: artifact.label },
-          { label: "Data Stores" },
-        ]}
-      />
-
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Data Stores</h1>
-      <p className="text-text-secondary mb-8">
+    <div style={{ maxWidth: 780, margin: "0 auto" }}>
+      <h1
+        style={{
+          fontSize: 24,
+          fontWeight: 750,
+          color: T.text,
+          letterSpacing: "-0.025em",
+          margin: "0 0 6px",
+        }}
+      >
+        Data Stores
+      </h1>
+      <p
+        style={{
+          fontSize: 14,
+          color: T.textMuted,
+          lineHeight: 1.7,
+          margin: "0 0 24px",
+        }}
+      >
         Storage backends used by {artifact.label}.
       </p>
 
-      <div className="space-y-6">
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 16 }}>
         {dataStores.map((store) => (
           <DataStoreCard key={store.id} store={store} />
         ))}
@@ -45,39 +54,81 @@ export function DataStorePage({ data }: DataStorePageProps) {
 }
 
 function DataStoreCard({ store }: { store: DataStore }) {
-  const variant = store.type ? STORE_TYPE_VARIANTS[store.type] || "default" : "default";
+  const typeColor = store.type
+    ? STORE_TYPE_COLORS[store.type] || T.accent
+    : T.accent;
 
   return (
-    <div className="p-5 rounded-lg border border-border">
-      <div className="flex items-center gap-3 mb-3">
-        <h2 className="text-lg font-semibold text-text-primary">
+    <div
+      style={{
+        padding: "16px 18px",
+        borderRadius: 10,
+        border: `1px solid ${T.surfaceBorder}`,
+        background: T.cardBg,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 16,
+            fontWeight: 650,
+            color: T.text,
+          }}
+        >
           {store.name || store.id}
-        </h2>
-        {store.type && (
-          <Badge variant={variant as any}>{store.type}</Badge>
-        )}
-        {store.migrationTool && (
-          <Badge variant="info">{store.migrationTool}</Badge>
-        )}
+        </span>
+        {store.type && <Tag color={typeColor}>{store.type}</Tag>}
+        {store.migrationTool && <Tag color={T.blue}>{store.migrationTool}</Tag>}
       </div>
 
       {store.schemaSource && (
-        <p className="text-xs text-text-tertiary mb-4">
-          Schema source: <code className="font-mono">{store.schemaSource}</code>
+        <p
+          style={{
+            fontSize: 11,
+            color: T.textDim,
+            margin: "0 0 12px",
+          }}
+        >
+          Schema source:{" "}
+          <code style={{ fontFamily: T.mono, color: T.textMuted, fontSize: 11 }}>
+            {store.schemaSource}
+          </code>
         </p>
       )}
 
       {/* Tables / Collections */}
       {store.tables && store.tables.length > 0 && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-text-primary mb-2">
+        <section style={{ marginBottom: 12 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 6,
+            }}
+          >
             Tables ({store.tables.length})
-          </h3>
-          <div className="flex flex-wrap gap-2">
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
             {store.tables.map((table) => (
               <code
                 key={table}
-                className="px-2 py-1 rounded bg-surface-secondary text-sm font-mono text-text-secondary border border-border"
+                style={{
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  background: T.surface,
+                  fontSize: 12,
+                  fontFamily: T.mono,
+                  color: T.textMuted,
+                  border: `1px solid ${T.surfaceBorder}`,
+                }}
               >
                 {table}
               </code>
@@ -88,15 +139,35 @@ function DataStoreCard({ store }: { store: DataStore }) {
 
       {/* Key Patterns */}
       {store.keyPatterns && store.keyPatterns.length > 0 && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-text-primary mb-2">Key Patterns</h3>
-          <div className="space-y-1">
+        <section style={{ marginBottom: 12 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 6,
+            }}
+          >
+            Key Patterns
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" as const, gap: 4 }}>
             {store.keyPatterns.map((pattern, i) => (
               <code
                 key={i}
-                className="block px-3 py-1.5 rounded bg-surface-secondary text-sm font-mono text-text-secondary border border-border"
+                style={{
+                  display: "block",
+                  padding: "5px 10px",
+                  borderRadius: 4,
+                  background: T.surface,
+                  fontSize: 12,
+                  fontFamily: T.mono,
+                  color: T.textMuted,
+                  border: `1px solid ${T.surfaceBorder}`,
+                }}
               >
-                {pattern.pattern}{pattern.type ? ` (${pattern.type})` : ""}{pattern.ttl ? ` TTL: ${pattern.ttl}` : ""}
+                {pattern.pattern}
+                {pattern.type ? ` (${pattern.type})` : ""}
+                {pattern.ttl ? ` TTL: ${pattern.ttl}` : ""}
               </code>
             ))}
           </div>
@@ -105,11 +176,22 @@ function DataStoreCard({ store }: { store: DataStore }) {
 
       {/* Topics */}
       {store.topics && store.topics.length > 0 && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-text-primary mb-2">Topics</h3>
-          <div className="flex flex-wrap gap-2">
+        <section style={{ marginBottom: 12 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 6,
+            }}
+          >
+            Topics
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
             {store.topics.map((topic) => (
-              <Badge key={topic.name} variant="info">{topic.name}</Badge>
+              <Tag key={topic.name} color={T.blue}>
+                {topic.name}
+              </Tag>
             ))}
           </div>
         </section>
@@ -117,11 +199,22 @@ function DataStoreCard({ store }: { store: DataStore }) {
 
       {/* Buckets */}
       {store.buckets && store.buckets.length > 0 && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-text-primary mb-2">Buckets</h3>
-          <div className="flex flex-wrap gap-2">
+        <section style={{ marginBottom: 12 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 6,
+            }}
+          >
+            Buckets
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
             {store.buckets.map((bucket) => (
-              <Badge key={bucket.name}>{bucket.name}</Badge>
+              <Tag key={bucket.name} color={T.accent}>
+                {bucket.name}
+              </Tag>
             ))}
           </div>
         </section>
@@ -130,17 +223,78 @@ function DataStoreCard({ store }: { store: DataStore }) {
       {/* Migration Timeline */}
       {store.migrations && store.migrations.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-text-primary mb-2">
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 8,
+            }}
+          >
             Migrations ({store.migrations.length})
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          </div>
+          <div style={{ overflowX: "auto" as const }}>
+            <table
+              style={{
+                width: "100%",
+                fontSize: 13,
+                borderCollapse: "collapse" as const,
+              }}
+            >
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Version</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Description</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Date</th>
-                  <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Tables</th>
+                <tr style={{ borderBottom: `1px solid ${T.surfaceBorder}` }}>
+                  <th
+                    style={{
+                      textAlign: "left" as const,
+                      padding: "6px 12px 6px 0",
+                      color: T.textDim,
+                      fontWeight: 600,
+                      fontSize: 10,
+                      textTransform: "uppercase" as const,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    Version
+                  </th>
+                  <th
+                    style={{
+                      textAlign: "left" as const,
+                      padding: "6px 12px 6px 0",
+                      color: T.textDim,
+                      fontWeight: 600,
+                      fontSize: 10,
+                      textTransform: "uppercase" as const,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    Description
+                  </th>
+                  <th
+                    style={{
+                      textAlign: "left" as const,
+                      padding: "6px 12px 6px 0",
+                      color: T.textDim,
+                      fontWeight: 600,
+                      fontSize: 10,
+                      textTransform: "uppercase" as const,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    Date
+                  </th>
+                  <th
+                    style={{
+                      textAlign: "left" as const,
+                      padding: "6px 0",
+                      color: T.textDim,
+                      fontWeight: 600,
+                      fontSize: 10,
+                      textTransform: "uppercase" as const,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    Tables
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -158,19 +312,53 @@ function DataStoreCard({ store }: { store: DataStore }) {
 
 function MigrationRow({ migration }: { migration: DataStoreMigration }) {
   return (
-    <tr className="border-b border-border/50">
-      <td className="py-2 pr-4 font-mono text-sm text-text-primary">{migration.version}</td>
-      <td className="py-2 pr-4 text-text-secondary">{migration.description || "—"}</td>
-      <td className="py-2 pr-4 text-text-tertiary text-xs">{migration.date || "—"}</td>
-      <td className="py-2">
+    <tr style={{ borderBottom: `1px solid ${T.surfaceBorder}50` }}>
+      <td
+        style={{
+          padding: "6px 12px 6px 0",
+          fontFamily: T.mono,
+          fontSize: 12,
+          color: T.text,
+        }}
+      >
+        {migration.version}
+      </td>
+      <td
+        style={{
+          padding: "6px 12px 6px 0",
+          color: T.textMuted,
+          fontSize: 12,
+        }}
+      >
+        {migration.description || "\u2014"}
+      </td>
+      <td
+        style={{
+          padding: "6px 12px 6px 0",
+          color: T.textDim,
+          fontSize: 11,
+        }}
+      >
+        {migration.date || "\u2014"}
+      </td>
+      <td style={{ padding: "6px 0" }}>
         {migration.tables && migration.tables.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
             {migration.tables.map((t) => (
-              <code key={t} className="text-xs font-mono text-text-secondary">{t}</code>
+              <code
+                key={t}
+                style={{
+                  fontSize: 11,
+                  fontFamily: T.mono,
+                  color: T.textMuted,
+                }}
+              >
+                {t}
+              </code>
             ))}
           </div>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>{"\u2014"}</span>
         )}
       </td>
     </tr>

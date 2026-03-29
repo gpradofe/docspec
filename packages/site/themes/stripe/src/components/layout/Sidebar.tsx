@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import type { NavigationTree, NavigationNode } from "@docspec/core";
-import { ProjectSwitcher } from "../ui/ProjectSwitcher.js";
+import { T, MC, KIND_COLORS } from "../../lib/tokens.js";
 
 interface SidebarProps {
   navigation: NavigationTree;
   currentSlug?: string;
+  lens: "docs" | "tests";
   artifacts?: Array<{ label: string; color?: string; version?: string }>;
   activeArtifact?: string;
   onArtifactChange?: (label: string) => void;
@@ -14,66 +15,333 @@ interface SidebarProps {
 
 interface ExtendedNavigationNode extends NavigationNode {
   httpMethod?: string;
+  kind?: string;
+  testCount?: number;
+  testStatus?: "pass" | "warn" | "fail";
+  isdScore?: number;
 }
 
-const HTTP_METHOD_COLORS: Record<string, { bg: string; text: string }> = {
-  GET: { bg: "#dbeafe", text: "#1d4ed8" },
-  POST: { bg: "#dcfce7", text: "#166534" },
-  PUT: { bg: "#fef3c7", text: "#92400e" },
-  PATCH: { bg: "#ffedd5", text: "#9a3412" },
-  DELETE: { bg: "#fee2e2", text: "#991b1b" },
-};
+function Tag({
+  children,
+  color = T.accent,
+}: {
+  children: React.ReactNode;
+  color?: string;
+}) {
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 600,
+        padding: "2px 7px",
+        borderRadius: 4,
+        background: color + "14",
+        color,
+        border: `1px solid ${color}30`,
+        fontFamily: T.mono,
+        letterSpacing: "0.02em",
+        lineHeight: "16px",
+        display: "inline-block",
+        flexShrink: 0,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function kindBadgeLetter(kind: string): string {
+  const map: Record<string, string> = {
+    class: "C",
+    interface: "I",
+    enum: "E",
+    record: "R",
+    annotation: "A",
+    struct: "S",
+    trait: "T",
+    function: "F",
+    module: "M",
+    endpoint: "EP",
+  };
+  return map[kind] || kind.charAt(0).toUpperCase();
+}
+
+function testStatusIcon(status?: "pass" | "warn" | "fail"): string {
+  if (status === "pass") return "\u2713";
+  if (status === "warn") return "\u26A0";
+  if (status === "fail") return "\u2715";
+  return "";
+}
+
+function testStatusColor(status?: "pass" | "warn" | "fail"): string {
+  if (status === "pass") return T.green;
+  if (status === "warn") return T.yellow;
+  if (status === "fail") return T.red;
+  return T.textDim;
+}
 
 export function Sidebar({
   navigation,
   currentSlug,
+  lens,
   artifacts,
   activeArtifact,
   onArtifactChange,
 }: SidebarProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const current =
+    artifacts?.find((a) => a.label === activeArtifact) || artifacts?.[0];
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const totalItems = navigation.sections.reduce(
+    (sum, s) => sum + s.items.length,
+    0,
+  );
+
   return (
-    <nav style={{
-      width: 260,
-      height: "100%",
-      borderRight: "1px solid var(--ds-border, #e2e8f0)",
-      background: "var(--ds-surface-primary, #ffffff)",
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",
-    }}>
-      {/* Project Switcher at top */}
+    <nav
+      style={{
+        width: 240,
+        borderRight: `1px solid ${T.surfaceBorder}`,
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+        background: T.bg,
+        overflow: "hidden",
+      }}
+    >
+      {/* Project Switcher */}
       {artifacts && artifacts.length > 0 && (
-        <div style={{ padding: "12px 12px 0", borderBottom: "1px solid var(--ds-border, #e2e8f0)" }}>
-          <ProjectSwitcher
-            artifacts={artifacts}
-            active={activeArtifact}
-            onChange={onArtifactChange}
-          />
+        <div
+          style={{ padding: "12px 10px", position: "relative" }}
+          ref={dropdownRef}
+        >
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              width: "100%",
+              padding: "9px 10px",
+              background: T.surface,
+              border: `1px solid ${T.surfaceBorder}`,
+              borderRadius: 8,
+              cursor: "pointer",
+              textAlign: "left",
+              transition: "border-color 0.15s",
+              fontFamily: T.sans,
+              color: T.text,
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.borderColor = T.accent + "40")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.borderColor = T.surfaceBorder)
+            }
+          >
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 7,
+                background: `linear-gradient(135deg,${current?.color || T.accent},${(current?.color || T.accent)}90)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontSize: 13,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              {(current?.label || "P").charAt(0).toUpperCase()}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 640,
+                  color: T.text,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {current?.label || "Select project"}
+              </div>
+              {current?.version && (
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: T.textDim,
+                    fontFamily: T.mono,
+                  }}
+                >
+                  {current.version}
+                </div>
+              )}
+            </div>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              style={{
+                opacity: 0.3,
+                transition: "transform 0.15s",
+                transform: dropdownOpen ? "rotate(180deg)" : "none",
+                flexShrink: 0,
+              }}
+            >
+              <path
+                d="M4 6L8 10L12 6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+
+          {/* Dropdown */}
+          {dropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                zIndex: 999,
+                left: 10,
+                right: 10,
+                top: "100%",
+                marginTop: 2,
+                background: T.bg,
+                border: `1px solid ${T.surfaceBorder}`,
+                borderRadius: 10,
+                boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+                padding: 4,
+              }}
+            >
+              {artifacts.map((artifact) => {
+                const isActive = artifact.label === activeArtifact;
+                return (
+                  <button
+                    key={artifact.label}
+                    onClick={() => {
+                      onArtifactChange?.(artifact.label);
+                      setDropdownOpen(false);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      width: "100%",
+                      padding: "8px 8px",
+                      background: isActive
+                        ? "rgba(129,140,248,0.08)"
+                        : "transparent",
+                      border: "none",
+                      borderRadius: 7,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "background 0.1s",
+                      fontFamily: T.sans,
+                      color: T.text,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive)
+                        e.currentTarget.style.background = T.surfaceHover;
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive)
+                        e.currentTarget.style.background = "transparent";
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 6,
+                        background: `linear-gradient(135deg,${artifact.color || T.accent},${(artifact.color || T.accent)}90)`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#fff",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {artifact.label.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 12.5,
+                          fontWeight: 550,
+                          color: T.text,
+                        }}
+                      >
+                        {artifact.label}
+                      </div>
+                      {artifact.version && (
+                        <div
+                          style={{
+                            fontSize: 10,
+                            color: T.textDim,
+                            fontFamily: T.mono,
+                          }}
+                        >
+                          v{artifact.version}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
       {/* Scrollable nav content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+      <div style={{ flex: 1, overflow: "auto", padding: "0 8px 16px" }}>
         {navigation.sections.map((section) => (
           <SidebarSection
             key={section.title}
             title={section.title}
             items={section.items}
             currentSlug={currentSlug}
+            lens={lens}
           />
         ))}
       </div>
 
       {/* Footer */}
-      <div style={{
-        padding: "10px 16px",
-        borderTop: "1px solid var(--ds-border, #e2e8f0)",
-        fontSize: 10,
-        color: "var(--ds-text-tertiary, #94a3b8)",
-        fontFamily: "var(--font-mono, monospace)",
-        letterSpacing: "0.02em",
-      }}>
-        Generated by DocSpec v3
+      <div
+        style={{
+          padding: "10px 14px",
+          borderTop: `1px solid ${T.surfaceBorder}`,
+          fontSize: 10,
+          color: T.textDim,
+        }}
+      >
+        Generated by{" "}
+        <span style={{ fontWeight: 650, color: T.accent }}>DocSpec v3</span>
+        {totalItems > 0 && (
+          <span> &middot; {totalItems} classes</span>
+        )}
       </div>
     </nav>
   );
@@ -83,59 +351,36 @@ function SidebarSection({
   title,
   items,
   currentSlug,
+  lens,
 }: {
   title: string;
   items: NavigationNode[];
   currentSlug?: string;
+  lens: "docs" | "tests";
 }) {
-  const [expanded, setExpanded] = useState(true);
-
   return (
-    <div style={{ marginBottom: 8 }}>
-      <button
-        onClick={() => setExpanded(!expanded)}
+    <div style={{ marginBottom: 16 }}>
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          padding: "6px 12px",
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          fontSize: 10.5,
-          fontWeight: 600,
+          fontSize: 10,
+          fontWeight: 730,
+          color: T.textDim,
+          letterSpacing: "0.1em",
+          padding: "8px 8px 4px",
           textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          color: "var(--ds-text-tertiary, #94a3b8)",
-          transition: "color 0.15s ease",
         }}
       >
-        <span style={{ flex: 1, textAlign: "left" }}>{title}</span>
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          style={{
-            transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 0.15s ease",
-          }}
-        >
-          <path d="M3.5 2l3.5 3-3.5 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-        </svg>
-      </button>
-      {expanded && (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {items.map((item) => (
-            <SidebarItem
-              key={item.slug || item.label}
-              item={item as ExtendedNavigationNode}
-              currentSlug={currentSlug}
-              depth={0}
-            />
-          ))}
-        </ul>
-      )}
+        {title}
+      </div>
+      {items.map((item) => (
+        <SidebarItem
+          key={(item as ExtendedNavigationNode).slug || item.label}
+          item={item as ExtendedNavigationNode}
+          currentSlug={currentSlug}
+          lens={lens}
+          depth={0}
+        />
+      ))}
     </div>
   );
 }
@@ -143,115 +388,189 @@ function SidebarSection({
 function SidebarItem({
   item,
   currentSlug,
+  lens,
   depth,
 }: {
   item: ExtendedNavigationNode;
   currentSlug?: string;
+  lens: "docs" | "tests";
   depth: number;
 }) {
   const [expanded, setExpanded] = useState(true);
   const [hovered, setHovered] = useState(false);
   const normalizedSlug = item.slug?.replace(/^\//, "");
-  const isActive = currentSlug === item.slug || currentSlug === normalizedSlug;
+  const isActive =
+    currentSlug === item.slug || currentSlug === normalizedSlug;
   const hasChildren = item.children && item.children.length > 0;
 
-  const paddingLeft = depth * 12 + 12;
+  const href = item.slug
+    ? item.slug.startsWith("/")
+      ? item.slug
+      : `/${item.slug}`
+    : "#";
 
   return (
-    <li style={{ listStyle: "none" }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
+    <div>
+      <a
+        href={href}
+        onClick={(e) => {
+          if (hasChildren && !item.slug) {
+            e.preventDefault();
+            setExpanded(!expanded);
+          }
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          width: "100%",
+          padding: `6px 8px 6px ${8 + depth * 12}px`,
+          background: isActive
+            ? "rgba(129,140,248,0.1)"
+            : hovered
+              ? T.surfaceHover
+              : "transparent",
+          borderRadius: 6,
+          cursor: "pointer",
+          textAlign: "left",
+          fontSize: 12.5,
+          fontWeight: isActive ? 600 : 420,
+          color: isActive ? T.accent : T.textMuted,
+          transition: "all 0.12s",
+          textDecoration: "none",
+          fontFamily: T.sans,
+        }}
+      >
+        {/* Collapse chevron for parent items */}
         {hasChildren && (
-          <button
-            onClick={() => setExpanded(!expanded)}
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
             style={{
-              width: 20,
-              height: 20,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.15s",
+              opacity: 0.4,
               flexShrink: 0,
-              border: "none",
-              background: "transparent",
               cursor: "pointer",
-              marginLeft: paddingLeft,
-              padding: 0,
             }}
           >
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              style={{
-                transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-                transition: "transform 0.15s ease",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-              }}
-            >
-              <path d="M3.5 2l3.5 3-3.5 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-            </svg>
-          </button>
+            <path
+              d="M3.5 2l3.5 3-3.5 3"
+              stroke="currentColor"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+            />
+          </svg>
         )}
-        <a
-          href={item.slug ? (item.slug.startsWith("/") ? item.slug : `/${item.slug}`) : "#"}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+
+        {/* Lens-aware badges */}
+        {lens === "docs" ? (
+          <>
+            {item.httpMethod && MC[item.httpMethod] ? (
+              <Tag color={MC[item.httpMethod].text}>{item.httpMethod}</Tag>
+            ) : item.kind ? (
+              <Tag color={KIND_COLORS[item.kind] || T.accent}>
+                {kindBadgeLetter(item.kind)}
+              </Tag>
+            ) : (
+              item.icon && (
+                <span style={{ fontSize: 12, flexShrink: 0 }}>
+                  {item.icon}
+                </span>
+              )
+            )}
+          </>
+        ) : (
+          <>
+            {item.testCount !== undefined && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  fontFamily: T.mono,
+                  color: testStatusColor(item.testStatus),
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <span>{testStatusIcon(item.testStatus)}</span>
+                <span>{item.testCount}</span>
+              </span>
+            )}
+            {item.isdScore !== undefined && (
+              <span
+                style={{
+                  fontSize: 9,
+                  fontFamily: T.mono,
+                  fontWeight: 500,
+                  color: T.textDim,
+                  background: T.surface,
+                  padding: "1px 5px",
+                  borderRadius: 3,
+                  flexShrink: 0,
+                }}
+              >
+                {(item.isdScore * 100).toFixed(0)}%
+              </span>
+            )}
+          </>
+        )}
+
+        {/* Label */}
+        <span
           style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
             flex: 1,
-            display: "flex",
-            alignItems: "center",
-            paddingLeft: hasChildren ? 4 : paddingLeft + 20,
-            paddingRight: 12,
-            paddingTop: 5,
-            paddingBottom: 5,
-            fontSize: 13,
-            fontFamily: "var(--font-body, 'Inter', sans-serif)",
-            fontWeight: isActive ? 500 : 400,
-            color: isActive
-              ? "var(--ds-primary, #6366f1)"
-              : "var(--ds-text-secondary, #475569)",
-            background: isActive
-              ? "var(--ds-primary-light, #eef2ff)"
-              : hovered
-                ? "var(--ds-surface-secondary, #f8fafc)"
-                : "transparent",
-            borderRadius: 4,
-            textDecoration: "none",
-            transition: "all 0.15s ease",
-            marginLeft: 4,
-            marginRight: 4,
+            minWidth: 0,
           }}
         >
-          {item.httpMethod && (
-            <span style={{
-              fontSize: 9,
-              fontFamily: "var(--font-mono)",
-              fontWeight: 600,
-              padding: "1px 4px",
-              borderRadius: 3,
-              background: HTTP_METHOD_COLORS[item.httpMethod]?.bg || "#f1f5f9",
-              color: HTTP_METHOD_COLORS[item.httpMethod]?.text || "#475569",
-              marginRight: 6,
-              letterSpacing: "0.03em",
-            }}>
-              {item.httpMethod}
-            </span>
-          )}
           {item.label}
-        </a>
-      </div>
+        </span>
+
+        {/* Child count badge for collapsible sections */}
+        {hasChildren && (
+          <span
+            style={{
+              fontSize: 10,
+              fontFamily: T.mono,
+              color: T.textFaint,
+              flexShrink: 0,
+            }}
+          >
+            {item.children!.length}
+          </span>
+        )}
+      </a>
+
+      {/* Children */}
       {hasChildren && expanded && (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <div>
           {item.children!.map((child) => (
             <SidebarItem
-              key={child.slug || child.label}
+              key={
+                (child as ExtendedNavigationNode).slug || child.label
+              }
               item={child as ExtendedNavigationNode}
               currentSlug={currentSlug}
+              lens={lens}
               depth={depth + 1}
             />
           ))}
-        </ul>
+        </div>
       )}
-    </li>
+    </div>
   );
 }

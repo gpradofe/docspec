@@ -1,14 +1,15 @@
 import React from "react";
 import type { ChangelogPageData } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 
 interface ChangelogPageProps {
   data: ChangelogPageData;
 }
 
-const STATUS_COLORS = {
-  added: { bg: "#dcfce7", text: "#166534", label: "Added" },
-  removed: { bg: "#fee2e2", text: "#991b1b", label: "Removed" },
-  modified: { bg: "#dbeafe", text: "#1d4ed8", label: "Modified" },
+const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }> = {
+  added: { bg: T.greenBg, text: T.green, label: "Added" },
+  removed: { bg: T.redBg, text: T.red, label: "Removed" },
+  modified: { bg: T.blueBg, text: T.blue, label: "Modified" },
 };
 
 export function ChangelogPage({ data }: ChangelogPageProps) {
@@ -16,26 +17,28 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
 
   if (diffs.length === 0) {
     return (
-      <div>
+      <div style={{ maxWidth: 780, margin: "0 auto" }}>
         <h1
           style={{
-            fontSize: 28,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            color: "var(--ds-text-primary)",
-            marginBottom: 16,
+            fontSize: 24,
+            fontWeight: 750,
+            color: T.text,
+            letterSpacing: "-0.025em",
+            margin: "0 0 6px",
           }}
         >
           Changelog
         </h1>
-        <p style={{ color: "var(--ds-text-secondary)", fontSize: 15 }}>
+        <p style={{ color: T.textMuted, fontSize: 14, lineHeight: 1.7 }}>
           No version history available. Run{" "}
           <code
             style={{
-              fontFamily: "var(--font-mono)",
-              background: "var(--ds-surface-tertiary)",
+              fontFamily: T.mono,
+              background: T.surface,
               padding: "2px 6px",
               borderRadius: 4,
+              fontSize: 12,
+              color: T.accentText,
             }}
           >
             docspec diff
@@ -47,14 +50,14 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
   }
 
   return (
-    <div>
+    <div style={{ maxWidth: 780, margin: "0 auto" }}>
       <h1
         style={{
-          fontSize: 28,
-          fontWeight: 700,
-          letterSpacing: "-0.02em",
-          color: "var(--ds-text-primary)",
-          marginBottom: 32,
+          fontSize: 24,
+          fontWeight: 750,
+          color: T.text,
+          letterSpacing: "-0.025em",
+          margin: "0 0 28px",
         }}
       >
         Changelog
@@ -63,24 +66,24 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
       {/* Timeline */}
       <div
         style={{
-          position: "relative",
+          position: "relative" as const,
           paddingLeft: 24,
-          borderLeft: "2px solid var(--ds-border, #e2e8f0)",
+          borderLeft: `2px solid ${T.surfaceBorder}`,
         }}
       >
         {diffs.map((diff, i) => (
-          <div key={i} style={{ marginBottom: 40, position: "relative" }}>
+          <div key={i} style={{ marginBottom: 40, position: "relative" as const }}>
             {/* Timeline dot */}
             <div
               style={{
-                position: "absolute",
+                position: "absolute" as const,
                 left: -29,
                 top: 4,
                 width: 12,
                 height: 12,
                 borderRadius: "50%",
-                background: "var(--ds-primary, #6366f1)",
-                border: "2px solid var(--ds-surface-primary, #fff)",
+                background: T.accent,
+                border: `2px solid ${T.bg}`,
               }}
             />
 
@@ -96,8 +99,8 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
               <span
                 style={{
                   fontSize: 18,
-                  fontWeight: 600,
-                  color: "var(--ds-text-primary)",
+                  fontWeight: 650,
+                  color: T.text,
                 }}
               >
                 v{diff.version?.to || "unknown"}
@@ -106,15 +109,21 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
                 <span
                   style={{
                     fontSize: 12,
-                    color: "var(--ds-text-tertiary)",
-                    fontFamily: "var(--font-mono)",
+                    color: T.textDim,
+                    fontFamily: T.mono,
                   }}
                 >
                   from v{diff.version.from}
                 </span>
               )}
               {diff.summary && (
-                <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    marginLeft: "auto",
+                  }}
+                >
                   {diff.summary.added > 0 && (
                     <DiffBadge status="added" count={diff.summary.added} />
                   )}
@@ -129,7 +138,13 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
             </div>
 
             {/* Changes list */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column" as const,
+                gap: 6,
+              }}
+            >
               {(diff.members || []).map((m, j) => (
                 <ChangeEntry
                   key={`m-${j}`}
@@ -153,9 +168,7 @@ export function ChangelogPage({ data }: ChangelogPageProps) {
                   key={`f-${j}`}
                   name={f.name}
                   status={f.status}
-                  detail={
-                    f.stepsAdded ? `+${f.stepsAdded} steps` : undefined
-                  }
+                  detail={f.stepsAdded ? `+${f.stepsAdded} steps` : undefined}
                   kind="flow"
                 />
               ))}
@@ -229,7 +242,8 @@ function ChangeEntry({
         gap: 8,
         padding: "6px 10px",
         borderRadius: 6,
-        border: "1px solid var(--ds-border, #e2e8f0)",
+        border: `1px solid ${T.surfaceBorder}`,
+        background: T.cardBg,
       }}
     >
       <span
@@ -240,7 +254,7 @@ function ChangeEntry({
           borderRadius: 3,
           background: c.bg,
           color: c.text,
-          textTransform: "uppercase",
+          textTransform: "uppercase" as const,
           letterSpacing: "0.04em",
         }}
       >
@@ -249,9 +263,9 @@ function ChangeEntry({
       <span
         style={{
           fontSize: 11,
-          fontFamily: "var(--font-mono)",
-          color: "var(--ds-text-tertiary)",
-          textTransform: "uppercase",
+          fontFamily: T.mono,
+          color: T.textDim,
+          textTransform: "uppercase" as const,
           letterSpacing: "0.04em",
         }}
       >
@@ -260,8 +274,8 @@ function ChangeEntry({
       <code
         style={{
           fontSize: 13,
-          fontFamily: "var(--font-mono)",
-          color: "var(--ds-text-primary)",
+          fontFamily: T.mono,
+          color: T.text,
         }}
       >
         {name}
@@ -270,7 +284,7 @@ function ChangeEntry({
         <span
           style={{
             fontSize: 12,
-            color: "var(--ds-text-tertiary)",
+            color: T.textDim,
             marginLeft: "auto",
           }}
         >

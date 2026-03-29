@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import type { NavigationTree, SiteData } from "@docspec/core";
+import type { NavigationTree } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Sidebar } from "./Sidebar.js";
 import { Header } from "./Header.js";
 
@@ -29,47 +30,51 @@ export function Layout({
   onArtifactChange,
   onOpenSearch,
 }: LayoutProps) {
+  const [lens, setLens] = useState<"docs" | "tests">("docs");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Determine active tab from the current URL slug
-  const normalizedSlug = currentSlug?.replace(/^\//, "") ?? "";
-  const activeTab: "docs" | "tests" = normalizedSlug.startsWith("tests") ? "tests" : "docs";
-
-  // Filter sidebar sections to only show those matching the active tab
-  const filteredNavigation = {
+  const filteredNavigation: NavigationTree = {
     sections: navigation.sections.filter(
-      (s) => !s.tab || s.tab === activeTab,
+      (s) => !s.tab || s.tab === lens,
     ),
   };
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div
+      style={{
+        fontFamily: T.sans,
+        color: T.text,
+        background: T.bg,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Header
         siteName={siteName}
         logo={logo}
+        lens={lens}
+        onLensChange={setLens}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        activeTab={activeTab}
         onOpenSearch={onOpenSearch}
         artifacts={artifacts}
         activeArtifact={activeArtifact}
         onArtifactChange={onArtifactChange}
       />
-      <div className="flex">
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {sidebarOpen && (
-          <aside className="fixed top-[52px] left-0 bottom-0 w-[260px] overflow-y-auto">
-            <Sidebar
-              navigation={filteredNavigation}
-              currentSlug={currentSlug}
-              artifacts={artifacts}
-              activeArtifact={activeArtifact}
-              onArtifactChange={onArtifactChange}
-            />
-          </aside>
+          <Sidebar
+            navigation={filteredNavigation}
+            currentSlug={currentSlug}
+            lens={lens}
+            artifacts={artifacts}
+            activeArtifact={activeArtifact}
+            onArtifactChange={onArtifactChange}
+          />
         )}
-        <main
-          className={`flex-1 min-w-0 pt-[52px] ${sidebarOpen ? "ml-[260px]" : ""}`}
-        >
-          <div className="max-w-4xl mx-auto px-8 py-10">
+        <main style={{ flex: 1, overflow: "auto" }}>
+          <div style={{ padding: "32px 40px 40px" }}>
             {children}
           </div>
         </main>

@@ -2,467 +2,540 @@
 
 import React, { useState } from "react";
 import type { EndpointPageData } from "@docspec/core";
-import { Breadcrumb } from "../layout/Breadcrumb.js";
-import { ParameterTable } from "../ui/ParameterTable.js";
-import { LanguageTabs } from "../ui/LanguageTabs.js";
+import { T, MC } from "../../lib/tokens.js";
 
 interface EndpointPageProps {
   data: EndpointPageData;
   referenceIndex?: Record<string, string>;
 }
 
-const METHOD_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  GET: { bg: "#dbeafe", text: "#1d4ed8", border: "#93c5fd" },
-  POST: { bg: "#dcfce7", text: "#166534", border: "#86efac" },
-  PUT: { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" },
-  PATCH: { bg: "#ffedd5", text: "#9a3412", border: "#fdba74" },
-  DELETE: { bg: "#fee2e2", text: "#991b1b", border: "#fca5a5" },
-};
+function Tag({ children, color = T.accent }: { children: React.ReactNode; color?: string }) {
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 600,
+        padding: "2px 7px",
+        borderRadius: 4,
+        background: color + "14",
+        color,
+        border: `1px solid ${color}30`,
+        fontFamily: T.mono,
+        letterSpacing: "0.02em",
+        lineHeight: "16px",
+        display: "inline-block",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
 
 export function EndpointPage({ data, referenceIndex }: EndpointPageProps) {
   const { method, memberName, artifact, examples, responseExample, linkedFlowId } = data;
   const mapping = method.endpointMapping!;
   const httpMethod = mapping.method || "GET";
-  const colors = METHOD_COLORS[httpMethod] || METHOD_COLORS.GET;
-  const [showFlow, setShowFlow] = useState(false);
+  const colors = MC[httpMethod] || MC.GET;
+  const [lang, setLang] = useState<string>(
+    examples && Object.keys(examples).length > 0
+      ? Object.keys(examples)[0]
+      : "cli",
+  );
+  const langs = examples ? Object.keys(examples) : [];
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <Breadcrumb
-        items={[
-          { label: "API Reference", href: "/api" },
-          { label: artifact.label },
-          { label: `${httpMethod} ${mapping.path}` },
-        ]}
-      />
-
-      {/* Endpoint header — full width */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        marginBottom: 8,
-        paddingBottom: 16,
-        borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-      }}>
-        <span style={{
-          display: "inline-flex",
+    <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      {/* Method badge + path */}
+      <div
+        style={{
+          display: "flex",
           alignItems: "center",
-          padding: "4px 10px",
-          borderRadius: 4,
-          fontSize: 13,
-          fontWeight: 600,
-          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-          background: colors.bg,
-          color: colors.text,
-          border: `1px solid ${colors.border}`,
-          letterSpacing: "0.03em",
-        }}>
-          {httpMethod}
-        </span>
-        <code style={{
-          fontSize: 16,
-          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-          color: "var(--ds-text-primary, #0f172a)",
-          fontWeight: 500,
-        }}>
+          gap: 10,
+          marginBottom: 8,
+        }}
+      >
+        <Tag color={colors.text}>{httpMethod}</Tag>
+        <code
+          style={{
+            fontSize: 15,
+            fontWeight: 550,
+            fontFamily: T.mono,
+            color: T.text,
+          }}
+        >
           {mapping.path}
         </code>
-        {artifact.label && (
-          <span style={{
-            fontSize: 11,
-            padding: "2px 8px",
-            borderRadius: 4,
-            background: "var(--ds-surface-tertiary, #f1f5f9)",
-            color: "var(--ds-text-tertiary, #94a3b8)",
-            fontFamily: "var(--font-mono)",
-          }}>
-            {artifact.label}
-          </span>
-        )}
       </div>
+      {/* Title */}
+      <h2
+        style={{
+          fontSize: 22,
+          fontWeight: 720,
+          color: T.text,
+          letterSpacing: "-0.02em",
+          margin: "0 0 8px",
+        }}
+      >
+        {method.name}
+      </h2>
+      {/* Description */}
+      {method.description && (
+        <p
+          style={{
+            fontSize: 14,
+            color: T.textMuted,
+            lineHeight: 1.7,
+            margin: "0 0 24px",
+            maxWidth: 520,
+          }}
+        >
+          {method.description}
+        </p>
+      )}
 
-      {/* Two-column split layout */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 420px",
-        gap: 0,
-        marginTop: 24,
-      }}>
-        {/* ═══════ LEFT PANEL (description + parameters) ═══════ */}
-        <div style={{ paddingRight: 40 }}>
-          {/* Description */}
-          {method.description && (
-            <p style={{
-              fontSize: 15,
-              lineHeight: 1.7,
-              color: "var(--ds-text-secondary, #475569)",
-              marginBottom: 32,
-            }}>
-              {method.description}
-            </p>
-          )}
-
-          {/* Implementation note */}
-          <div style={{
-            fontSize: 12,
-            color: "var(--ds-text-tertiary, #94a3b8)",
-            marginBottom: 32,
-            fontFamily: "var(--font-mono)",
-          }}>
-            Implemented by <code style={{ color: "var(--ds-text-secondary)" }}>{memberName}.{method.name}()</code>
-          </div>
-
+      {/* Split layout */}
+      <div
+        style={{
+          display: "flex",
+          border: `1px solid ${T.surfaceBorder}`,
+          borderRadius: 10,
+          overflow: "hidden",
+          minHeight: 500,
+        }}
+      >
+        {/* Left panel: parameters + internal pipeline */}
+        <div style={{ flex: 1, padding: "24px 28px", overflow: "auto" }}>
           {/* PARAMETERS section */}
           {method.params && method.params.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <h3 style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-                marginBottom: 16,
-                paddingBottom: 8,
-                borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-              }}>
+            <>
+              <div
+                style={{
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: T.textDim,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginBottom: 12,
+                }}
+              >
                 Parameters
-              </h3>
-              <ParameterTable params={method.params} referenceIndex={referenceIndex} />
-            </section>
+              </div>
+              {method.params.map((p) => (
+                <div
+                  key={p.name}
+                  style={{
+                    padding: "10px 0",
+                    borderBottom: `1px solid ${T.surfaceBorder}`,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 3,
+                    }}
+                  >
+                    <code
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 600,
+                        color: T.text,
+                        fontFamily: T.mono,
+                      }}
+                    >
+                      {p.name}
+                    </code>
+                    <span
+                      style={{ fontSize: 11, color: T.textDim, fontFamily: T.mono }}
+                    >
+                      {p.type}
+                    </span>
+                    {p.required && (
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          color: T.red,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        required
+                      </span>
+                    )}
+                  </div>
+                  {p.description && (
+                    <div
+                      style={{ fontSize: 12.5, color: T.textMuted, lineHeight: 1.5 }}
+                    >
+                      {p.description}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
           )}
 
           {/* ERRORS section */}
           {method.throws && method.throws.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <h3 style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-                marginBottom: 16,
-                paddingBottom: 8,
-                borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-              }}>
+            <>
+              <div
+                style={{
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: T.textDim,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginTop: 24,
+                  marginBottom: 10,
+                }}
+              >
                 Errors
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {method.throws.map((t, i) => (
-                  <div key={i} style={{
-                    padding: "10px 12px",
-                    borderRadius: 6,
-                    border: "1px solid var(--ds-border, #e2e8f0)",
-                  }}>
-                    <code style={{
-                      fontSize: 13,
-                      fontFamily: "var(--font-mono)",
-                      color: "var(--ds-error, #ef4444)",
-                    }}>
-                      {t.type}
-                    </code>
-                    {t.description && (
-                      <p style={{
-                        fontSize: 13,
-                        color: "var(--ds-text-secondary, #475569)",
-                        marginTop: 4,
-                      }}>
-                        {t.description}
-                      </p>
-                    )}
-                  </div>
-                ))}
               </div>
-            </section>
+              {method.throws.map((t, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: "6px 0",
+                    borderBottom: `1px solid ${T.surfaceBorder}`,
+                    fontSize: 12.5,
+                  }}
+                >
+                  <code style={{ color: T.red, fontFamily: T.mono }}>
+                    {t.type}
+                  </code>
+                  {t.description && (
+                    <span style={{ color: T.textMuted }}> &mdash; {t.description}</span>
+                  )}
+                </div>
+              ))}
+            </>
           )}
 
           {/* ERROR CONDITIONS section */}
           {method.errorConditions && method.errorConditions.length > 0 && (
-            <section style={{ marginBottom: 32 }}>
-              <h3 style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-                marginBottom: 16,
-                paddingBottom: 8,
-                borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-              }}>
+            <>
+              <div
+                style={{
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: T.textDim,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginTop: 24,
+                  marginBottom: 10,
+                }}
+              >
                 Error Conditions
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {method.errorConditions.map((ec, i) => (
-                  <div key={i} style={{
-                    padding: "10px 12px",
-                    borderRadius: 6,
-                    border: "1px solid var(--ds-border, #e2e8f0)",
+              </div>
+              {method.errorConditions.map((ec, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: "6px 0",
+                    borderBottom: `1px solid ${T.surfaceBorder}`,
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
                     flexWrap: "wrap",
-                  }}>
-                    {ec.code && (
-                      <span style={{
-                        fontSize: 12,
-                        fontFamily: "var(--font-mono)",
-                        fontWeight: 600,
-                        color: "var(--ds-error, #ef4444)",
-                        background: "#fee2e2",
-                        padding: "2px 6px",
+                    fontSize: 12.5,
+                  }}
+                >
+                  {ec.code && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: T.red,
+                        fontFamily: T.mono,
+                        background: T.redBg,
+                        padding: "1px 5px",
                         borderRadius: 3,
-                      }}>
-                        {ec.code}
-                      </span>
-                    )}
-                    {ec.type && (
-                      <code style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--ds-text-secondary)" }}>
-                        {ec.type}
-                      </code>
-                    )}
-                    {ec.description && (
-                      <span style={{ fontSize: 13, color: "var(--ds-text-secondary)", flex: "1 0 100%", marginTop: 4 }}>
-                        {ec.description}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
+                      }}
+                    >
+                      {ec.code}
+                    </span>
+                  )}
+                  {ec.type && (
+                    <code style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}>
+                      {ec.type}
+                    </code>
+                  )}
+                  {ec.description && (
+                    <span style={{ color: T.textMuted, flex: "1 0 100%", marginTop: 2 }}>
+                      {ec.description}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </>
           )}
 
-          {/* INTERNAL FLOW (collapsible) */}
+          {/* INTERNAL PIPELINE */}
           {linkedFlowId && (
-            <section style={{ marginBottom: 32 }}>
-              <button
-                onClick={() => setShowFlow(!showFlow)}
+            <>
+              <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontSize: 11,
-                  fontWeight: 600,
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: T.textDim,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "var(--ds-text-tertiary, #94a3b8)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0,
-                  paddingBottom: 8,
-                  borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-                  width: "100%",
-                  textAlign: "left",
+                  marginTop: 24,
+                  marginBottom: 10,
                 }}
               >
-                <svg
-                  width="10" height="10" viewBox="0 0 10 10"
-                  style={{ transform: showFlow ? "rotate(90deg)" : "none", transition: "transform 0.15s ease" }}
-                >
-                  <path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-                </svg>
-                Internal Execution Flow
-              </button>
-              {showFlow && (
-                <div style={{ marginTop: 12 }}>
-                  <a
-                    href={`/flows/${linkedFlowId}`}
-                    style={{
-                      fontSize: 13,
-                      color: "var(--ds-primary, #6366f1)",
-                      textDecoration: "none",
-                      transition: "color 0.15s ease",
-                    }}
-                  >
-                    View full flow: {linkedFlowId} →
-                  </a>
+                Internal Pipeline
+              </div>
+              <div
+                style={{
+                  fontFamily: T.mono,
+                  fontSize: 11.5,
+                  color: T.textMuted,
+                  padding: "12px 14px",
+                  borderRadius: 8,
+                  background: T.surface,
+                  border: `1px solid ${T.surfaceBorder}`,
+                  lineHeight: 2,
+                }}
+              >
+                <div>
+                  {"\u2192"} {memberName}.{method.name}()
                 </div>
-              )}
-            </section>
+                <div style={{ color: T.accent }}>
+                  {"  \u2192"} Flow: {linkedFlowId}
+                </div>
+              </div>
+            </>
           )}
 
           {/* PERFORMANCE */}
           {method.performance && (
-            <section style={{ marginBottom: 32 }}>
-              <h3 style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--ds-text-tertiary, #94a3b8)",
-                marginBottom: 16,
-                paddingBottom: 8,
-                borderBottom: "1px solid var(--ds-border, #e2e8f0)",
-              }}>
+            <>
+              <div
+                style={{
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: T.textDim,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginTop: 24,
+                  marginBottom: 10,
+                }}
+              >
                 Performance
-              </h3>
-              <div style={{
-                display: "flex",
-                gap: 24,
-                fontSize: 13,
-              }}>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 24,
+                  fontSize: 12.5,
+                }}
+              >
                 {method.performance.expectedLatency && (
                   <div>
-                    <span style={{ color: "var(--ds-text-tertiary)" }}>Latency: </span>
-                    <span style={{ color: "var(--ds-text-primary)", fontWeight: 500 }}>
+                    <span style={{ color: T.textDim }}>Latency: </span>
+                    <span style={{ color: T.text, fontWeight: 500 }}>
                       {method.performance.expectedLatency}
                     </span>
                   </div>
                 )}
                 {method.performance.bottleneck && (
                   <div>
-                    <span style={{ color: "var(--ds-text-tertiary)" }}>Bottleneck: </span>
-                    <span style={{ color: "var(--ds-text-primary)", fontWeight: 500 }}>
+                    <span style={{ color: T.textDim }}>Bottleneck: </span>
+                    <span style={{ color: T.text, fontWeight: 500 }}>
                       {method.performance.bottleneck}
                     </span>
                   </div>
                 )}
               </div>
-            </section>
+            </>
           )}
         </div>
 
-        {/* ═══════ RIGHT PANEL (dark, sticky, code examples + response) ═══════ */}
-        <div style={{
-          position: "sticky",
-          top: 68,
-          alignSelf: "start",
-          background: "var(--ds-code-bg, #0f172a)",
-          borderRadius: 8,
-          padding: 0,
-          maxHeight: "calc(100vh - 84px)",
-          overflowY: "auto",
-        }}>
-          {/* Request examples with language tabs */}
-          {examples && Object.keys(examples).length > 0 && (
-            <div>
-              <LanguageTabs examples={examples} title="Request" />
-            </div>
-          )}
-
-          {/* Response preview */}
-          {(responseExample || (method.returns && method.returns.type)) && (
-            <div style={{
-              borderTop: examples ? "1px solid var(--ds-code-border, #1e293b)" : "none",
-            }}>
-              <div style={{
-                padding: "8px 16px",
-                background: "var(--ds-code-surface, #0c1222)",
-                borderBottom: "1px solid var(--ds-code-border, #1e293b)",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}>
-                <span style={{
-                  fontSize: 11,
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--ds-text-tertiary, #94a3b8)",
-                  letterSpacing: "0.02em",
-                }}>
-                  Response
-                </span>
-                <span style={{
+        {/* Right panel: dark code area */}
+        <div
+          style={{
+            width: 380,
+            background: T.codeBg,
+            borderLeft: `1px solid ${T.codeBorder}`,
+            flexShrink: 0,
+            padding: "24px 16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          {/* Code examples with language tabs */}
+          {langs.length > 0 && (
+            <>
+              <div
+                style={{
                   fontSize: 10,
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 600,
-                  padding: "1px 6px",
-                  borderRadius: 3,
-                  background: "#166534",
-                  color: "#4ade80",
-                }}>
-                  200
-                </span>
-                {method.returns?.type && (
-                  <code style={{
-                    fontSize: 11,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--ds-text-tertiary, #64748b)",
-                    marginLeft: "auto",
-                  }}>
-                    {method.returns.type}
-                  </code>
-                )}
+                  fontWeight: 650,
+                  color: T.textFaint,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                Usage
               </div>
-              <div style={{
-                padding: 16,
-                background: "var(--ds-code-bg, #0f172a)",
-                overflowX: "auto",
-              }}>
-                {responseExample ? (
-                  <pre style={{ margin: 0 }}>
-                    <code style={{
-                      fontSize: 12.5,
-                      lineHeight: 1.65,
-                      color: "var(--ds-code-text, #e2e8f0)",
-                      fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                    }}>
-                      {responseExample}
-                    </code>
-                  </pre>
-                ) : (
-                  <code style={{
-                    fontSize: 12.5,
-                    color: "var(--ds-text-tertiary, #64748b)",
-                    fontFamily: "var(--font-mono)",
-                  }}>
-                    {method.returns?.type || "void"}
-                  </code>
-                )}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 2,
+                  background: "rgba(255,255,255,0.03)",
+                  borderRadius: 6,
+                  padding: 3,
+                }}
+              >
+                {langs.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    style={{
+                      flex: 1,
+                      padding: "5px 4px",
+                      fontSize: 10.5,
+                      fontWeight: lang === l ? 650 : 400,
+                      background:
+                        lang === l ? "rgba(255,255,255,0.07)" : "transparent",
+                      border: "none",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      color: lang === l ? T.text : "rgba(255,255,255,0.25)",
+                      fontFamily: T.mono,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {l}
+                  </button>
+                ))}
               </div>
-            </div>
+              <div
+                style={{
+                  borderRadius: 9,
+                  overflow: "hidden",
+                  border: `1px solid ${T.codeBorder}`,
+                  background: T.codeBg,
+                }}
+              >
+                <pre
+                  style={{
+                    margin: 0,
+                    padding: "14px 16px",
+                    overflowX: "auto",
+                  }}
+                >
+                  <code
+                    style={{
+                      fontSize: 12,
+                      lineHeight: 1.7,
+                      color: T.text,
+                      fontFamily: T.mono,
+                    }}
+                  >
+                    {examples?.[lang] || ""}
+                  </code>
+                </pre>
+              </div>
+            </>
           )}
 
-          {/* Fallback: if no examples and no response, show a placeholder */}
-          {(!examples || Object.keys(examples).length === 0) && !responseExample && !method.returns?.type && (
-            <div style={{
-              padding: 24,
-              color: "var(--ds-text-tertiary, #64748b)",
-              fontSize: 13,
-              fontFamily: "var(--font-mono)",
-              textAlign: "center",
-            }}>
+          {/* OUTPUT section */}
+          {(responseExample || method.returns?.type) && (
+            <>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 650,
+                  color: T.textFaint,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginTop: 8,
+                }}
+              >
+                Output
+              </div>
+              <div
+                style={{
+                  borderRadius: 9,
+                  overflow: "hidden",
+                  border: `1px solid ${T.codeBorder}`,
+                  background: T.codeBg,
+                }}
+              >
+                {method.returns?.type && (
+                  <div
+                    style={{
+                      padding: "6px 14px",
+                      borderBottom: `1px solid ${T.codeBorder}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontFamily: T.mono,
+                        fontWeight: 600,
+                        padding: "1px 6px",
+                        borderRadius: 3,
+                        background: "rgba(52,211,153,0.15)",
+                        color: T.green,
+                      }}
+                    >
+                      200
+                    </span>
+                    <code
+                      style={{
+                        fontSize: 11,
+                        fontFamily: T.mono,
+                        color: T.textDim,
+                      }}
+                    >
+                      {method.returns.type}
+                    </code>
+                  </div>
+                )}
+                <pre
+                  style={{
+                    margin: 0,
+                    padding: "14px 16px",
+                    overflowX: "auto",
+                  }}
+                >
+                  <code
+                    style={{
+                      fontSize: 12,
+                      lineHeight: 1.7,
+                      color: T.text,
+                      fontFamily: T.mono,
+                    }}
+                  >
+                    {responseExample || method.returns?.type || "void"}
+                  </code>
+                </pre>
+              </div>
+            </>
+          )}
+
+          {/* Fallback */}
+          {langs.length === 0 && !responseExample && !method.returns?.type && (
+            <div
+              style={{
+                padding: 24,
+                color: T.textDim,
+                fontSize: 13,
+                fontFamily: T.mono,
+                textAlign: "center",
+              }}
+            >
               No code examples available
             </div>
           )}
         </div>
-      </div>
-
-      {/* Bottom: Related cross-links */}
-      <div style={{
-        marginTop: 40,
-        paddingTop: 20,
-        borderTop: "1px solid var(--ds-border, #e2e8f0)",
-        display: "flex",
-        gap: 16,
-        flexWrap: "wrap",
-      }}>
-        {method.throws && method.throws.length > 0 && (
-          <a href="/errors" style={{
-            fontSize: 13,
-            color: "var(--ds-primary, #6366f1)",
-            textDecoration: "none",
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid var(--ds-border, #e2e8f0)",
-            transition: "all 0.15s ease",
-          }}>
-            Related Errors ({method.throws.length})
-          </a>
-        )}
-        {linkedFlowId && (
-          <a href={`/flows/${linkedFlowId}`} style={{
-            fontSize: 13,
-            color: "var(--ds-primary, #6366f1)",
-            textDecoration: "none",
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid var(--ds-border, #e2e8f0)",
-            transition: "all 0.15s ease",
-          }}>
-            Execution Flow
-          </a>
-        )}
       </div>
     </div>
   );

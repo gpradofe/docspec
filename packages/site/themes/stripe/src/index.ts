@@ -1,3 +1,6 @@
+// Design tokens
+export { T, MC, CH, SC, KIND_COLORS } from "./lib/tokens.js";
+
 // Layout components
 export { Layout } from "./components/layout/Layout.js";
 export { Sidebar } from "./components/layout/Sidebar.js";
@@ -47,6 +50,8 @@ export { Badge } from "./components/ui/Badge.js";
 export { MethodSignature } from "./components/ui/MethodSignature.js";
 export { TypeLink } from "./components/ui/TypeLink.js";
 export { LanguageTabs } from "./components/ui/LanguageTabs.js";
+export { Tag } from "./components/ui/Tag.js";
+export { ChTag } from "./components/ui/ChTag.js";
 
 // Context providers
 export { LanguageProvider, useLanguage } from "./context/LanguageContext.js";
