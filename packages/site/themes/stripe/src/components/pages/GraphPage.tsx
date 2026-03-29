@@ -1,33 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import type { GraphPageData, GraphNode, GraphEdge } from "@docspec/core";
 import { T } from "../../lib/tokens.js";
 
 interface GraphPageProps {
   data: GraphPageData;
-}
-
-function Tag({ children, color = T.accent }: { children: React.ReactNode; color?: string }) {
-  return (
-    <span
-      style={{
-        fontSize: 10,
-        fontWeight: 600,
-        padding: "2px 7px",
-        borderRadius: 4,
-        background: color + "14",
-        color,
-        border: `1px solid ${color}30`,
-        fontFamily: T.mono,
-        letterSpacing: "0.02em",
-        lineHeight: "16px",
-        display: "inline-block",
-      }}
-    >
-      {children}
-    </span>
-  );
 }
 
 interface LayoutNode {
@@ -42,102 +20,147 @@ interface LayoutNode {
 }
 
 function getGroupColor(group: string): string {
-  switch (group) {
-    case "core": return T.accent;
-    case "dsti": case "channel": case "scoring": return T.orange;
-    case "framework": return T.blue;
-    case "verifier": return T.yellow;
-    case "output": return T.green;
-    case "reader": return T.accent;
-    case "discovery": return T.accent;
-    case "flow": return T.accent;
-    case "metrics": return T.accent;
-    default: return T.accent;
-  }
+  const map: Record<string, string> = {
+    core: T.accent, processor: T.accent, discovery: T.accent,
+    dsti: T.orange, channel: T.orange, scoring: T.orange,
+    framework: T.blue, reader: "#a78bfa",
+    verifier: T.yellow, output: T.green,
+    metrics: "#22d3ee", flow: T.blue,
+    extractor: "#fb923c", model: T.textDim,
+    config: T.yellow, scanner: T.green,
+    maven: T.green,
+  };
+  return map[group] || T.accent;
 }
 
-function layoutNodes(nodes: GraphNode[], edges: GraphEdge[]): LayoutNode[] {
+/**
+ * Force-directed layout simulation.
+ * Runs N iterations of: repulsion between all node pairs + attraction along edges + centering.
+ */
+function forceLayout(
+  nodes: GraphNode[],
+  edges: GraphEdge[],
+  width: number,
+  height: number,
+): LayoutNode[] {
   if (nodes.length === 0) return [];
 
-  const adjacency = new Map<string, string[]>();
-  const inDegree = new Map<string, number>();
+  // Initialize positions: spread in a grid to avoid overlap
+  const cols = Math.ceil(Math.sqrt(nodes.length));
+  const cellW = width / (cols + 1);
+  const cellH = height / (Math.ceil(nodes.length / cols) + 1);
 
-  for (const n of nodes) {
-    adjacency.set(n.id, []);
-    inDegree.set(n.id, 0);
-  }
+  const positions: Array<{ x: number; y: number; vx: number; vy: number }> = nodes.map((_, i) => ({
+    x: cellW * ((i % cols) + 1) + (Math.random() - 0.5) * 20,
+    y: cellH * (Math.floor(i / cols) + 1) + (Math.random() - 0.5) * 20,
+    vx: 0,
+    vy: 0,
+  }));
 
-  for (const e of edges) {
-    const children = adjacency.get(e.source);
-    if (children) children.push(e.target);
-    inDegree.set(e.target, (inDegree.get(e.target) || 0) + 1);
-  }
+  const nodeIndex = new Map(nodes.map((n, i) => [n.id, i]));
 
-  const layers: string[][] = [];
-  const placed = new Set<string>();
+  // Simulation parameters
+  const repulsion = 8000;
+  const attraction = 0.005;
+  const damping = 0.85;
+  const centerForce = 0.01;
+  const iterations = 200;
+  const padding = 60;
+  const centerX = width / 2;
+  const centerY = height / 2;
 
-  const roots = nodes.filter((n) => (inDegree.get(n.id) || 0) === 0).map((n) => n.id);
-  if (roots.length === 0) roots.push(nodes[0].id);
-
-  let currentLayer = roots;
-  while (currentLayer.length > 0) {
-    layers.push(currentLayer);
-    for (const id of currentLayer) placed.add(id);
-    const nextLayer: string[] = [];
-    for (const id of currentLayer) {
-      for (const child of adjacency.get(id) || []) {
-        if (!placed.has(child) && !nextLayer.includes(child)) {
-          nextLayer.push(child);
-        }
+  for (let iter = 0; iter < iterations; iter++) {
+    // Repulsion: every pair pushes apart
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        let dx = positions[j].x - positions[i].x;
+        let dy = positions[j].y - positions[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = repulsion / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        positions[i].vx -= fx;
+        positions[i].vy -= fy;
+        positions[j].vx += fx;
+        positions[j].vy += fy;
       }
     }
-    currentLayer = nextLayer;
-  }
 
-  for (const n of nodes) {
-    if (!placed.has(n.id)) {
-      if (layers.length > 0) layers[layers.length - 1].push(n.id);
-      else layers.push([n.id]);
+    // Attraction: connected nodes pull together
+    for (const edge of edges) {
+      const si = nodeIndex.get(edge.source);
+      const ti = nodeIndex.get(edge.target);
+      if (si === undefined || ti === undefined) continue;
+      const dx = positions[ti].x - positions[si].x;
+      const dy = positions[ti].y - positions[si].y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = dist * attraction;
+      const fx = (dx / dist) * force;
+      const fy = (dy / dist) * force;
+      positions[si].vx += fx;
+      positions[si].vy += fy;
+      positions[ti].vx -= fx;
+      positions[ti].vy -= fy;
+    }
+
+    // Centering force
+    for (const p of positions) {
+      p.vx += (centerX - p.x) * centerForce;
+      p.vy += (centerY - p.y) * centerForce;
+    }
+
+    // Apply velocity + damping
+    for (const p of positions) {
+      p.vx *= damping;
+      p.vy *= damping;
+      p.x += p.vx;
+      p.y += p.vy;
+      // Clamp to bounds
+      p.x = Math.max(padding, Math.min(width - padding, p.x));
+      p.y = Math.max(padding, Math.min(height - padding, p.y));
     }
   }
 
-  const svgWidth = 800;
-  const yStep = 120;
-  const yStart = 50;
-  const result: LayoutNode[] = [];
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  return nodes.map((n, i) => {
+    // Derive group from the node's label or artifact type
+    const label = n.label.toLowerCase();
+    let group = "core";
+    if (label.includes("channel") || label.includes("naming") || label.includes("guard") || label.includes("branch") || label.includes("loop") || label.includes("error") || label.includes("constant") || label.includes("assignment") || label.includes("exception") || label.includes("logging") || label.includes("equality") || label.includes("return")) group = "channel";
+    else if (label.includes("intent") || label.includes("isd") || label.includes("density") || label.includes("dsti")) group = "dsti";
+    else if (label.includes("extractor") || label.includes("privacy") || label.includes("security") || label.includes("config") || label.includes("observ") || label.includes("datastore") || label.includes("external")) group = "extractor";
+    else if (label.includes("spring") || label.includes("jpa") || label.includes("jackson")) group = "framework";
+    else if (label.includes("serial") || label.includes("output")) group = "output";
+    else if (label.includes("reader") || label.includes("javadoc") || label.includes("inferrer")) group = "reader";
+    else if (label.includes("scanner") || label.includes("filter") || label.includes("discovery")) group = "scanner";
+    else if (label.includes("coverage") || label.includes("metric")) group = "metrics";
+    else if (label.includes("model")) group = "model";
+    else if (label.includes("mojo") || label.includes("maven") || label.includes("generate") || label.includes("validate") || label.includes("publish") || label.includes("schema") || label.includes("aggregate") || label.includes("check")) group = "maven";
+    else if (label.includes("processor")) group = "core";
 
-  for (let li = 0; li < layers.length; li++) {
-    const layer = layers[li];
-    const count = layer.length;
-    const spacing = svgWidth / (count + 1);
-    for (let ni = 0; ni < count; ni++) {
-      const nodeId = layer[ni];
-      const gn = nodeMap.get(nodeId);
-      if (!gn) continue;
+    const color = getGroupColor(group);
 
-      const group = gn.type === "module" ? "core" : gn.type === "artifact" ? "framework" : "discovery";
-      const color = getGroupColor(group);
-      const isd = 5 + Math.random() * 10;
-
-      result.push({
-        id: gn.id,
-        label: gn.label,
-        x: spacing * (ni + 1),
-        y: yStart + li * yStep,
-        color,
-        isd: Math.round(isd * 10) / 10,
-        tests: Math.floor(Math.random() * 20) + 2,
-        group,
-      });
-    }
-  }
-
-  return result;
+    return {
+      id: n.id,
+      label: n.label,
+      x: Math.round(positions[i].x),
+      y: Math.round(positions[i].y),
+      color,
+      isd: 0, // Will be enriched if data available
+      tests: 0,
+      group,
+    };
+  });
 }
 
 export function GraphPage({ data }: GraphPageProps) {
-  const layoutData = layoutNodes(data.nodes, data.edges);
+  const svgWidth = 900;
+  const svgHeight = Math.max(500, Math.ceil(data.nodes.length / 3) * 80 + 100);
+
+  const layoutData = useMemo(
+    () => forceLayout(data.nodes, data.edges, svgWidth, svgHeight),
+    [data.nodes, data.edges, svgWidth, svgHeight],
+  );
+
   const [hovered, setHovered] = useState<string | null>(null);
 
   const getNode = (id: string) => layoutData.find((n) => n.id === id);
@@ -152,10 +175,7 @@ export function GraphPage({ data }: GraphPageProps) {
     );
   };
 
-  const svgHeight = layoutData.length > 0
-    ? Math.max(...layoutData.map((n) => n.y)) + 80
-    : 540;
-
+  // Collect legend entries
   const groupEntries: [string, string][] = [];
   const seenGroups = new Set<string>();
   for (const n of layoutData) {
@@ -166,53 +186,22 @@ export function GraphPage({ data }: GraphPageProps) {
   }
 
   return (
-    <div style={{ maxWidth: 780, margin: "0 auto" }}>
-      <h1
-        style={{
-          fontSize: 24,
-          fontWeight: 750,
-          color: T.text,
-          letterSpacing: "-0.025em",
-          margin: "0 0 6px",
-        }}
-      >
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <h1 style={{ fontSize: 24, fontWeight: 750, color: T.text, letterSpacing: "-0.025em", margin: "0 0 6px" }}>
         Dependency Graph
       </h1>
-      <p
-        style={{
-          fontSize: 14,
-          color: T.textMuted,
-          lineHeight: 1.7,
-          margin: "0 0 24px",
-        }}
-      >
-        Interactive component map. Hover a node to see its connections. Node
-        size reflects ISD score.
+      <p style={{ fontSize: 14, color: T.textMuted, lineHeight: 1.7, margin: "0 0 24px" }}>
+        Interactive component map. Hover a node to see its connections. {data.nodes.length} components, {data.edges.length} dependencies.
       </p>
 
       {data.nodes.length === 0 ? (
-        <div
-          style={{
-            padding: "48px 0",
-            textAlign: "center",
-            fontSize: 14,
-            color: T.textDim,
-          }}
-        >
+        <div style={{ padding: "48px 0", textAlign: "center", fontSize: 14, color: T.textDim }}>
           No cross-references found. Add @DocUses annotations to populate this graph.
         </div>
       ) : (
         <>
-          <div
-            style={{
-              borderRadius: 12,
-              border: `1px solid ${T.surfaceBorder}`,
-              background: T.cardBg,
-              overflow: "hidden",
-              padding: 10,
-            }}
-          >
-            <svg viewBox={`0 0 800 ${svgHeight}`} style={{ width: "100%", display: "block" }}>
+          <div style={{ borderRadius: 12, border: `1px solid ${T.surfaceBorder}`, background: T.cardBg, overflow: "hidden", padding: 10 }}>
+            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: "100%", display: "block" }}>
               {/* Edges */}
               {data.edges.map((e, i) => {
                 const f = getNode(e.source);
@@ -222,19 +211,15 @@ export function GraphPage({ data }: GraphPageProps) {
                 return (
                   <line
                     key={i}
-                    x1={f.x}
-                    y1={f.y}
-                    x2={t.x}
-                    y2={t.y}
-                    stroke={
-                      active ? T.surfaceBorder + "ff" : T.surfaceBorder + "30"
-                    }
+                    x1={f.x} y1={f.y} x2={t.x} y2={t.y}
+                    stroke={active ? T.surfaceBorder : T.surfaceBorder + "30"}
                     strokeWidth={active ? 1.5 : 0.5}
                     strokeDasharray={active ? "" : "4,4"}
                     style={{ transition: "all 0.3s" }}
                   />
                 );
               })}
+
               {/* Edge arrows */}
               {data.edges.map((e, i) => {
                 const f = getNode(e.source);
@@ -255,94 +240,56 @@ export function GraphPage({ data }: GraphPageProps) {
                     key={"a" + i}
                     points={`${mx},${my - 3} ${mx + 6 * ux},${my + 6 * uy} ${mx},${my + 3}`}
                     fill={T.surfaceBorder}
-                    style={{ transition: "all 0.3s", opacity: active ? 0.6 : 0 }}
+                    style={{ transition: "all 0.3s", opacity: 0.6 }}
                   />
                 );
               })}
+
               {/* Nodes */}
               {layoutData.map((n) => {
                 const connected = isConnected(n.id);
                 const isHov = hovered === n.id;
-                const r = 12 + n.isd * 1.2;
+                const r = 14 + (n.label.length > 20 ? 4 : 0);
+
                 return (
                   <g
                     key={n.id}
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
-                    style={{
-                      cursor: "pointer",
-                      transition: "opacity 0.3s",
-                      opacity: connected ? 1 : 0.15,
-                    }}
+                    style={{ cursor: "pointer", transition: "opacity 0.3s", opacity: connected ? 1 : 0.12 }}
                   >
                     {/* Glow */}
                     {isHov && (
-                      <circle
-                        cx={n.x}
-                        cy={n.y}
-                        r={r + 8}
-                        fill={n.color}
-                        opacity={0.12}
-                      />
+                      <circle cx={n.x} cy={n.y} r={r + 10} fill={n.color} opacity={0.15} />
                     )}
                     {/* Circle */}
                     <circle
-                      cx={n.x}
-                      cy={n.y}
-                      r={r}
+                      cx={n.x} cy={n.y} r={r}
                       fill={isHov ? n.color + "30" : T.bg}
                       stroke={n.color}
                       strokeWidth={isHov ? 2.5 : 1.5}
                     />
-                    {/* ISD badge */}
-                    <rect
-                      x={n.x - 12}
-                      y={n.y - 6}
-                      width={24}
-                      height={12}
-                      rx={3}
-                      fill={
-                        n.isd > 8
-                          ? "rgba(52,211,153,0.15)"
-                          : "rgba(251,191,36,0.15)"
-                      }
-                    />
+                    {/* Group initial */}
                     <text
-                      x={n.x}
-                      y={n.y + 3}
+                      x={n.x} y={n.y + 4}
                       textAnchor="middle"
-                      style={{
-                        fontSize: 8,
-                        fontWeight: 700,
-                        fill: n.isd > 8 ? T.green : T.yellow,
-                        fontFamily: T.mono,
-                      }}
+                      style={{ fontSize: 10, fontWeight: 700, fill: n.color, fontFamily: T.mono }}
                     >
-                      {n.isd}
+                      {n.group.substring(0, 2).toUpperCase()}
                     </text>
                     {/* Label */}
                     <text
-                      x={n.x}
-                      y={n.y + r + 14}
+                      x={n.x} y={n.y + r + 14}
                       textAnchor="middle"
                       style={{
-                        fontSize: 10,
-                        fontWeight: isHov ? 650 : 450,
+                        fontSize: 9,
+                        fontWeight: isHov ? 650 : 400,
                         fill: connected ? T.text : T.textFaint,
                         fontFamily: T.sans,
                         transition: "all 0.3s",
                       }}
                     >
-                      {n.label}
-                    </text>
-                    {/* Test count */}
-                    <text
-                      x={n.x}
-                      y={n.y + r + 25}
-                      textAnchor="middle"
-                      style={{ fontSize: 8, fill: T.textDim, fontFamily: T.mono }}
-                    >
-                      {n.tests} tests
+                      {n.label.length > 22 ? n.label.substring(0, 20) + ".." : n.label}
                     </text>
                   </g>
                 );
@@ -351,125 +298,51 @@ export function GraphPage({ data }: GraphPageProps) {
           </div>
 
           {/* Legend */}
-          <div
-            style={{
-              display: "flex",
-              gap: 20,
-              marginTop: 14,
-              justifyContent: "center",
-            }}
-          >
+          <div style={{ display: "flex", gap: 16, marginTop: 14, justifyContent: "center", flexWrap: "wrap" }}>
             {groupEntries.map(([label, color]) => (
-              <div
-                key={label}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: 11,
-                  color: T.textMuted,
-                }}
-              >
-                <div
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: color,
-                  }}
-                />
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: T.textMuted }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
                 {label}
               </div>
             ))}
           </div>
 
-          {/* Hovered node detail */}
-          {hovered &&
-            (() => {
-              const n = getNode(hovered);
-              if (!n) return null;
-              const deps = data.edges
-                .filter((e) => e.source === hovered)
-                .map((e) => getNode(e.target)?.label)
-                .filter(Boolean);
-              const usedBy = data.edges
-                .filter((e) => e.target === hovered)
-                .map((e) => getNode(e.source)?.label)
-                .filter(Boolean);
-              return (
-                <div
-                  style={{
-                    marginTop: 16,
-                    padding: "14px 18px",
-                    borderRadius: 8,
-                    border: `1px solid ${n.color}30`,
-                    background: n.color + "08",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Tag color={n.color}>{n.group}</Tag>
-                    <code
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 650,
-                        color: T.text,
-                        fontFamily: T.mono,
-                      }}
-                    >
-                      {n.label}
-                    </code>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        padding: "2px 6px",
-                        borderRadius: 4,
-                        background: n.isd > 8 ? T.greenBg : T.yellowBg,
-                        color: n.isd > 8 ? T.green : T.yellow,
-                        fontWeight: 650,
-                        border: `1px solid ${n.isd > 8 ? T.greenBorder : T.yellowBorder}`,
-                      }}
-                    >
-                      ISD {n.isd}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        color: T.accent,
-                        fontWeight: 600,
-                        marginLeft: "auto",
-                      }}
-                    >
-                      {n.tests} tests
-                    </span>
-                  </div>
-                  {deps.length > 0 && (
-                    <div
-                      style={{
-                        fontSize: 11.5,
-                        color: T.textMuted,
-                        marginBottom: 3,
-                      }}
-                    >
-                      <span style={{ color: T.textDim }}>Depends on:</span>{" "}
-                      {deps.join(", ")}
-                    </div>
-                  )}
-                  {usedBy.length > 0 && (
-                    <div style={{ fontSize: 11.5, color: T.textMuted }}>
-                      <span style={{ color: T.textDim }}>Used by:</span>{" "}
-                      {usedBy.join(", ")}
-                    </div>
-                  )}
+          {/* Hover detail */}
+          {hovered && (() => {
+            const n = getNode(hovered);
+            if (!n) return null;
+            const deps = data.edges.filter((e) => e.source === hovered).map((e) => getNode(e.target)?.label).filter(Boolean);
+            const usedBy = data.edges.filter((e) => e.target === hovered).map((e) => getNode(e.source)?.label).filter(Boolean);
+            return (
+              <div style={{
+                marginTop: 16, padding: "14px 18px", borderRadius: 8,
+                border: `1px solid ${n.color}30`, background: n.color + "08",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
+                    background: n.color + "14", color: n.color, border: `1px solid ${n.color}30`,
+                    fontFamily: T.mono,
+                  }}>
+                    {n.group}
+                  </span>
+                  <code style={{ fontSize: 13, fontWeight: 650, color: T.text, fontFamily: T.mono }}>
+                    {n.label}
+                  </code>
                 </div>
-              );
-            })()}
+                {deps.length > 0 && (
+                  <div style={{ fontSize: 12, color: T.textMuted, marginBottom: 3 }}>
+                    <span style={{ color: T.textDim }}>Depends on:</span> {deps.join(", ")}
+                  </div>
+                )}
+                {usedBy.length > 0 && (
+                  <div style={{ fontSize: 12, color: T.textMuted }}>
+                    <span style={{ color: T.textDim }}>Used by:</span> {usedBy.join(", ")}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </>
       )}
     </div>
