@@ -1,10 +1,12 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "ModuleModel", rules = {"id NOT_BLANK", "members NOT_NULL"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ModuleModel {
 

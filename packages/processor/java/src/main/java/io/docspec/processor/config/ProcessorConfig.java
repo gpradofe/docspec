@@ -1,5 +1,7 @@
 package io.docspec.processor.config;
 
+import io.docspec.annotation.DocMethod;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +36,7 @@ public class ProcessorConfig {
     private boolean privacyEnabled = true;
     private boolean observabilityEnabled = true;
 
+    @DocMethod(since = "3.0.0")
     public static ProcessorConfig from(Map<String, String> options) {
         ProcessorConfig config = new ProcessorConfig();
 

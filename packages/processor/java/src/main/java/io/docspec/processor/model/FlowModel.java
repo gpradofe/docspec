@@ -1,10 +1,12 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "FlowModel", rules = {"id NOT_BLANK", "steps NOT_NULL"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class FlowModel {
 

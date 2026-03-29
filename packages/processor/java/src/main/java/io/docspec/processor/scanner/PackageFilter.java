@@ -1,5 +1,8 @@
 package io.docspec.processor.scanner;
 
+import io.docspec.annotation.DocDeterministic;
+import io.docspec.annotation.DocMethod;
+
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -19,6 +22,8 @@ public class PackageFilter {
                 .toList();
     }
 
+    @DocDeterministic
+    @DocMethod(since = "3.0.0")
     public boolean accepts(String qualifiedName) {
         // If excludes match, reject
         for (Pattern exclude : excludePatterns) {

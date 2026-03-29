@@ -1,10 +1,12 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "ArtifactModel", rules = {"groupId NOT_BLANK", "artifactId NOT_BLANK", "language NOT_BLANK"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ArtifactModel {
 

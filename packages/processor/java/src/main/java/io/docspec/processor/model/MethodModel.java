@@ -2,10 +2,12 @@ package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "MethodModel", rules = {"name NOT_BLANK", "params NOT_NULL"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MethodModel {
 

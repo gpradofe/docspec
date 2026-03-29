@@ -1,7 +1,6 @@
 package io.docspec.processor.extractor;
 
-import io.docspec.annotation.DocBoundary;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.DocSpecModel;
 import io.docspec.processor.model.SecurityEndpointRuleModel;
 import io.docspec.processor.model.SecurityModel;
@@ -16,6 +15,12 @@ import java.util.*;
  * of the DocSpec model.
  */
 @DocBoundary("classpath-safe extraction")
+@DocEvent(name = "docspec.extraction.security",
+    description = "Emitted when Spring Security annotations have been extracted from a type.",
+    trigger = "Type has @PreAuthorize, @Secured, or @RolesAllowed annotations",
+    channel = "compiler-diagnostics",
+    since = "3.0"
+)
 public class SecurityExtractor implements DocSpecExtractor {
 
     private static final String PRE_AUTHORIZE = "org.springframework.security.access.prepost.PreAuthorize";
@@ -45,6 +50,7 @@ public class SecurityExtractor implements DocSpecExtractor {
 
     @Override
     @DocMethod(since = "3.0.0")
+    @DocBoundary("security extraction entry point")
     public void extract(TypeElement typeElement, ProcessingEnvironment processingEnv, DocSpecModel model) {
         String basePath = getClassBasePath(typeElement);
         Set<String> allRoles = new LinkedHashSet<>();

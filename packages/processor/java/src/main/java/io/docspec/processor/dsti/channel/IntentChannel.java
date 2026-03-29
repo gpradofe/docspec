@@ -1,5 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
+import io.docspec.annotation.DocBoundary;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -10,6 +11,7 @@ import javax.lang.model.element.TypeElement;
  * Each channel analyzes one specific aspect of method behavior.
  * Channels are independent and can be enabled/disabled for ablation studies.
  */
+@DocBoundary("DSTI channel interface")
 public interface IntentChannel {
     /** Human-readable channel name (e.g., "naming", "guard-clauses"). */
     String channelName();

@@ -1,7 +1,6 @@
 package io.docspec.processor.extractor;
 
-import io.docspec.annotation.DocBoundary;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.DocSpecModel;
 import io.docspec.processor.model.PrivacyFieldModel;
 
@@ -32,6 +31,7 @@ public class PrivacyExtractor implements DocSpecExtractor {
 
     @Override
     @DocMethod(since = "3.0.0")
+    @DocBoundary("privacy extraction entry point")
     public void extract(TypeElement typeElement, ProcessingEnvironment processingEnv, DocSpecModel model) {
         String ownerQualified = typeElement.getQualifiedName().toString();
         List<PrivacyFieldModel> privacyFields = new ArrayList<>();

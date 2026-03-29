@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -29,6 +29,7 @@ import java.io.File;
         name = "publish",
         defaultPhase = LifecyclePhase.DEPLOY
 )
+@DocBoundary("Maven plugin entry point")
 public class PublishMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)

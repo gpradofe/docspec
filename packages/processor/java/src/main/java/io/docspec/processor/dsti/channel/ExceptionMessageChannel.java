@@ -1,14 +1,18 @@
 package io.docspec.processor.dsti.channel;
 
+import io.docspec.annotation.DocMethod;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
 /**
  * Channel 10: Null Checks (Exception Messages).
  * Counts null check patterns ({@code != null}, {@code == null},
- * {@code Objects.requireNonNull}, {@code Optional.ofNullable}, {@code Optional.of}).
+ * {@code Objects.requireNonNull}, {@code Optional.ofNullable}, {@code Optional.of}) from source.
+ * Falls back to counting @NonNull/@Nullable annotations on parameters when Trees is unavailable.
  * Sets the nullChecks count on signals.
  */
 public class ExceptionMessageChannel extends AbstractTreesChannel {
@@ -24,28 +28,57 @@ public class ExceptionMessageChannel extends AbstractTreesChannel {
     }
 
     @Override
+    public boolean requiresTrees() {
+        // Works without Trees via annotation-based fallback
+        return false;
+    }
+
+    @Override
+    @DocMethod(since = "3.0.0")
     public void extract(ExecutableElement method, TypeElement owner,
                         Object trees, Object methodTree,
                         ProcessingEnvironment env, IntentSignalsModel signals) {
-        if (methodTree == null) return;
-
-        String methodSource = getMethodSource(methodTree);
         int nullChecks = 0;
 
-        if (methodSource.contains("!= null")) {
+        if (methodTree != null) {
+            // AST-based: scan method source for null-related patterns
+            String methodSource = getMethodSource(methodTree);
+
             nullChecks += countOccurrences(methodSource, "!= null");
-        }
-        if (methodSource.contains("== null")) {
             nullChecks += countOccurrences(methodSource, "== null");
-        }
-        if (methodSource.contains("Objects.requireNonNull")) {
             nullChecks += countOccurrences(methodSource, "Objects.requireNonNull");
-        }
-        if (methodSource.contains("Optional.ofNullable")) {
             nullChecks += countOccurrences(methodSource, "Optional.ofNullable");
-        }
-        if (methodSource.contains("Optional.of(")) {
             nullChecks += countOccurrences(methodSource, "Optional.of(");
+            nullChecks += countOccurrences(methodSource, "Preconditions.checkNotNull");
+            nullChecks += countOccurrences(methodSource, "Objects.nonNull");
+            nullChecks += countOccurrences(methodSource, "Objects.isNull");
+        } else {
+            // Fallback: count @NonNull, @Nullable, @Nonnull annotations on parameters
+            // These indicate the developer is thinking about nullability
+            for (VariableElement param : method.getParameters()) {
+                for (AnnotationMirror am : param.getAnnotationMirrors()) {
+                    String annotName = am.getAnnotationType().asElement().getSimpleName().toString();
+                    if ("NonNull".equals(annotName) || "Nonnull".equals(annotName)
+                            || "Nullable".equals(annotName) || "NotNull".equals(annotName)) {
+                        nullChecks++;
+                    }
+                }
+            }
+
+            // Also check return type annotations
+            for (AnnotationMirror am : method.getAnnotationMirrors()) {
+                String annotName = am.getAnnotationType().asElement().getSimpleName().toString();
+                if ("NonNull".equals(annotName) || "Nonnull".equals(annotName)
+                        || "Nullable".equals(annotName) || "NotNull".equals(annotName)) {
+                    nullChecks++;
+                }
+            }
+
+            // Optional return type implies null awareness
+            String returnTypeName = method.getReturnType().toString();
+            if (returnTypeName.contains("Optional")) {
+                nullChecks++;
+            }
         }
 
         if (nullChecks > 0) {

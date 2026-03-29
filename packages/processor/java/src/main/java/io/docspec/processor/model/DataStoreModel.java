@@ -1,10 +1,12 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "DataStoreModel", rules = {"id NOT_BLANK", "type NOT_BLANK"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DataStoreModel {
 

@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
@@ -35,6 +35,19 @@ import java.util.Set;
         name = "validate",
         defaultPhase = LifecyclePhase.VERIFY
 )
+@DocContext(id = "validate-context",
+    name = "Validate Mojo Context",
+    inputs = {
+        @ContextInput(name = "specFile", source = "config", description = "Path to the docspec.json file to validate"),
+        @ContextInput(name = "schema", source = "classpath", description = "DocSpec JSON Schema bundled in the processor JAR")
+    }
+)
+@DocBoundary("Maven plugin entry point")
+@DocError(code = "DOCSPEC_VAL_001",
+    description = "Schema validation of docspec.json failed against the DocSpec JSON Schema.",
+    causes = {"Generated specification does not conform to the v3 schema", "Specification file is missing or malformed JSON", "Schema file not found on plugin classpath"},
+    resolution = "Run docspec:generate first, then check the validation errors for specific schema violations."
+)
 public class ValidateMojo extends AbstractMojo {
 
     /**
@@ -50,6 +63,7 @@ public class ValidateMojo extends AbstractMojo {
 
     @Override
     @DocMethod(since = "3.0.0")
+    @DocBoundary("Maven validate goal entry point")
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("DocSpec: Validating specification at " + specFile.getAbsolutePath());
 

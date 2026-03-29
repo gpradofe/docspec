@@ -1,7 +1,6 @@
 package io.docspec.processor.metrics;
 
-import io.docspec.annotation.DocDeterministic;
-import io.docspec.annotation.DocInvariant;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.*;
 
 import java.util.List;
@@ -20,6 +19,8 @@ public class CoverageCalculator {
     private int documentedParams;
 
     @DocDeterministic
+    @DocMethod(since = "3.0.0")
+    @DocBoundary("coverage analysis entry point")
     public void analyze(DocSpecModel model) {
         for (ModuleModel module : model.getModules()) {
             for (MemberModel member : module.getMembers()) {
@@ -58,6 +59,7 @@ public class CoverageCalculator {
         inferredDescriptions++;
     }
 
+    @DocMethod(since = "3.0.0")
     public DiscoveryModel toDiscoveryModel(String mode, List<String> frameworks,
                                             List<String> scannedPackages, List<String> excludedPackages) {
         DiscoveryModel discovery = new DiscoveryModel();

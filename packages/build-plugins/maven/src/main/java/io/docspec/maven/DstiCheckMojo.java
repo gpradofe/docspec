@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.plugin.AbstractMojo;
@@ -20,6 +20,12 @@ import java.util.List;
  * Fails the build if any public method's ISD score falls below the configured threshold.
  */
 @Mojo(name = "dsti-check", defaultPhase = LifecyclePhase.VERIFY)
+@DocBoundary("Maven plugin entry point")
+@DocError(code = "DOCSPEC_DSTI_001",
+    description = "One or more methods have an ISD score below the configured minimum threshold.",
+    causes = {"Method body lacks structural signals (branches, loops, error handling)", "Method name does not follow naming conventions recognized by NamingAnalyzer", "DSTI was not enabled during generation"},
+    resolution = "Enrich method implementations or add DocSpec semantic annotations (@DocIntentional, @DocPreserves) to improve ISD scores."
+)
 public class DstiCheckMojo extends AbstractMojo {
 
     @Parameter(property = "docspec.spec.file", defaultValue = "${project.build.directory}/docspec.json")

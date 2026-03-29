@@ -1,7 +1,6 @@
 package io.docspec.processor.dsti;
 
-import io.docspec.annotation.DocDeterministic;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,6 +22,10 @@ import java.util.regex.Pattern;
  *   <li>{@code "field NOT_BLANK"} — string must not be blank</li>
  * </ul>
  */
+@DocInvariant(on = "PropertyDSL", rules = {
+    "parse() returns null for unparseable expressions",
+    "parseAll() never returns null"
+})
 public class PropertyDSL {
 
     // -- Patterns (compiled once) -------------------------------------------

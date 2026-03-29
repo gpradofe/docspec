@@ -1,10 +1,12 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "ObservabilityModel", rules = {"metrics NOT_NULL", "healthChecks NOT_NULL"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ObservabilityModel {
 

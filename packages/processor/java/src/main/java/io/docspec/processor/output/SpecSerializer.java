@@ -3,7 +3,7 @@ package io.docspec.processor.output;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.docspec.annotation.DocBoundary;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.DocSpecModel;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -15,6 +15,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @DocBoundary("JSON serialization")
+@DocError(code = "DOCSPEC_SER_001",
+    description = "Failed to serialize the DocSpec model to JSON or write the output file.",
+    causes = {"Output directory does not exist or is not writable", "Jackson serialization encountered a cycle or unknown type", "Disk is full or path is invalid"},
+    resolution = "Check the docspec.output.dir configuration and ensure the target directory is writable."
+)
+@DocEvent(name = "docspec.serialization.completed",
+    description = "Emitted when docspec.json has been successfully written to the output directory.",
+    trigger = "Successful completion of serialize()",
+    channel = "compiler-diagnostics",
+    since = "3.0"
+)
 public class SpecSerializer {
 
     private final ObjectMapper mapper;
@@ -25,6 +36,9 @@ public class SpecSerializer {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 
+    @DocIdempotent
+    @DocMethod(since = "3.0.0")
+    @DocBoundary("JSON serialization entry point")
     public void serialize(DocSpecModel model, String outputDir, ProcessingEnvironment processingEnv) {
         try {
             String json = mapper.writeValueAsString(model);
@@ -52,6 +66,8 @@ public class SpecSerializer {
         }
     }
 
+    @DocIdempotent
+    @DocMethod(since = "3.0.0")
     public void serializeIntentGraph(DocSpecModel model, String outputDir, ProcessingEnvironment processingEnv) {
         if (model.getIntentGraph() == null) return;
 
@@ -91,6 +107,8 @@ public class SpecSerializer {
         }
     }
 
+    @DocDeterministic
+    @DocMethod(since = "3.0.0")
     public String toJson(DocSpecModel model) {
         try {
             return mapper.writeValueAsString(model);

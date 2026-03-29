@@ -1,5 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
+import io.docspec.annotation.DocMethod;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -23,6 +24,7 @@ public abstract class AbstractTreesChannel implements IntentChannel {
      * @param methodTree the method tree obtained from Trees.getTree()
      * @return the list of statement tree objects, or an empty list if unavailable
      */
+    @DocMethod(since = "3.0.0")
     protected List<?> getStatements(Object methodTree) {
         try {
             java.lang.reflect.Method getBody = methodTree.getClass().getMethod("getBody");

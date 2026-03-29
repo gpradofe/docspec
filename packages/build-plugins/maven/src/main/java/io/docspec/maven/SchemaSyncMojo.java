@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.plugin.AbstractMojo;
@@ -29,6 +29,12 @@ import java.util.regex.Pattern;
 @Mojo(
         name = "schema-sync",
         defaultPhase = LifecyclePhase.VALIDATE
+)
+@DocBoundary("Maven plugin entry point")
+@DocError(code = "DOCSPEC_SYNC_001",
+    description = "JPA entity fields do not match the Flyway migration schema.",
+    causes = {"A JPA entity field was added without a corresponding migration", "A migration column was added without a matching entity field", "Column type mismatch between entity and migration"},
+    resolution = "Add the missing Flyway migration or update the JPA entity to match the database schema."
 )
 public class SchemaSyncMojo extends AbstractMojo {
 

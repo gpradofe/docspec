@@ -1,5 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
+import io.docspec.annotation.DocMethod;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -32,6 +33,7 @@ public class ReturnTypeChannel implements IntentChannel {
     }
 
     @Override
+    @DocMethod(since = "3.0.0")
     public void extract(ExecutableElement method, TypeElement owner,
                         Object trees, Object methodTree,
                         ProcessingEnvironment env, IntentSignalsModel signals) {

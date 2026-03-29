@@ -1,7 +1,9 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
+@DocInvariant(on = "EventModel", rules = {"name NOT_BLANK"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class EventModel {
 

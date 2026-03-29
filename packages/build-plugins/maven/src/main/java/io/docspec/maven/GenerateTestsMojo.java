@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.plugin.AbstractMojo;
@@ -28,6 +28,14 @@ import java.util.List;
 @Mojo(
         name = "generate-tests",
         defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES
+)
+@DocBoundary("Maven plugin entry point")
+@DocContext(id = "generate-tests-context",
+    name = "Generate Tests Mojo Context",
+    inputs = {
+        @ContextInput(name = "intentGraphPath", source = "config", description = "Path to intent-graph.json file"),
+        @ContextInput(name = "testOutputDir", source = "config", description = "Target directory for generated test stubs")
+    }
 )
 public class GenerateTestsMojo extends AbstractMojo {
 

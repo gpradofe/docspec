@@ -1,10 +1,12 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "DiscoveryModel", rules = {"coveragePercent >= 0", "coveragePercent <= 100", "totalClasses >= 0"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DiscoveryModel {
 

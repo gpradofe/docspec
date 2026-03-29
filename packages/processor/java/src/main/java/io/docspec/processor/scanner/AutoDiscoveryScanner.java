@@ -1,6 +1,6 @@
 package io.docspec.processor.scanner;
 
-import io.docspec.annotation.DocBoundary;
+import io.docspec.annotation.*;
 import io.docspec.processor.config.ProcessorConfig;
 import io.docspec.processor.model.MemberModel;
 import io.docspec.processor.model.MethodModel;
@@ -29,6 +29,8 @@ public class AutoDiscoveryScanner {
         this.packageFilter = new PackageFilter(config.getIncludePackages(), config.getExcludePackages());
     }
 
+    @DocMethod(since = "3.0.0")
+    @DocBoundary("auto-discovery scan entry point")
     public List<TypeElement> scan(Set<? extends Element> rootElements) {
         List<TypeElement> discovered = new ArrayList<>();
         for (Element element : rootElements) {
@@ -41,6 +43,7 @@ public class AutoDiscoveryScanner {
         return discovered;
     }
 
+    @DocMethod(since = "3.0.0")
     public MemberModel toMemberModel(TypeElement typeElement) {
         MemberModel member = new MemberModel();
         member.setKind(resolveKind(typeElement));

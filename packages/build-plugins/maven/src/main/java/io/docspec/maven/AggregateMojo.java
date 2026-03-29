@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,6 +30,7 @@ import java.util.List;
  * {@code privacy}) into one unified document.</p>
  */
 @Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PACKAGE, aggregator = true)
+@DocBoundary("Maven plugin entry point")
 public class AggregateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)

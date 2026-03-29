@@ -1,7 +1,9 @@
 package io.docspec.processor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.docspec.annotation.DocInvariant;
 
+@DocInvariant(on = "CrossRefModel", rules = {"sourceQualified NOT_BLANK", "targetArtifact NOT_BLANK"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CrossRefModel {
 

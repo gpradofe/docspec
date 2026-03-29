@@ -3,10 +3,12 @@ package io.docspec.processor.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.docspec.annotation.DocInvariant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@DocInvariant(on = "DocSpecModel", rules = {"version == \"3.0.0\"", "modules NOT_NULL", "errors NOT_NULL", "events NOT_NULL"})
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({"docspec", "artifact", "project", "modules", "flows", "contexts",
         "crossRefs", "errors", "events", "dataModels", "dataStores", "configuration",

@@ -1,7 +1,6 @@
 package io.docspec.processor.reader;
 
-import io.docspec.annotation.DocBoundary;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 
 import java.util.List;
 import java.util.regex.Matcher;

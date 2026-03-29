@@ -1,7 +1,6 @@
 package io.docspec.processor.framework;
 
-import io.docspec.annotation.DocBoundary;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.EndpointMappingModel;
 import io.docspec.processor.model.MethodModel;
 

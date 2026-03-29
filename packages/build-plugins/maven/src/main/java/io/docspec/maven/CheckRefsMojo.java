@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.plugin.AbstractMojo;
@@ -20,6 +20,7 @@ import java.util.*;
  * references point to entities that exist in the spec.
  */
 @Mojo(name = "check-refs", defaultPhase = LifecyclePhase.VERIFY)
+@DocBoundary("Maven plugin entry point")
 public class CheckRefsMojo extends AbstractMojo {
 
     @Parameter(property = "docspec.spec.file", defaultValue = "${project.build.directory}/docspec.json")

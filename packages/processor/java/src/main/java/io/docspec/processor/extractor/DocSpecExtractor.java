@@ -1,5 +1,6 @@
 package io.docspec.processor.extractor;
 
+import io.docspec.annotation.DocBoundary;
 import io.docspec.processor.model.DocSpecModel;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -9,6 +10,7 @@ import javax.lang.model.element.TypeElement;
  * Interface for extractors that analyze types and populate the DocSpec model
  * with domain-specific documentation (security, configuration, observability, etc.).
  */
+@DocBoundary("extractor interface boundary")
 public interface DocSpecExtractor {
 
     /**

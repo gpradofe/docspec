@@ -1,6 +1,6 @@
 package io.docspec.processor;
 
-import io.docspec.annotation.DocBoundary;
+import io.docspec.annotation.*;
 import io.docspec.processor.config.DiscoveryMode;
 import io.docspec.processor.config.ProcessorConfig;
 import io.docspec.processor.dsti.IntentGraphExtractor;
@@ -22,6 +22,56 @@ import javax.tools.Diagnostic;
 import java.util.*;
 
 @DocBoundary("annotation processor entry point")
+@DocFlow(id = "processing-pipeline",
+    name = "DocSpec Processing Pipeline",
+    description = "The 7-phase annotation processing pipeline that produces docspec.json with documentation and DSTI intent data. Triggered by mvn docspec:generate.",
+    trigger = "mvn docspec:generate",
+    steps = {
+        @Step(id = "1-discovery", name = "Auto-Discovery", actor = "AutoDiscoveryScanner",
+              actorQualified = "io.docspec.processor.scanner.AutoDiscoveryScanner", type = "process",
+              description = "Scans all public classes, detects Spring Boot/JPA/Jackson frameworks on classpath",
+              outputs = {"discoveredTypes"}),
+        @Step(id = "2-read-metadata", name = "Read Metadata", actor = "AnnotationReader",
+              actorQualified = "io.docspec.processor.reader.AnnotationReader", type = "process",
+              description = "Reads @DocModule, @DocFlow, @DocMethod, JavaDoc comments. Infers descriptions from method names.",
+              inputs = {"discoveredTypes"}, outputs = {"memberModels", "moduleModels"}),
+        @Step(id = "3-extract-system", name = "Extract System Info", actor = "DocSpecExtractor",
+              actorQualified = "io.docspec.processor.extractor.DocSpecExtractor", type = "process",
+              description = "Runs 7 extractors: Security, Config, Observability, DataStore, ExternalDeps, Privacy, ErrorsEvents",
+              inputs = {"discoveredTypes"}, outputs = {"securityModel", "configModel", "observabilityModel", "dataStoreModel"}),
+        @Step(id = "4-dsti", name = "DSTI Intent Extraction", actor = "IntentGraphExtractor",
+              actorQualified = "io.docspec.processor.dsti.IntentGraphExtractor", type = "ai", ai = true,
+              description = "Runs 13 independent intent channels on every public method. Cross-verifies signals. Computes ISD scores.",
+              inputs = {"discoveredTypes"}, outputs = {"intentGraph"}),
+        @Step(id = "5-cross-ref", name = "Cross-Reference Resolution", actor = "DocSpecProcessor",
+              actorQualified = "io.docspec.processor.DocSpecProcessor", type = "process",
+              description = "Resolves @DocUses, builds error.thrownBy, dataModel.usedBy, member.referencedBy mappings",
+              inputs = {"memberModels", "moduleModels"}, outputs = {"crossRefs", "referencedBy"}),
+        @Step(id = "6-coverage", name = "Coverage Calculation", actor = "CoverageCalculator",
+              actorQualified = "io.docspec.processor.metrics.CoverageCalculator", type = "process",
+              description = "Computes documentation coverage: % of classes documented, % of methods with descriptions",
+              inputs = {"memberModels"}, outputs = {"discoveryModel"}),
+        @Step(id = "7-serialize", name = "Serialize Output", actor = "SpecSerializer",
+              actorQualified = "io.docspec.processor.output.SpecSerializer", type = "storage",
+              description = "Serializes the complete DocSpec model to target/docspec.json via Jackson ObjectMapper",
+              inputs = {"docSpecModel"}, outputs = {"docspec.json", "intent-graph.json"})
+    }
+)
+@DocError(code = "DOCSPEC_PROC_001",
+    description = "Annotation processing failed due to an unrecoverable error during type analysis or model building.",
+    causes = {"A type element could not be resolved during processing", "Extractor threw an uncaught exception", "Processing environment is misconfigured"},
+    resolution = "Check compiler diagnostics for the root cause. Ensure all dependencies are on the classpath."
+)
+@DocEvent(name = "docspec.processing.started",
+    description = "Emitted when the DocSpec annotation processor begins its first processing round.",
+    trigger = "javac invocation with DocSpecProcessor on the annotation processor path",
+    channel = "compiler-diagnostics",
+    since = "3.0"
+)
+@DocUses(artifact = "io.docspec:docspec-annotations-java",
+    description = "Reads all 42 DocSpec annotations from source code to build the documentation model")
+@DocUses(artifact = "com.fasterxml.jackson.core:jackson-databind",
+    description = "Serializes the DocSpec model and intent graph to JSON output files")
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedOptions({
@@ -164,6 +214,9 @@ public class DocSpecProcessor extends AbstractProcessor {
     }
 
     @Override
+    @DocBoundary("annotation processor entry point")
+    @DocPerformance(expectedLatency = "< 5s for projects with < 500 types",
+                    bottleneck = "DSTI intent extraction across all methods when Trees API is available")
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {
             if (processed) {
@@ -500,6 +553,7 @@ public class DocSpecProcessor extends AbstractProcessor {
         }
     }
 
+    @DocMethod(since = "3.0.0")
     private void finalizeSpec() {
         // Set artifact info
         ArtifactModel artifact = new ArtifactModel();

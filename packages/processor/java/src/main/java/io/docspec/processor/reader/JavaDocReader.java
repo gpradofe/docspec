@@ -1,7 +1,6 @@
 package io.docspec.processor.reader;
 
-import io.docspec.annotation.DocBoundary;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.sun.source.doctree.*;
 import com.sun.source.util.DocTrees;
 

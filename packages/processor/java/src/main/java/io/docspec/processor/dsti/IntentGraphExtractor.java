@@ -1,7 +1,6 @@
 package io.docspec.processor.dsti;
 
-import io.docspec.annotation.DocBoundary;
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.dsti.channel.*;
 import io.docspec.processor.extractor.DocSpecExtractor;
 import io.docspec.processor.model.DocSpecModel;
@@ -28,6 +27,49 @@ import java.util.List;
  * degrades if that API is unavailable.</p>
  */
 @DocBoundary("DSTI intent graph extraction boundary")
+@DocFlow(id = "dsti-analysis",
+    name = "DSTI Intent Analysis Pipeline",
+    description = "Analyzes every public method across 13 independent intent channels, cross-verifies signals, and computes an ISD score. Each channel is self-contained for ablation.",
+    trigger = "DocSpecProcessor invokes extract() on a discovered type",
+    steps = {
+        @Step(id = "resolve-trees", name = "Resolve Trees API", actor = "IntentGraphExtractor", type = "process",
+              description = "Obtains com.sun.source.util.Trees via reflection for AST-level analysis; gracefully degrades if unavailable"),
+        @Step(id = "ch1-naming", name = "Channel 1: Name Semantics", actor = "NamingChannel", type = "process",
+              description = "Extracts verb, object, and intent category from method name via NamingAnalyzer"),
+        @Step(id = "ch2-guards", name = "Channel 2: Guard Clauses", actor = "GuardClauseChannel", type = "process",
+              description = "Counts if-throw guard patterns and @DocIntentional/@DocPreserves annotation-based guards"),
+        @Step(id = "ch3-branches", name = "Channel 3: Branch Structure", actor = "BranchStructureChannel", type = "process",
+              description = "Counts if-statements (branching complexity) from the AST"),
+        @Step(id = "ch4-gap", name = "Channel 4: Name-Behavior Gap", actor = "NameBehaviorGapChannel", type = "process",
+              description = "Cross-references naming intent with guard/branch signals to detect naming inconsistencies"),
+        @Step(id = "ch5-return", name = "Channel 5: Return Type", actor = "ReturnTypeChannel", type = "process",
+              description = "Analyzes return type for Optional, Collection, reactive, void, or scalar signals"),
+        @Step(id = "ch6-assignment", name = "Channel 6: Assignment Patterns", actor = "AssignmentPatternChannel", type = "process",
+              description = "Detects builder patterns, constructor calls, and data flow writes"),
+        @Step(id = "ch7-loops", name = "Channel 7: Loop Patterns", actor = "LoopPatternChannel", type = "process",
+              description = "Detects .stream(), enhanced-for loops, and specific stream operations (filter, map, flatMap)"),
+        @Step(id = "ch8-errors", name = "Channel 8: Error Handling", actor = "ErrorHandlingChannel", type = "process",
+              description = "Counts try/catch blocks and extracts caught exception types"),
+        @Step(id = "ch9-constants", name = "Channel 9: Constants", actor = "AssignmentChainChannel", type = "process",
+              description = "Scans for UPPER_CASE constant references in the method body"),
+        @Step(id = "ch10-nulls", name = "Channel 10: Null Checks", actor = "ExceptionMessageChannel", type = "process",
+              description = "Counts null check patterns: != null, == null, Objects.requireNonNull, Optional.ofNullable"),
+        @Step(id = "ch11-assertions", name = "Channel 11: Assertions", actor = "ConstantChannel", type = "process",
+              description = "Detects assert statements and assertion-style method calls (check*, require*, verify*)"),
+        @Step(id = "ch12-logging", name = "Channel 12: Logging", actor = "LoggingChannel", type = "process",
+              description = "Detects logger method calls (log, debug, info, warn, error, trace)"),
+        @Step(id = "ch13-validation", name = "Channel 13: Validation Annotations", actor = "EqualityChannel", type = "process",
+              description = "Counts Bean Validation annotations on parameters (@NotNull, @Valid, @Min, @Max, @Size, etc.)"),
+        @Step(id = "cross-verify", name = "Cross-Verification", actor = "IntentGraphExtractor", type = "process",
+              description = "Collects injected field types as dependency signals for cross-cutting analysis"),
+        @Step(id = "isd-score", name = "ISD Score Calculation", actor = "IntentDensityCalculator", type = "process",
+              description = "Computes weighted ISD score (0.0-1.0) from all 13 channel signals")
+    }
+)
+@DocUses(artifact = "io.docspec:docspec-processor-java", member = "NamingAnalyzer",
+    description = "Delegates method name parsing to NamingAnalyzer for verb/object/intent extraction")
+@DocUses(artifact = "io.docspec:docspec-processor-java", member = "IntentDensityCalculator",
+    description = "Computes the weighted ISD score from merged channel signals")
 public class IntentGraphExtractor implements DocSpecExtractor {
 
     private final boolean dstiEnabled;
@@ -79,6 +121,10 @@ public class IntentGraphExtractor implements DocSpecExtractor {
 
     @Override
     @DocMethod(since = "3.0.0")
+    @DocBoundary("DSTI extraction entry point")
+    @DocExample(title = "Extract intent signals for a type",
+        language = "java",
+        code = "IntentGraphExtractor extractor = new IntentGraphExtractor(true);\nextractor.extract(typeElement, processingEnv, model);\n// model.getIntentGraph().getMethods() now contains ISD-scored intent signals")
     public void extract(TypeElement typeElement, ProcessingEnvironment processingEnv, DocSpecModel model) {
         String ownerQualified = typeElement.getQualifiedName().toString();
         List<IntentMethodModel> methods = new ArrayList<>();

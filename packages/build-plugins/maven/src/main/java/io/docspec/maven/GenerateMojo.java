@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.maven.config.DiscoveryConfig;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -42,6 +42,26 @@ import java.util.stream.Collectors;
         defaultPhase = LifecyclePhase.COMPILE,
         requiresDependencyResolution = ResolutionScope.COMPILE
 )
+@DocContext(id = "generate-context",
+    name = "Generate Mojo Context",
+    flow = "processing-pipeline",
+    inputs = {
+        @ContextInput(name = "sourceRoots", source = "project.compileSourceRoots", description = "Java source directories to scan"),
+        @ContextInput(name = "classpath", source = "project.artifacts", description = "Compile classpath for framework detection"),
+        @ContextInput(name = "outputDir", source = "config", description = "Target directory for docspec.json output")
+    },
+    uses = {
+        @ContextUses(artifact = "io.docspec:docspec-processor-java", what = "DocSpecProcessor", why = "Annotation processor that generates the docspec.json specification")
+    }
+)
+@DocBoundary("Maven plugin entry point")
+@DocError(code = "DOCSPEC_GEN_001",
+    description = "Source compilation or annotation processing failed during docspec:generate.",
+    causes = {"No JDK available (running with a JRE)", "Source files contain compilation errors", "Annotation processor threw an exception", "File manager could not be initialized"},
+    resolution = "Ensure Maven runs with a JDK, source code compiles, and all dependencies are resolved."
+)
+@DocUses(artifact = "io.docspec:docspec-processor-java",
+    description = "Programmatically invokes DocSpecProcessor via javac -proc:only for annotation processing")
 public class GenerateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
@@ -64,6 +84,7 @@ public class GenerateMojo extends AbstractMojo {
 
     @Override
     @DocMethod(since = "3.0.0")
+    @DocBoundary("Maven generate goal entry point")
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("DocSpec: Starting specification generation");
 

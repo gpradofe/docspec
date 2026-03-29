@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.docspec.maven.config.CoverageConfig;
@@ -27,6 +27,19 @@ import java.io.IOException;
         name = "coverage",
         defaultPhase = LifecyclePhase.VERIFY
 )
+@DocContext(id = "coverage-context",
+    name = "Coverage Mojo Context",
+    inputs = {
+        @ContextInput(name = "specFile", source = "config", description = "Path to the docspec.json file to analyze"),
+        @ContextInput(name = "minimumPercent", source = "config", description = "Minimum coverage percentage threshold (default 0)")
+    }
+)
+@DocBoundary("Maven plugin entry point")
+@DocError(code = "DOCSPEC_COV_001",
+    description = "Documentation coverage is below the configured minimum threshold.",
+    causes = {"Too many classes lack descriptions", "Methods are missing JavaDoc or @DocMethod annotations", "Description inference is disabled"},
+    resolution = "Add JavaDoc comments or DocSpec annotations to increase coverage above the threshold."
+)
 public class CoverageMojo extends AbstractMojo {
 
     /**
@@ -46,6 +59,7 @@ public class CoverageMojo extends AbstractMojo {
 
     @Override
     @DocMethod(since = "3.0.0")
+    @DocBoundary("Maven coverage goal entry point")
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Apply defaults if no config was provided
         if (coverage == null) {

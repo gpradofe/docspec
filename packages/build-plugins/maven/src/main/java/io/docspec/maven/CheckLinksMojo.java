@@ -1,6 +1,6 @@
 package io.docspec.maven;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.maven.plugin.AbstractMojo;
@@ -21,6 +21,7 @@ import java.util.List;
  * within description fields resolve to valid targets in the specification.
  */
 @Mojo(name = "check-links", defaultPhase = LifecyclePhase.VERIFY)
+@DocBoundary("Maven plugin entry point")
 public class CheckLinksMojo extends AbstractMojo {
 
     @Parameter(property = "docspec.spec.file", defaultValue = "${project.build.directory}/docspec.json")
