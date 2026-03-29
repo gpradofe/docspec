@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import type { GraphPageData, GraphNode, GraphEdge } from "@docspec/core";
 import { T } from "../../lib/tokens.js";
 
@@ -14,8 +14,6 @@ interface LayoutNode {
   x: number;
   y: number;
   color: string;
-  isd: number;
-  tests: number;
   group: string;
 }
 
@@ -27,24 +25,30 @@ function getGroupColor(group: string): string {
     verifier: T.yellow, output: T.green,
     metrics: "#22d3ee", flow: T.blue,
     extractor: "#fb923c", model: T.textDim,
-    config: T.yellow, scanner: T.green,
-    maven: T.green,
+    config: T.yellow, scanner: T.green, maven: T.green,
   };
   return map[group] || T.accent;
 }
 
-/**
- * Hierarchical (Sugiyama-style) layout.
- * 1. Assign layers via longest-path from roots (top = orchestrators, bottom = leaves)
- * 2. Order nodes within layers to minimize edge crossings (barycenter heuristic)
- * 3. Position with even spacing
- */
-function hierarchicalLayout(
-  nodes: GraphNode[],
-  edges: GraphEdge[],
-  width: number,
-): { layout: LayoutNode[]; height: number; width: number } {
-  if (nodes.length === 0) return { layout: [], height: 200, width: 600 };
+function classifyNode(label: string): string {
+  const l = label.toLowerCase();
+  if (/channel|naming|guard|branch|loop|errorhandling|constant|assignment|exception|logging|equality|return/i.test(l)) return "channel";
+  if (/intent|isd|density|dsti/i.test(l)) return "dsti";
+  if (/extractor|privacy|security(?!model)|configur|observ|datastore|external/i.test(l)) return "extractor";
+  if (/spring|jpa|jackson/i.test(l)) return "framework";
+  if (/serial|output/i.test(l)) return "output";
+  if (/reader|javadoc|inferrer/i.test(l)) return "reader";
+  if (/scanner|filter|discovery/i.test(l)) return "scanner";
+  if (/coverage|metric/i.test(l)) return "metrics";
+  if (/model/i.test(l)) return "model";
+  if (/mojo|maven|generate(?!d)|validate|publish|schema|aggregate|check/i.test(l)) return "maven";
+  if (/processor/i.test(l)) return "core";
+  return "core";
+}
+
+/** Hierarchical layout with BFS layers + barycenter ordering */
+function hierarchicalLayout(nodes: GraphNode[], edges: GraphEdge[]): LayoutNode[] {
+  if (nodes.length === 0) return [];
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const children = new Map<string, string[]>();
@@ -62,7 +66,7 @@ function hierarchicalLayout(
     inDegree.set(e.target, (inDegree.get(e.target) || 0) + 1);
   }
 
-  // --- Step 1: Assign layers via BFS from roots ---
+  // Assign layers via BFS
   const layerOf = new Map<string, number>();
   const roots = nodes.filter((n) => (inDegree.get(n.id) || 0) === 0).map((n) => n.id);
   if (roots.length === 0) roots.push(nodes[0].id);
@@ -72,7 +76,6 @@ function hierarchicalLayout(
   while (queue.length > 0) {
     const { id, layer } = queue.shift()!;
     if (visited.has(id)) {
-      // Update to deeper layer if reached via longer path
       layerOf.set(id, Math.max(layerOf.get(id) || 0, layer));
     } else {
       visited.add(id);
@@ -82,11 +85,8 @@ function hierarchicalLayout(
       queue.push({ id: child, layer: layer + 1 });
     }
   }
-  // Place unvisited nodes in the last layer
   for (const n of nodes) {
-    if (!layerOf.has(n.id)) {
-      layerOf.set(n.id, (Math.max(...layerOf.values()) || 0) + 1);
-    }
+    if (!layerOf.has(n.id)) layerOf.set(n.id, (Math.max(0, ...layerOf.values())) + 1);
   }
 
   // Group by layer
@@ -96,99 +96,112 @@ function hierarchicalLayout(
     layers[layer].push(id);
   }
 
-  // --- Step 2: Order within layers to reduce crossings (barycenter, 4 passes) ---
+  // Barycenter ordering (4 passes)
   for (let pass = 0; pass < 4; pass++) {
     for (let li = 1; li < layers.length; li++) {
-      const layer = layers[li];
-      const prevLayer = layers[li - 1];
-      const prevIndex = new Map(prevLayer.map((id, i) => [id, i]));
-
-      layer.sort((a, b) => {
-        const aParents = parents.get(a) || [];
-        const bParents = parents.get(b) || [];
-        const aAvg = aParents.length > 0 ? aParents.reduce((s, p) => s + (prevIndex.get(p) ?? 0), 0) / aParents.length : 0;
-        const bAvg = bParents.length > 0 ? bParents.reduce((s, p) => s + (prevIndex.get(p) ?? 0), 0) / bParents.length : 0;
+      const prevIndex = new Map(layers[li - 1].map((id, i) => [id, i]));
+      layers[li].sort((a, b) => {
+        const ap = parents.get(a) || [];
+        const bp = parents.get(b) || [];
+        const aAvg = ap.length > 0 ? ap.reduce((s, p) => s + (prevIndex.get(p) ?? 0), 0) / ap.length : 0;
+        const bAvg = bp.length > 0 ? bp.reduce((s, p) => s + (prevIndex.get(p) ?? 0), 0) / bp.length : 0;
         return aAvg - bAvg;
       });
     }
   }
 
-  // --- Step 3: Position nodes ---
-  const layerGap = 90;
-  const minNodeSpacing = 90;
-  const topPadding = 40;
-  // Compute actual needed width from widest layer
-  const maxLayerSize = Math.max(...layers.map((l) => l.length), 1);
-  const neededWidth = Math.max(maxLayerSize * minNodeSpacing + 80, 600);
-  const actualWidth = Math.min(neededWidth, width);
-
+  // Position
+  const nodeSpacing = 110;
+  const layerGap = 100;
   const result: LayoutNode[] = [];
 
   for (let li = 0; li < layers.length; li++) {
     const layer = layers[li];
-    const layerWidth = layer.length * minNodeSpacing;
-    const startX = (actualWidth - layerWidth) / 2 + minNodeSpacing / 2;
-    const y = topPadding + li * layerGap;
+    const totalW = layer.length * nodeSpacing;
+    const startX = -totalW / 2 + nodeSpacing / 2;
 
     for (let ni = 0; ni < layer.length; ni++) {
-      const id = layer[ni];
-      const gn = nodeMap.get(id);
+      const gn = nodeMap.get(layer[ni]);
       if (!gn) continue;
-
-      const x = startX + ni * minNodeSpacing;
-      const label = gn.label.toLowerCase();
-
-      // Derive group from class name
-      let group = "core";
-      if (/channel|naming|guard|branch|loop|errorhandling|constant|assignment|exception|logging|equality|return/i.test(label)) group = "channel";
-      else if (/intent|isd|density|dsti/i.test(label)) group = "dsti";
-      else if (/extractor|privacy|security(?!model)|configur|observ|datastore|external/i.test(label)) group = "extractor";
-      else if (/spring|jpa|jackson/i.test(label)) group = "framework";
-      else if (/serial|output/i.test(label)) group = "output";
-      else if (/reader|javadoc|inferrer/i.test(label)) group = "reader";
-      else if (/scanner|filter|discovery/i.test(label)) group = "scanner";
-      else if (/coverage|metric/i.test(label)) group = "metrics";
-      else if (/model/i.test(label)) group = "model";
-      else if (/mojo|maven|generate(?!d)|validate|publish|schema|aggregate|check/i.test(label)) group = "maven";
-
+      const group = classifyNode(gn.label);
       result.push({
         id: gn.id,
         label: gn.label,
-        x: Math.round(x),
-        y: Math.round(y),
+        x: startX + ni * nodeSpacing,
+        y: li * layerGap,
         color: getGroupColor(group),
-        isd: 0,
-        tests: 0,
         group,
       });
     }
   }
 
-  const totalHeight = topPadding + layers.length * layerGap + 40;
-  return { layout: result, height: totalHeight, width: actualWidth };
+  return result;
 }
 
 export function GraphPage({ data }: GraphPageProps) {
-  const { layout: layoutData, height: svgHeight, width: svgWidth } = useMemo(
-    () => hierarchicalLayout(data.nodes, data.edges, 1200),
-    [data.nodes, data.edges],
-  );
+  const layoutData = useMemo(() => hierarchicalLayout(data.nodes, data.edges), [data.nodes, data.edges]);
 
+  // Zoom / pan state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+
+  // Focus mode: click a node to show only it + its direct connections
+  const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+
+  // Compute focus set
+  const focusSet = useMemo(() => {
+    if (!focusedNode) return null;
+    const set = new Set<string>([focusedNode]);
+    for (const e of data.edges) {
+      if (e.source === focusedNode) set.add(e.target);
+      if (e.target === focusedNode) set.add(e.source);
+    }
+    return set;
+  }, [focusedNode, data.edges]);
+
+  const visibleNodes = focusSet ? layoutData.filter((n) => focusSet.has(n.id)) : layoutData;
+  const visibleEdges = focusSet
+    ? data.edges.filter((e) => focusSet.has(e.source) && focusSet.has(e.target))
+    : data.edges;
 
   const getNode = (id: string) => layoutData.find((n) => n.id === id);
 
   const isConnected = (nodeId: string): boolean => {
+    if (focusSet) return focusSet.has(nodeId);
     if (!hovered) return true;
     if (nodeId === hovered) return true;
     return data.edges.some(
-      (e) =>
-        (e.source === hovered && e.target === nodeId) ||
-        (e.target === hovered && e.source === nodeId),
+      (e) => (e.source === hovered && e.target === nodeId) || (e.target === hovered && e.source === nodeId),
     );
   };
 
-  // Collect legend entries
+  // Mouse handlers for pan
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setDragging(true);
+    dragStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+  }, [pan]);
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragging) return;
+    setPan({
+      x: dragStart.current.panX + (e.clientX - dragStart.current.x) / zoom,
+      y: dragStart.current.panY + (e.clientY - dragStart.current.y) / zoom,
+    });
+  }, [dragging, zoom]);
+
+  const onMouseUp = useCallback(() => setDragging(false), []);
+
+  const onWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setZoom((z) => Math.max(0.2, Math.min(3, z * delta)));
+  }, []);
+
+  // Legend
   const groupEntries: [string, string][] = [];
   const seenGroups = new Set<string>();
   for (const n of layoutData) {
@@ -198,25 +211,109 @@ export function GraphPage({ data }: GraphPageProps) {
     }
   }
 
+  // Compute viewBox to center the graph
+  const minX = Math.min(...layoutData.map((n) => n.x)) - 60;
+  const maxX = Math.max(...layoutData.map((n) => n.x)) + 60;
+  const minY = Math.min(...layoutData.map((n) => n.y)) - 40;
+  const maxY = Math.max(...layoutData.map((n) => n.y)) + 60;
+  const vbW = maxX - minX || 600;
+  const vbH = maxY - minY || 400;
+
   return (
-    <div style={{ margin: "0 auto" }}>
-      <h1 style={{ fontSize: 24, fontWeight: 750, color: T.text, letterSpacing: "-0.025em", margin: "0 0 6px" }}>
-        Dependency Graph
-      </h1>
-      <p style={{ fontSize: 14, color: T.textMuted, lineHeight: 1.7, margin: "0 0 24px" }}>
-        Interactive component map. Hover a node to see its connections. {data.nodes.length} components, {data.edges.length} dependencies.
-      </p>
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 750, color: T.text, letterSpacing: "-0.025em", margin: 0 }}>
+            Dependency Graph
+          </h1>
+          <p style={{ fontSize: 13, color: T.textMuted, marginTop: 4 }}>
+            {data.nodes.length} components, {data.edges.length} dependencies.
+            {focusedNode ? " Focus mode — click background to exit." : " Scroll to zoom, drag to pan, click a node to focus."}
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {focusedNode && (
+            <button
+              onClick={() => { setFocusedNode(null); setZoom(1); setPan({ x: 0, y: 0 }); }}
+              style={{
+                padding: "5px 12px", fontSize: 11, fontWeight: 600,
+                background: T.accentBg, color: T.accent, border: `1px solid ${T.accentBorder}`,
+                borderRadius: 6, cursor: "pointer", fontFamily: T.sans,
+              }}
+            >
+              Show all
+            </button>
+          )}
+          <button
+            onClick={() => setZoom((z) => Math.min(3, z * 1.3))}
+            style={{
+              padding: "5px 10px", fontSize: 13, fontWeight: 600,
+              background: T.surface, color: T.textMuted, border: `1px solid ${T.surfaceBorder}`,
+              borderRadius: 6, cursor: "pointer",
+            }}
+          >
+            +
+          </button>
+          <button
+            onClick={() => setZoom((z) => Math.max(0.2, z * 0.7))}
+            style={{
+              padding: "5px 10px", fontSize: 13, fontWeight: 600,
+              background: T.surface, color: T.textMuted, border: `1px solid ${T.surfaceBorder}`,
+              borderRadius: 6, cursor: "pointer",
+            }}
+          >
+            -
+          </button>
+          <button
+            onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+            style={{
+              padding: "5px 10px", fontSize: 11, fontWeight: 600,
+              background: T.surface, color: T.textMuted, border: `1px solid ${T.surfaceBorder}`,
+              borderRadius: 6, cursor: "pointer", fontFamily: T.sans,
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
 
       {data.nodes.length === 0 ? (
         <div style={{ padding: "48px 0", textAlign: "center", fontSize: 14, color: T.textDim }}>
-          No cross-references found. Add @DocUses annotations to populate this graph.
+          No cross-references found.
         </div>
       ) : (
         <>
-          <div style={{ borderRadius: 12, border: `1px solid ${T.surfaceBorder}`, background: T.cardBg, overflowX: "auto", padding: 10 }}>
-            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: "100%", display: "block" }}>
+          <div
+            style={{
+              borderRadius: 12, border: `1px solid ${T.surfaceBorder}`,
+              background: T.cardBg, overflow: "hidden",
+              cursor: dragging ? "grabbing" : "grab",
+              height: 500,
+              position: "relative",
+            }}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseUp}
+            onWheel={onWheel}
+          >
+            <svg
+              viewBox={`${minX} ${minY} ${vbW} ${vbH}`}
+              style={{
+                width: "100%", height: "100%", display: "block",
+                transform: `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`,
+                transformOrigin: "center center",
+                transition: dragging ? "none" : "transform 0.15s ease",
+              }}
+              onClick={(e) => {
+                // Click on background exits focus mode
+                if ((e.target as SVGElement).tagName === "svg") {
+                  setFocusedNode(null);
+                }
+              }}
+            >
               {/* Edges */}
-              {data.edges.map((e, i) => {
+              {visibleEdges.map((e, i) => {
                 const f = getNode(e.source);
                 const t = getNode(e.target);
                 if (!f || !t) return null;
@@ -233,8 +330,8 @@ export function GraphPage({ data }: GraphPageProps) {
                 );
               })}
 
-              {/* Edge arrows */}
-              {data.edges.map((e, i) => {
+              {/* Arrow tips */}
+              {visibleEdges.map((e, i) => {
                 const f = getNode(e.source);
                 const t = getNode(e.target);
                 if (!f || !t) return null;
@@ -246,63 +343,70 @@ export function GraphPage({ data }: GraphPageProps) {
                 if (len === 0) return null;
                 const ux = dx / len;
                 const uy = dy / len;
-                const mx = f.x + dx * 0.65;
-                const my = f.y + dy * 0.65;
+                const mx = f.x + dx * 0.7;
+                const my = f.y + dy * 0.7;
                 return (
                   <polygon
                     key={"a" + i}
                     points={`${mx},${my - 3} ${mx + 6 * ux},${my + 6 * uy} ${mx},${my + 3}`}
                     fill={T.surfaceBorder}
-                    style={{ transition: "all 0.3s", opacity: 0.6 }}
+                    opacity={0.6}
                   />
                 );
               })}
 
               {/* Nodes */}
-              {layoutData.map((n) => {
+              {visibleNodes.map((n) => {
                 const connected = isConnected(n.id);
                 const isHov = hovered === n.id;
-                const r = 14 + (n.label.length > 20 ? 4 : 0);
+                const isFocused = focusedNode === n.id;
+                const r = 16;
 
                 return (
                   <g
                     key={n.id}
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
-                    style={{ cursor: "pointer", transition: "opacity 0.3s", opacity: connected ? 1 : 0.12 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFocusedNode(focusedNode === n.id ? null : n.id);
+                    }}
+                    style={{
+                      cursor: "pointer",
+                      transition: "opacity 0.3s",
+                      opacity: connected ? 1 : 0.1,
+                    }}
                   >
                     {/* Glow */}
-                    {isHov && (
+                    {(isHov || isFocused) && (
                       <circle cx={n.x} cy={n.y} r={r + 10} fill={n.color} opacity={0.15} />
                     )}
                     {/* Circle */}
                     <circle
                       cx={n.x} cy={n.y} r={r}
-                      fill={isHov ? n.color + "30" : T.bg}
+                      fill={(isHov || isFocused) ? n.color + "30" : T.bg}
                       stroke={n.color}
-                      strokeWidth={isHov ? 2.5 : 1.5}
+                      strokeWidth={isFocused ? 3 : isHov ? 2.5 : 1.5}
                     />
                     {/* Group initial */}
                     <text
                       x={n.x} y={n.y + 4}
                       textAnchor="middle"
-                      style={{ fontSize: 10, fontWeight: 700, fill: n.color, fontFamily: T.mono }}
+                      style={{ fontSize: 9, fontWeight: 700, fill: n.color, fontFamily: T.mono }}
                     >
-                      {n.group.substring(0, 2).toUpperCase()}
+                      {n.group.substring(0, 3).toUpperCase()}
                     </text>
                     {/* Label */}
                     <text
                       x={n.x} y={n.y + r + 14}
                       textAnchor="middle"
                       style={{
-                        fontSize: 9,
-                        fontWeight: isHov ? 650 : 400,
+                        fontSize: 8.5, fontWeight: isHov || isFocused ? 650 : 400,
                         fill: connected ? T.text : T.textFaint,
-                        fontFamily: T.sans,
-                        transition: "all 0.3s",
+                        fontFamily: T.sans, transition: "all 0.3s",
                       }}
                     >
-                      {n.label.length > 22 ? n.label.substring(0, 20) + ".." : n.label}
+                      {n.label.length > 20 ? n.label.substring(0, 18) + ".." : n.label}
                     </text>
                   </g>
                 );
@@ -311,7 +415,7 @@ export function GraphPage({ data }: GraphPageProps) {
           </div>
 
           {/* Legend */}
-          <div style={{ display: "flex", gap: 16, marginTop: 14, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 14, marginTop: 12, justifyContent: "center", flexWrap: "wrap" }}>
             {groupEntries.map(([label, color]) => (
               <div key={label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: T.textMuted }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
@@ -320,18 +424,19 @@ export function GraphPage({ data }: GraphPageProps) {
             ))}
           </div>
 
-          {/* Hover detail */}
-          {hovered && (() => {
-            const n = getNode(hovered);
+          {/* Detail panel */}
+          {(hovered || focusedNode) && (() => {
+            const n = getNode(focusedNode || hovered!);
             if (!n) return null;
-            const deps = data.edges.filter((e) => e.source === hovered).map((e) => getNode(e.target)?.label).filter(Boolean);
-            const usedBy = data.edges.filter((e) => e.target === hovered).map((e) => getNode(e.source)?.label).filter(Boolean);
+            const nId = n.id;
+            const deps = data.edges.filter((e) => e.source === nId).map((e) => getNode(e.target)).filter(Boolean) as LayoutNode[];
+            const usedBy = data.edges.filter((e) => e.target === nId).map((e) => getNode(e.source)).filter(Boolean) as LayoutNode[];
             return (
               <div style={{
-                marginTop: 16, padding: "14px 18px", borderRadius: 8,
+                marginTop: 12, padding: "14px 18px", borderRadius: 8,
                 border: `1px solid ${n.color}30`, background: n.color + "08",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                   <span style={{
                     fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
                     background: n.color + "14", color: n.color, border: `1px solid ${n.color}30`,
@@ -344,13 +449,35 @@ export function GraphPage({ data }: GraphPageProps) {
                   </code>
                 </div>
                 {deps.length > 0 && (
-                  <div style={{ fontSize: 12, color: T.textMuted, marginBottom: 3 }}>
-                    <span style={{ color: T.textDim }}>Depends on:</span> {deps.join(", ")}
+                  <div style={{ fontSize: 12, color: T.textMuted, marginBottom: 4 }}>
+                    <span style={{ color: T.textDim, fontWeight: 600 }}>Depends on: </span>
+                    {deps.map((d, i) => (
+                      <span key={d.id}>
+                        <span
+                          style={{ color: d.color, cursor: "pointer", fontWeight: 500 }}
+                          onClick={() => setFocusedNode(d.id)}
+                        >
+                          {d.label}
+                        </span>
+                        {i < deps.length - 1 && ", "}
+                      </span>
+                    ))}
                   </div>
                 )}
                 {usedBy.length > 0 && (
                   <div style={{ fontSize: 12, color: T.textMuted }}>
-                    <span style={{ color: T.textDim }}>Used by:</span> {usedBy.join(", ")}
+                    <span style={{ color: T.textDim, fontWeight: 600 }}>Used by: </span>
+                    {usedBy.map((u, i) => (
+                      <span key={u.id}>
+                        <span
+                          style={{ color: u.color, cursor: "pointer", fontWeight: 500 }}
+                          onClick={() => setFocusedNode(u.id)}
+                        >
+                          {u.label}
+                        </span>
+                        {i < usedBy.length - 1 && ", "}
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
