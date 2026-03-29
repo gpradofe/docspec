@@ -1,5 +1,6 @@
 import React from "react";
 import type { PrivacyPageData, PrivacyField } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -22,41 +23,41 @@ export function PrivacyPage({ data }: PrivacyPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Privacy & PII</h1>
-      <p className="text-text-secondary mb-4">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>Privacy & PII</h1>
+      <p style={{ color: T.textMuted, marginBottom: 16 }}>
         Personally identifiable information fields and their handling policies for {artifact.label}.
       </p>
 
       {/* Summary stats */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        <div className="px-4 py-3 rounded-lg bg-surface-secondary border border-border">
-          <div className="text-2xl font-bold text-text-primary">{fields.length}</div>
-          <div className="text-xs text-text-tertiary">PII Fields</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 32 }}>
+        <div style={{ padding: "12px 16px", borderRadius: 8, background: T.surface, border: "1px solid " + T.surfaceBorder }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{fields.length}</div>
+          <div style={{ fontSize: 12, color: T.textDim }}>PII Fields</div>
         </div>
-        <div className="px-4 py-3 rounded-lg bg-surface-secondary border border-border">
-          <div className="text-2xl font-bold text-text-primary">{encryptedCount}</div>
-          <div className="text-xs text-text-tertiary">Encrypted</div>
+        <div style={{ padding: "12px 16px", borderRadius: 8, background: T.surface, border: "1px solid " + T.surfaceBorder }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{encryptedCount}</div>
+          <div style={{ fontSize: 12, color: T.textDim }}>Encrypted</div>
         </div>
-        <div className="px-4 py-3 rounded-lg bg-surface-secondary border border-border">
-          <div className="text-2xl font-bold text-text-primary">{neverLogCount}</div>
-          <div className="text-xs text-text-tertiary">Never Logged</div>
+        <div style={{ padding: "12px 16px", borderRadius: 8, background: T.surface, border: "1px solid " + T.surfaceBorder }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{neverLogCount}</div>
+          <div style={{ fontSize: 12, color: T.textDim }}>Never Logged</div>
         </div>
       </div>
 
       {/* PII Fields Table */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="pii-fields">
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="pii-fields">
           PII Fields ({fields.length})
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Field</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">PII Type</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Retention</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">GDPR Basis</th>
-                <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Policies</th>
+              <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Field</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>PII Type</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Retention</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>GDPR Basis</th>
+                <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Policies</th>
               </tr>
             </thead>
             <tbody>
@@ -73,30 +74,30 @@ export function PrivacyPage({ data }: PrivacyPageProps) {
 
 function PrivacyFieldRow({ field }: { field: PrivacyField }) {
   return (
-    <tr className="border-b border-border/50">
-      <td className="py-2 pr-4">
-        <code className="font-mono text-sm text-text-primary">{field.field}</code>
+    <tr style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        <code style={{ fontFamily: T.mono, fontSize: 14, color: T.text }}>{field.field}</code>
       </td>
-      <td className="py-2 pr-4">
+      <td style={{ padding: "8px 16px 8px 0" }}>
         {field.piiType ? (
           <Badge variant="warning">{field.piiType}</Badge>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
-      <td className="py-2 pr-4">
-        <span className="text-text-secondary">{field.retention || "—"}</span>
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        <span style={{ color: T.textMuted }}>{field.retention || "\u2014"}</span>
       </td>
-      <td className="py-2 pr-4">
-        <span className="text-text-secondary">{field.gdprBasis || "—"}</span>
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        <span style={{ color: T.textMuted }}>{field.gdprBasis || "\u2014"}</span>
       </td>
-      <td className="py-2">
-        <div className="flex flex-wrap gap-1">
+      <td style={{ padding: "8px 0" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
           {field.encrypted && <Badge variant="success">encrypted</Badge>}
           {field.neverLog && <Badge variant="error">never-log</Badge>}
           {field.neverReturn && <Badge variant="error">never-return</Badge>}
           {!field.encrypted && !field.neverLog && !field.neverReturn && (
-            <span className="text-text-tertiary">—</span>
+            <span style={{ color: T.textDim }}>\u2014</span>
           )}
         </div>
       </td>

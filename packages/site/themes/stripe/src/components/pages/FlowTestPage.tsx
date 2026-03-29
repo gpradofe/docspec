@@ -1,5 +1,6 @@
 import React from "react";
 import type { FlowTestPageData, FlowStep, FlowStepDataStoreOp } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { CodeBlock } from "../ui/CodeBlock.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
@@ -31,24 +32,24 @@ export function FlowTestPage({ data }: FlowTestPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>
         Flow Test: {flow.name || flow.id}
       </h1>
       {flow.description && (
-        <p className="text-text-secondary mb-4">{flow.description}</p>
+        <p style={{ color: T.textMuted, marginBottom: 16 }}>{flow.description}</p>
       )}
-      <p className="text-xs text-text-tertiary mb-8">
+      <p style={{ fontSize: 12, color: T.textDim, marginBottom: 32 }}>
         {steps.length} step{steps.length !== 1 ? "s" : ""} &middot;{" "}
         {stepsWithMocks} mock{stepsWithMocks !== 1 ? "s" : ""} &middot;{" "}
         {stepsWithStubs} stub{stepsWithStubs !== 1 ? "s" : ""}
       </p>
 
       {/* Flow Diagram */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="flow-diagram">
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="flow-diagram">
           Flow Diagram
         </h2>
-        <div className="space-y-0">
+        <div>
           {steps.map((step, i) => (
             <FlowStepCard key={step.id} step={step} index={i} isLast={i === steps.length - 1} />
           ))}
@@ -56,21 +57,21 @@ export function FlowTestPage({ data }: FlowTestPageProps) {
       </section>
 
       {/* Mock Boundary Visualization */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="mock-boundaries">
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="mock-boundaries">
           Mock Boundaries
         </h2>
-        <p className="text-sm text-text-secondary mb-4">
+        <p style={{ fontSize: 14, color: T.textMuted, marginBottom: 16 }}>
           Dependencies that would be mocked or stubbed in an integration test.
         </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Step</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Type</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Dependencies</th>
-                <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Boundary</th>
+              <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Step</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Type</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Dependencies</th>
+                <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Boundary</th>
               </tr>
             </thead>
             <tbody>
@@ -83,8 +84,8 @@ export function FlowTestPage({ data }: FlowTestPageProps) {
       </section>
 
       {/* Integration Test Skeleton */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="test-skeleton">
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="test-skeleton">
           Integration Test Skeleton
         </h2>
         <CodeBlock
@@ -95,18 +96,18 @@ export function FlowTestPage({ data }: FlowTestPageProps) {
       </section>
 
       {/* Data Flow Table */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="data-flow">
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="data-flow">
           Data Flow
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Step</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Inputs</th>
-                <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Outputs</th>
-                <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Data Store Ops</th>
+              <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Step</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Inputs</th>
+                <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Outputs</th>
+                <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Data Store Ops</th>
               </tr>
             </thead>
             <tbody>
@@ -126,18 +127,30 @@ function FlowStepCard({ step, index, isLast }: { step: FlowStep; index: number; 
   const hasStubs = step.type === "external";
 
   return (
-    <div className="relative">
+    <div style={{ position: "relative" }}>
       {/* Connector line */}
       {!isLast && (
-        <div className="absolute left-5 top-full w-0.5 h-4 bg-border z-0" />
+        <div style={{ position: "absolute", left: 20, top: "100%", width: 2, height: 16, background: T.surfaceBorder, zIndex: 0 }} />
       )}
 
-      <div className="p-4 rounded-lg border border-border bg-surface">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+      <div style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder, background: T.surface }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+          <span style={{
+            width: 24,
+            height: 24,
+            borderRadius: "50%",
+            background: T.accentBg,
+            color: T.accent,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 12,
+            fontWeight: 700,
+            flexShrink: 0,
+          }}>
             {index + 1}
           </span>
-          <span className="text-sm font-semibold text-text-primary">
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.text }}>
             {step.name || step.id}
           </span>
           {step.type && <Badge>{step.type}</Badge>}
@@ -146,17 +159,17 @@ function FlowStepCard({ step, index, isLast }: { step: FlowStep; index: number; 
         </div>
 
         {step.description && (
-          <p className="text-sm text-text-secondary ml-8 mb-1">{step.description}</p>
+          <p style={{ fontSize: 14, color: T.textMuted, marginLeft: 32, marginBottom: 4 }}>{step.description}</p>
         )}
 
         {/* Config dependencies */}
         {step.configDependencies && step.configDependencies.length > 0 && (
-          <div className="ml-8 mt-1 flex flex-wrap items-center gap-1 text-xs">
-            <span className="text-text-tertiary font-medium">Config:</span>
+          <div style={{ marginLeft: 32, marginTop: 4, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4, fontSize: 12 }}>
+            <span style={{ color: T.textDim, fontWeight: 500 }}>Config:</span>
             {step.configDependencies.map((cfg) => (
               <code
                 key={cfg}
-                className="px-1.5 py-0.5 rounded bg-surface-secondary font-mono text-text-secondary border border-border"
+                style={{ padding: "2px 6px", borderRadius: 4, background: T.surface, fontFamily: T.mono, color: T.textMuted, border: "1px solid " + T.surfaceBorder }}
               >
                 {cfg}
               </code>
@@ -166,7 +179,7 @@ function FlowStepCard({ step, index, isLast }: { step: FlowStep; index: number; 
       </div>
 
       {/* Spacer for connector */}
-      {!isLast && <div className="h-4" />}
+      {!isLast && <div style={{ height: 16 }} />}
     </div>
   );
 }
@@ -178,13 +191,13 @@ function MockBoundaryRow({ step }: { step: FlowStep }) {
 
   if (!hasMocks && !hasStubs && !hasConfigDeps) {
     return (
-      <tr className="border-b border-border/50">
-        <td className="py-2 pr-4 text-text-primary text-sm">{step.name || step.id}</td>
-        <td className="py-2 pr-4">
-          {step.type ? <Badge>{step.type}</Badge> : <span className="text-text-tertiary">—</span>}
+      <tr style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+        <td style={{ padding: "8px 16px 8px 0", color: T.text, fontSize: 14 }}>{step.name || step.id}</td>
+        <td style={{ padding: "8px 16px 8px 0" }}>
+          {step.type ? <Badge>{step.type}</Badge> : <span style={{ color: T.textDim }}>\u2014</span>}
         </td>
-        <td className="py-2 pr-4 text-text-tertiary text-sm">None</td>
-        <td className="py-2">
+        <td style={{ padding: "8px 16px 8px 0", color: T.textDim, fontSize: 14 }}>None</td>
+        <td style={{ padding: "8px 0" }}>
           <Badge variant="success">Real</Badge>
         </td>
       </tr>
@@ -192,28 +205,28 @@ function MockBoundaryRow({ step }: { step: FlowStep }) {
   }
 
   return (
-    <tr className="border-b border-border/50">
-      <td className="py-2 pr-4 text-text-primary text-sm">{step.name || step.id}</td>
-      <td className="py-2 pr-4">
-        {step.type ? <Badge>{step.type}</Badge> : <span className="text-text-tertiary">—</span>}
+    <tr style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+      <td style={{ padding: "8px 16px 8px 0", color: T.text, fontSize: 14 }}>{step.name || step.id}</td>
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        {step.type ? <Badge>{step.type}</Badge> : <span style={{ color: T.textDim }}>\u2014</span>}
       </td>
-      <td className="py-2 pr-4">
-        <div className="space-y-1">
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {step.dataStoreOps?.map((op, i) => (
-            <div key={i} className="text-sm text-text-secondary">
-              <code className="font-mono">{op.store}</code>
-              {op.operation && <span className="text-text-tertiary"> ({op.operation})</span>}
+            <div key={i} style={{ fontSize: 14, color: T.textMuted }}>
+              <code style={{ fontFamily: T.mono }}>{op.store}</code>
+              {op.operation && <span style={{ color: T.textDim }}> ({op.operation})</span>}
             </div>
           ))}
           {hasConfigDeps && (
-            <div className="text-xs text-text-tertiary">
+            <div style={{ fontSize: 12, color: T.textDim }}>
               Config: {step.configDependencies!.join(", ")}
             </div>
           )}
         </div>
       </td>
-      <td className="py-2">
-        <div className="flex flex-wrap gap-1">
+      <td style={{ padding: "8px 0" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
           {hasMocks && <Badge variant="warning">Mock</Badge>}
           {hasStubs && <Badge variant="info">Stub</Badge>}
         </div>
@@ -224,42 +237,42 @@ function MockBoundaryRow({ step }: { step: FlowStep }) {
 
 function DataFlowRow({ step }: { step: FlowStep }) {
   return (
-    <tr className="border-b border-border/50">
-      <td className="py-2 pr-4 text-text-primary text-sm">{step.name || step.id}</td>
-      <td className="py-2 pr-4">
+    <tr style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+      <td style={{ padding: "8px 16px 8px 0", color: T.text, fontSize: 14 }}>{step.name || step.id}</td>
+      <td style={{ padding: "8px 16px 8px 0" }}>
         {step.inputs && step.inputs.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {step.inputs.map((input) => (
-              <code key={input} className="text-xs font-mono text-text-secondary">{input}</code>
+              <code key={input} style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}>{input}</code>
             ))}
           </div>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
-      <td className="py-2 pr-4">
+      <td style={{ padding: "8px 16px 8px 0" }}>
         {step.outputs && step.outputs.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {step.outputs.map((output) => (
-              <code key={output} className="text-xs font-mono text-text-secondary">{output}</code>
+              <code key={output} style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}>{output}</code>
             ))}
           </div>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
-      <td className="py-2">
+      <td style={{ padding: "8px 0" }}>
         {step.dataStoreOps && step.dataStoreOps.length > 0 ? (
-          <div className="space-y-1">
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {step.dataStoreOps.map((op, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <code className="text-xs font-mono text-text-secondary">{op.store}</code>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <code style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}>{op.store}</code>
                 {op.operation && <Badge>{op.operation}</Badge>}
               </div>
             ))}
           </div>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
     </tr>
@@ -285,7 +298,7 @@ function generateTestSkeleton(flowName: string, steps: FlowStep[]): string {
     .join("\n");
 
   const stepComments = steps
-    .map((step, i) => `        // Step ${i + 1}: ${step.name || step.id}${step.description ? " — " + step.description : ""}`)
+    .map((step, i) => `        // Step ${i + 1}: ${step.name || step.id}${step.description ? " \u2014 " + step.description : ""}`)
     .join("\n");
 
   return `@SpringBootTest

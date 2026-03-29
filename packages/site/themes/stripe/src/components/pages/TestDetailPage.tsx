@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { IntentSignals } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { CodeBlock } from "../ui/CodeBlock.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
@@ -33,22 +34,23 @@ interface ChannelDescriptor {
   label: string;
   shortLabel: string;
   color: string;
+  bg: string;
 }
 
 const DSTI_CHANNELS: ChannelDescriptor[] = [
-  { key: "nameSemantics", label: "Name Semantics", shortLabel: "Name", color: "bg-blue-100 text-blue-700" },
-  { key: "guardClauses", label: "Guard Clauses", shortLabel: "Guards", color: "bg-red-100 text-red-700" },
-  { key: "branches", label: "Branches", shortLabel: "Branch", color: "bg-purple-100 text-purple-700" },
-  { key: "dataFlow", label: "Data Flow", shortLabel: "Data", color: "bg-cyan-100 text-cyan-700" },
-  { key: "loopProperties", label: "Loop Properties", shortLabel: "Loops", color: "bg-teal-100 text-teal-700" },
-  { key: "errorHandling", label: "Error Handling", shortLabel: "Errors", color: "bg-orange-100 text-orange-700" },
-  { key: "constants", label: "Constants", shortLabel: "Const", color: "bg-gray-100 text-gray-700" },
-  { key: "dependencies", label: "Dependencies", shortLabel: "Deps", color: "bg-indigo-100 text-indigo-700" },
-  { key: "nullChecks", label: "Null Checks", shortLabel: "Null", color: "bg-amber-100 text-amber-700" },
-  { key: "assertions", label: "Assertions", shortLabel: "Assert", color: "bg-emerald-100 text-emerald-700" },
-  { key: "validationAnnotations", label: "Validation Annotations", shortLabel: "Valid", color: "bg-pink-100 text-pink-700" },
-  { key: "logStatements", label: "Log Statements", shortLabel: "Logs", color: "bg-yellow-100 text-yellow-800" },
-  { key: "intentDensityScore", label: "Density Score", shortLabel: "ISD", color: "bg-violet-100 text-violet-700" },
+  { key: "nameSemantics", label: "Name Semantics", shortLabel: "Name", color: T.blue, bg: T.blueBg },
+  { key: "guardClauses", label: "Guard Clauses", shortLabel: "Guards", color: T.red, bg: T.redBg },
+  { key: "branches", label: "Branches", shortLabel: "Branch", color: T.accent, bg: T.accentBg },
+  { key: "dataFlow", label: "Data Flow", shortLabel: "Data", color: "#06b6d4", bg: "rgba(6,182,212,0.08)" },
+  { key: "loopProperties", label: "Loop Properties", shortLabel: "Loops", color: T.green, bg: T.greenBg },
+  { key: "errorHandling", label: "Error Handling", shortLabel: "Errors", color: T.orange, bg: T.orangeBg },
+  { key: "constants", label: "Constants", shortLabel: "Const", color: T.textMuted, bg: T.surface },
+  { key: "dependencies", label: "Dependencies", shortLabel: "Deps", color: T.accent, bg: T.accentBg },
+  { key: "nullChecks", label: "Null Checks", shortLabel: "Null", color: T.yellow, bg: T.yellowBg },
+  { key: "assertions", label: "Assertions", shortLabel: "Assert", color: T.green, bg: T.greenBg },
+  { key: "validationAnnotations", label: "Validation Annotations", shortLabel: "Valid", color: T.pink, bg: "rgba(244,114,182,0.08)" },
+  { key: "logStatements", label: "Log Statements", shortLabel: "Logs", color: T.yellow, bg: T.yellowBg },
+  { key: "intentDensityScore", label: "Density Score", shortLabel: "ISD", color: T.accent, bg: T.accentBg },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -136,7 +138,7 @@ function generateTestCode(method: MethodEntry): string {
   if (guardCount > 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_shouldValidateGuards() {`);
-    lines.push(`    // ${guardCount} guard clause(s) detected — verify precondition checks`);
+    lines.push(`    // ${guardCount} guard clause(s) detected \u2014 verify precondition checks`);
     if (params.length > 0) {
       lines.push(`    assertThrows(IllegalArgumentException.class,`);
       lines.push(`        () -> service.${name}(${params.map(() => "null").join(", ")}));`);
@@ -152,7 +154,7 @@ function generateTestCode(method: MethodEntry): string {
   if (branchCount > 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_shouldCoverBranches() {`);
-    lines.push(`    // ${branchCount} branch(es) detected — verify each path`);
+    lines.push(`    // ${branchCount} branch(es) detected \u2014 verify each path`);
 
     if (branchCount >= 2) {
       lines.push(`    // Path 1: primary branch`);
@@ -174,7 +176,7 @@ function generateTestCode(method: MethodEntry): string {
   if (catchCount > 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_shouldHandleErrors() {`);
-    lines.push(`    // ${catchCount} catch block(s) detected — verify error handling`);
+    lines.push(`    // ${catchCount} catch block(s) detected \u2014 verify error handling`);
     if (caughtTypes.length > 0) {
       for (const ct of caughtTypes.slice(0, 3)) {
         const shortType = ct.split(".").pop() || ct;
@@ -192,7 +194,7 @@ function generateTestCode(method: MethodEntry): string {
   if (nullChecks > 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_shouldHandleNulls() {`);
-    lines.push(`    // ${nullChecks} null check(s) detected — verify null safety`);
+    lines.push(`    // ${nullChecks} null check(s) detected \u2014 verify null safety`);
     for (const p of params.slice(0, 3)) {
       lines.push(`    assertThrows(NullPointerException.class,`);
       lines.push(`        () -> service.${name}(${params.map((pp) => pp.name === p.name ? "null" : `valid${camelToTitle(pp.name).replace(/\s/g, "")}`).join(", ")}));`);
@@ -209,7 +211,7 @@ function generateTestCode(method: MethodEntry): string {
   if (validations > 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_shouldValidateInput() {`);
-    lines.push(`    // ${validations} validation annotation(s) detected — verify constraints`);
+    lines.push(`    // ${validations} validation annotation(s) detected \u2014 verify constraints`);
     lines.push(`    assertThrows(ConstraintViolationException.class,`);
     lines.push(`        () -> service.${name}(${params.map(() => "invalidValue").join(", ")}));`);
     lines.push(`}`);
@@ -220,7 +222,7 @@ function generateTestCode(method: MethodEntry): string {
   if (assertions > 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_shouldMeetInvariants() {`);
-    lines.push(`    // ${assertions} assertion(s) detected — verify invariants hold`);
+    lines.push(`    // ${assertions} assertion(s) detected \u2014 verify invariants hold`);
     lines.push(`    ${returnType !== "void" ? `var result = ` : ""}service.${name}(${params.map((p) => `/* ${p.name} */ validValue`).join(", ")});`);
     if (returnType !== "void") {
       lines.push(`    assertNotNull(result);`);
@@ -233,7 +235,7 @@ function generateTestCode(method: MethodEntry): string {
   if (guardCount === 0 && branchCount === 0 && catchCount === 0 && nullChecks === 0 && validations === 0 && assertions === 0) {
     lines.push(`@Test`);
     lines.push(`void test${camelToTitle(name).replace(/\s/g, "")}_happyPath() {`);
-    lines.push(`    // ISD ${isd.toFixed(2)} — limited signals, basic test`);
+    lines.push(`    // ISD ${isd.toFixed(2)} \u2014 limited signals, basic test`);
     lines.push(`    ${returnType !== "void" ? `var result = ` : ""}service.${name}(${params.map((p) => `/* ${p.name} */ testValue`).join(", ")});`);
     if (returnType !== "void") {
       lines.push(`    assertNotNull(result);`);
@@ -262,12 +264,12 @@ export function TestDetailPage({ data }: TestDetailPageProps) {
         ]}
       />
 
-      <header className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-bold text-text-primary">Test Detail: {className}</h1>
+      <header style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text }}>Test Detail: {className}</h1>
           {artifact.label && <Badge variant="primary">{artifact.label}</Badge>}
         </div>
-        <p className="text-text-secondary">
+        <p style={{ color: T.textMuted }}>
           {methods.length} method{methods.length !== 1 ? "s" : ""} with intent signals.
           Select a method to view generated test code.
         </p>
@@ -276,80 +278,100 @@ export function TestDetailPage({ data }: TestDetailPageProps) {
       {/* ============================================================ */}
       {/* Split Layout: method list (left) + test preview (right)       */}
       {/* ============================================================ */}
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {/* ---- Left: method list ---- */}
-        <div className="lg:w-[360px] lg:flex-shrink-0">
-          <div className="sticky top-4">
-            <h2 className="text-sm font-medium text-text-tertiary uppercase mb-3">
-              Methods ({methods.length})
-            </h2>
-            <div className="space-y-1 max-h-[calc(100vh-200px)] overflow-y-auto pr-1">
-              {methods.map((method, i) => {
-                const signals = method.intentSignals ?? {};
-                const isd = getIsd(signals);
-                const isSelected = i === selectedIndex;
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        {/* Responsive: stack on small, side-by-side on large */}
+        <div style={{ display: "flex", gap: 24 }}>
+          {/* ---- Left: method list ---- */}
+          <div style={{ width: 360, flexShrink: 0 }}>
+            <div style={{ position: "sticky", top: 16 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 12 }}>
+                Methods ({methods.length})
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: "calc(100vh - 200px)", overflowY: "auto", paddingRight: 4 }}>
+                {methods.map((method, i) => {
+                  const signals = method.intentSignals ?? {};
+                  const isd = getIsd(signals);
+                  const isSelected = i === selectedIndex;
 
-                return (
-                  <button
-                    key={method.qualified}
-                    onClick={() => setSelectedIndex(i)}
-                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                      isSelected
-                        ? "border-blue-500 bg-blue-50 ring-1 ring-blue-200"
-                        : "border-border bg-surface hover:bg-surface-secondary"
-                    }`}
-                  >
-                    {/* Method name + ISD badge */}
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <code className="text-sm font-mono text-text-primary truncate flex-1 min-w-0">
-                        {shortMethodName(method.qualified)}
-                      </code>
-                      <Badge variant={isdBadgeVariant(isd)}>
-                        {(isd * 100).toFixed(0)}%
-                      </Badge>
-                    </div>
-
-                    {/* Parameters */}
-                    {method.params && method.params.length > 0 && (
-                      <div className="text-xs text-text-tertiary mb-1.5 truncate">
-                        ({method.params.map((p) => `${p.type} ${p.name}`).join(", ")})
+                  return (
+                    <button
+                      key={method.qualified}
+                      onClick={() => setSelectedIndex(i)}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: 12,
+                        borderRadius: 8,
+                        border: isSelected
+                          ? "1px solid " + T.accent
+                          : "1px solid " + T.surfaceBorder,
+                        background: isSelected ? T.accentBg : T.surface,
+                        cursor: "pointer",
+                        transition: "border-color 0.15s, background 0.15s",
+                        outline: isSelected ? "1px solid " + T.accentBorder : "none",
+                      }}
+                    >
+                      {/* Method name + ISD badge */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                        <code style={{ fontSize: 14, fontFamily: T.mono, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
+                          {shortMethodName(method.qualified)}
+                        </code>
+                        <Badge variant={isdBadgeVariant(isd)}>
+                          {(isd * 100).toFixed(0)}%
+                        </Badge>
                       </div>
-                    )}
 
-                    {/* Return type */}
-                    {method.returns?.type && (
-                      <div className="text-xs text-text-tertiary mb-1.5">
-                        returns <span className="font-mono">{method.returns.type}</span>
+                      {/* Parameters */}
+                      {method.params && method.params.length > 0 && (
+                        <div style={{ fontSize: 12, color: T.textDim, marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          ({method.params.map((p) => `${p.type} ${p.name}`).join(", ")})
+                        </div>
+                      )}
+
+                      {/* Return type */}
+                      {method.returns?.type && (
+                        <div style={{ fontSize: 12, color: T.textDim, marginBottom: 6 }}>
+                          returns <span style={{ fontFamily: T.mono }}>{method.returns.type}</span>
+                        </div>
+                      )}
+
+                      {/* Channel badges */}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        {DSTI_CHANNELS.map((ch) => {
+                          const val = channelValue(signals, ch.key);
+                          if (val === null) return null;
+                          return (
+                            <span
+                              key={ch.key}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                fontSize: 10,
+                                fontWeight: 500,
+                                background: ch.bg,
+                                color: ch.color,
+                              }}
+                            >
+                              {ch.shortLabel}: {val}
+                            </span>
+                          );
+                        })}
                       </div>
-                    )}
-
-                    {/* Channel badges */}
-                    <div className="flex flex-wrap gap-1">
-                      {DSTI_CHANNELS.map((ch) => {
-                        const val = channelValue(signals, ch.key);
-                        if (val === null) return null;
-                        return (
-                          <span
-                            key={ch.key}
-                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${ch.color}`}
-                          >
-                            {ch.shortLabel}: {val}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* ---- Right: test code preview ---- */}
-        <div className="flex-1 min-w-0">
-          {selectedMethod && (
-            <MethodTestPreview method={selectedMethod} />
-          )}
+          {/* ---- Right: test code preview ---- */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {selectedMethod && (
+              <MethodTestPreview method={selectedMethod} />
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -367,11 +389,11 @@ function MethodTestPreview({ method }: { method: MethodEntry }) {
   const obj = signals.nameSemantics?.object;
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* Method header card */}
-      <div className="p-5 rounded-lg border border-border bg-surface-secondary">
-        <div className="flex items-center gap-3 mb-3">
-          <code className="text-base font-mono font-semibold text-text-primary flex-1 min-w-0 truncate">
+      <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder, background: T.surface }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          <code style={{ fontSize: 16, fontFamily: T.mono, fontWeight: 600, color: T.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {method.qualified}
           </code>
           <Badge variant={isdBadgeVariant(isd)}>
@@ -380,29 +402,29 @@ function MethodTestPreview({ method }: { method: MethodEntry }) {
         </div>
 
         {/* Signature */}
-        <div className="flex flex-wrap gap-4 text-sm text-text-secondary mb-3">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14, color: T.textMuted, marginBottom: 12 }}>
           {method.params && method.params.length > 0 && (
             <div>
-              <span className="text-text-tertiary">Params: </span>
+              <span style={{ color: T.textDim }}>Params: </span>
               {method.params.map((p, i) => (
                 <span key={p.name}>
                   {i > 0 && ", "}
-                  <code className="font-mono text-xs">{p.type}</code>{" "}
-                  <span className="text-text-primary">{p.name}</span>
+                  <code style={{ fontFamily: T.mono, fontSize: 12 }}>{p.type}</code>{" "}
+                  <span style={{ color: T.text }}>{p.name}</span>
                 </span>
               ))}
             </div>
           )}
           {method.returns?.type && (
             <div>
-              <span className="text-text-tertiary">Returns: </span>
-              <code className="font-mono text-xs">{method.returns.type}</code>
+              <span style={{ color: T.textDim }}>Returns: </span>
+              <code style={{ fontFamily: T.mono, fontSize: 12 }}>{method.returns.type}</code>
             </div>
           )}
         </div>
 
         {/* Intent & semantics */}
-        <div className="flex flex-wrap gap-2">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <Badge variant="info">{intent}</Badge>
           {verb && <Badge>verb: {verb}</Badge>}
           {obj && <Badge>object: {obj}</Badge>}
@@ -411,26 +433,38 @@ function MethodTestPreview({ method }: { method: MethodEntry }) {
 
       {/* Channel detail grid */}
       <div>
-        <h3 className="text-sm font-medium text-text-primary mb-3">DSTI Channel Breakdown</h3>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: T.text, marginBottom: 12 }}>DSTI Channel Breakdown</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 8 }}>
           {DSTI_CHANNELS.map((ch) => {
             const val = channelValue(signals, ch.key);
             const active = val !== null;
             return (
               <div
                 key={ch.key}
-                className={`px-3 py-2 rounded-lg border text-center ${
-                  active
-                    ? "border-border bg-surface-secondary"
-                    : "border-border/50 bg-surface opacity-50"
-                }`}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "1px solid " + (active ? T.surfaceBorder : T.surfaceBorder + "80"),
+                  textAlign: "center",
+                  background: active ? T.surface : "transparent",
+                  opacity: active ? 1 : 0.5,
+                }}
               >
-                <div className={`text-lg font-bold ${active ? "text-text-primary" : "text-text-tertiary"}`}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: active ? T.text : T.textDim }}>
                   {active ? val : "--"}
                 </div>
-                <div className="text-xs text-text-tertiary truncate">{ch.label}</div>
+                <div style={{ fontSize: 12, color: T.textDim, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ch.label}</div>
                 {active && (
-                  <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${ch.color}`}>
+                  <span style={{
+                    display: "inline-block",
+                    marginTop: 4,
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                    fontSize: 10,
+                    fontWeight: 500,
+                    background: ch.bg,
+                    color: ch.color,
+                  }}>
                     active
                   </span>
                 )}
@@ -442,19 +476,19 @@ function MethodTestPreview({ method }: { method: MethodEntry }) {
 
       {/* Detailed signal info */}
       {signals.dataFlow && (
-        <div className="p-4 rounded-lg border border-border">
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Data Flow</h4>
-          <div className="flex flex-wrap gap-4 text-sm">
+        <div style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Data Flow</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14 }}>
             {signals.dataFlow.reads && signals.dataFlow.reads.length > 0 && (
               <div>
-                <span className="text-text-tertiary">Reads: </span>
-                <span className="text-text-secondary">{signals.dataFlow.reads.join(", ")}</span>
+                <span style={{ color: T.textDim }}>Reads: </span>
+                <span style={{ color: T.textMuted }}>{signals.dataFlow.reads.join(", ")}</span>
               </div>
             )}
             {signals.dataFlow.writes && signals.dataFlow.writes.length > 0 && (
               <div>
-                <span className="text-text-tertiary">Writes: </span>
-                <span className="text-text-secondary">{signals.dataFlow.writes.join(", ")}</span>
+                <span style={{ color: T.textDim }}>Writes: </span>
+                <span style={{ color: T.textMuted }}>{signals.dataFlow.writes.join(", ")}</span>
               </div>
             )}
           </div>
@@ -462,11 +496,11 @@ function MethodTestPreview({ method }: { method: MethodEntry }) {
       )}
 
       {signals.errorHandling?.caughtTypes && signals.errorHandling.caughtTypes.length > 0 && (
-        <div className="p-4 rounded-lg border border-border">
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Caught Exception Types</h4>
-          <div className="flex flex-wrap gap-2">
+        <div style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Caught Exception Types</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {signals.errorHandling.caughtTypes.map((t) => (
-              <code key={t} className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs font-mono">{t}</code>
+              <code key={t} style={{ padding: "4px 8px", borderRadius: 4, background: T.redBg, color: T.red, fontSize: 12, fontFamily: T.mono }}>{t}</code>
             ))}
           </div>
         </div>
@@ -474,11 +508,11 @@ function MethodTestPreview({ method }: { method: MethodEntry }) {
 
       {/* Generated test code */}
       <div>
-        <h3 className="text-sm font-medium text-text-primary mb-3">Generated Test Code</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: T.text, marginBottom: 12 }}>Generated Test Code</h3>
         <CodeBlock
           code={generateTestCode(method)}
           language="java"
-          title={`${shortMethodName(method.qualified)}Test.java — auto-generated skeleton`}
+          title={`${shortMethodName(method.qualified)}Test.java \u2014 auto-generated skeleton`}
         />
       </div>
     </div>

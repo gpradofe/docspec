@@ -1,5 +1,6 @@
 import React from "react";
 import type { GapReportPageData, IntentGraph, IntentMethod, IntentSignals } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -94,13 +95,13 @@ export function GapReportPage({ data }: GapReportPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Gap Report</h1>
-      <p className="text-text-secondary mb-8">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>Gap Report</h1>
+      <p style={{ color: T.textMuted, marginBottom: 32 }}>
         DSTI gap analysis and actionable recommendations for {artifact.label}.
       </p>
 
       {/* Summary Cards */}
-      <div className="flex flex-wrap gap-4 mb-8">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 32 }}>
         <SummaryCard label="Total Methods" value={totalMethods} />
         <SummaryCard label="Methods With Gaps" value={methodsWithGaps} />
         <SummaryCard label="Critical Gaps" value={criticalGaps} />
@@ -109,24 +110,24 @@ export function GapReportPage({ data }: GapReportPageProps) {
 
       {/* Gap Categories */}
       {categories.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="categories">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="categories">
             Gap Categories
           </h2>
-          <div className="space-y-6">
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {categories.map(([category, entries]) => {
               const catMeta = GAP_CATEGORIES[category];
               const label = catMeta?.label ?? category;
               const severity = catMeta?.severity ?? "info";
 
               return (
-                <div key={category} className="p-5 rounded-lg border border-border">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-sm font-semibold text-text-primary">{label}</h3>
+                <div key={category} style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: T.text }}>{label}</h3>
                     <Badge variant={SEVERITY_VARIANT[severity]}>{severity}</Badge>
                     <Badge variant="info">{entries.length}</Badge>
                   </div>
-                  <div className="space-y-2">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {entries.map((gap) => (
                       <GapRow key={gap.qualified} gap={gap} />
                     ))}
@@ -140,39 +141,39 @@ export function GapReportPage({ data }: GapReportPageProps) {
 
       {/* Priority List */}
       {priorityList.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="priority">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="priority">
             Priority List (Top 10)
           </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">#</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Method</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Category</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Severity</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">ISD</th>
-                  <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Action</th>
+                <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>#</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Method</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Category</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Severity</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>ISD</th>
+                  <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {priorityList.map((gap, i) => (
-                  <tr key={gap.qualified} className="border-b border-border/50">
-                    <td className="py-2 pr-4 text-text-tertiary text-xs">{i + 1}</td>
-                    <td className="py-2 pr-4">
-                      <code className="font-mono text-sm text-text-primary">{gap.methodName}</code>
+                  <tr key={gap.qualified} style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+                    <td style={{ padding: "8px 16px 8px 0", color: T.textDim, fontSize: 12 }}>{i + 1}</td>
+                    <td style={{ padding: "8px 16px 8px 0" }}>
+                      <code style={{ fontFamily: T.mono, fontSize: 14, color: T.text }}>{gap.methodName}</code>
                     </td>
-                    <td className="py-2 pr-4">
+                    <td style={{ padding: "8px 16px 8px 0" }}>
                       <Badge>{GAP_CATEGORIES[gap.category]?.label ?? gap.category}</Badge>
                     </td>
-                    <td className="py-2 pr-4">
+                    <td style={{ padding: "8px 16px 8px 0" }}>
                       <Badge variant={SEVERITY_VARIANT[gap.severity]}>{gap.severity}</Badge>
                     </td>
-                    <td className="py-2 pr-4">
-                      <span className="text-xs font-mono text-text-secondary">{gap.isdScore.toFixed(2)}</span>
+                    <td style={{ padding: "8px 16px 8px 0" }}>
+                      <span style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}>{gap.isdScore.toFixed(2)}</span>
                     </td>
-                    <td className="py-2 text-sm text-text-secondary">{gap.recommendation}</td>
+                    <td style={{ padding: "8px 0", fontSize: 14, color: T.textMuted }}>{gap.recommendation}</td>
                   </tr>
                 ))}
               </tbody>
@@ -183,22 +184,22 @@ export function GapReportPage({ data }: GapReportPageProps) {
 
       {/* Recommendations */}
       {gaps.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="recommendations">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="recommendations">
             Recommendations
           </h2>
-          <div className="space-y-3">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {gaps.map((gap) => (
-              <div key={gap.qualified} className="p-4 rounded-lg border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <code className="text-sm font-mono text-text-primary flex-1 min-w-0 truncate">
+              <div key={gap.qualified} style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <code style={{ fontSize: 14, fontFamily: T.mono, color: T.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {gap.qualified}
                   </code>
                   <Badge variant={SEVERITY_VARIANT[gap.severity]}>{gap.severity}</Badge>
                 </div>
-                <p className="text-sm text-text-secondary mb-1">{gap.description}</p>
-                <p className="text-sm text-text-tertiary">
-                  <span className="font-medium">Suggested action:</span> {gap.recommendation}
+                <p style={{ fontSize: 14, color: T.textMuted, marginBottom: 4 }}>{gap.description}</p>
+                <p style={{ fontSize: 14, color: T.textDim }}>
+                  <span style={{ fontWeight: 500 }}>Suggested action:</span> {gap.recommendation}
                 </p>
               </div>
             ))}
@@ -208,8 +209,8 @@ export function GapReportPage({ data }: GapReportPageProps) {
 
       {/* Empty state */}
       {gaps.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-text-secondary">
+        <div style={{ textAlign: "center", padding: "48px 0" }}>
+          <p style={{ color: T.textMuted }}>
             No gaps detected. All methods have sufficient intent coverage.
           </p>
         </div>
@@ -220,24 +221,24 @@ export function GapReportPage({ data }: GapReportPageProps) {
 
 function SummaryCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="px-4 py-3 rounded-lg bg-surface-secondary border border-border">
-      <div className="text-2xl font-bold text-text-primary">{value}</div>
-      <div className="text-xs text-text-tertiary">{label}</div>
+    <div style={{ padding: "12px 16px", borderRadius: 8, background: T.surface, border: "1px solid " + T.surfaceBorder }}>
+      <div style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{value}</div>
+      <div style={{ fontSize: 12, color: T.textDim }}>{label}</div>
     </div>
   );
 }
 
 function GapRow({ gap }: { gap: GapEntry }) {
   return (
-    <div className="p-3 rounded-lg bg-surface-secondary">
-      <div className="flex items-center gap-2 mb-1">
-        <code className="text-xs font-mono text-text-primary flex-1 min-w-0 truncate">
+    <div style={{ padding: 12, borderRadius: 8, background: T.surface }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+        <code style={{ fontSize: 12, fontFamily: T.mono, color: T.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {gap.qualified}
         </code>
         <Badge variant={SEVERITY_VARIANT[gap.severity]}>{gap.severity}</Badge>
-        <span className="text-xs font-mono text-text-tertiary">{gap.isdScore.toFixed(2)}</span>
+        <span style={{ fontSize: 12, fontFamily: T.mono, color: T.textDim }}>{gap.isdScore.toFixed(2)}</span>
       </div>
-      <p className="text-xs text-text-secondary">{gap.description}</p>
+      <p style={{ fontSize: 12, color: T.textMuted }}>{gap.description}</p>
     </div>
   );
 }

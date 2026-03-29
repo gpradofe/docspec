@@ -1,5 +1,6 @@
 import React from "react";
 import type { TestOverviewPageData, IntentMethod, IntentSignals } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -43,11 +44,11 @@ function getIsd(m: IntentMethod): number {
 }
 
 function isdColor(score: number): string {
-  if (score >= 0.8) return "bg-emerald-500";
-  if (score >= 0.6) return "bg-emerald-400";
-  if (score >= 0.4) return "bg-amber-400";
-  if (score >= 0.2) return "bg-amber-500";
-  return "bg-red-500";
+  if (score >= 0.8) return T.green;
+  if (score >= 0.6) return "#34d399";
+  if (score >= 0.4) return T.yellow;
+  if (score >= 0.2) return "#f59e0b";
+  return T.red;
 }
 
 function isdBadgeVariant(score: number): "success" | "warning" | "error" {
@@ -69,16 +70,16 @@ interface Bucket {
   min: number;
   max: number;
   color: string;
-  bgLight: string;
-  textColor: string;
+  badgeColor: string;
+  badgeBg: string;
 }
 
 const BUCKETS: Bucket[] = [
-  { label: "0 - 0.2", min: 0, max: 0.2, color: "bg-red-500", bgLight: "bg-red-50", textColor: "text-red-700" },
-  { label: "0.2 - 0.4", min: 0.2, max: 0.4, color: "bg-amber-500", bgLight: "bg-amber-50", textColor: "text-amber-700" },
-  { label: "0.4 - 0.6", min: 0.4, max: 0.6, color: "bg-amber-400", bgLight: "bg-amber-50", textColor: "text-amber-700" },
-  { label: "0.6 - 0.8", min: 0.6, max: 0.8, color: "bg-emerald-400", bgLight: "bg-emerald-50", textColor: "text-emerald-700" },
-  { label: "0.8 - 1.0", min: 0.8, max: 1.0, color: "bg-emerald-500", bgLight: "bg-emerald-50", textColor: "text-emerald-700" },
+  { label: "0 - 0.2", min: 0, max: 0.2, color: T.red, badgeColor: T.red, badgeBg: T.redBg },
+  { label: "0.2 - 0.4", min: 0.2, max: 0.4, color: "#f59e0b", badgeColor: T.yellow, badgeBg: T.yellowBg },
+  { label: "0.4 - 0.6", min: 0.4, max: 0.6, color: T.yellow, badgeColor: T.yellow, badgeBg: T.yellowBg },
+  { label: "0.6 - 0.8", min: 0.6, max: 0.8, color: "#34d399", badgeColor: T.green, badgeBg: T.greenBg },
+  { label: "0.8 - 1.0", min: 0.8, max: 1.0, color: T.green, badgeColor: T.green, badgeBg: T.greenBg },
 ];
 
 function bucketize(methods: IntentMethod[]): Map<string, IntentMethod[]> {
@@ -158,20 +159,20 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Test Overview</h1>
-      <p className="text-text-secondary mb-6">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>Test Overview</h1>
+      <p style={{ color: T.textMuted, marginBottom: 24 }}>
         Intent analysis and test strategy insights for {artifact.label}.
       </p>
 
       {/* ============================================================ */}
       {/* SECTION 1 — Coverage Dashboard                                */}
       {/* ============================================================ */}
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="coverage-dashboard">
+      <section style={{ marginBottom: 40 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="coverage-dashboard">
           Coverage Dashboard
         </h2>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-5 mb-6">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16, marginBottom: 24 }}>
           <StatCard label="Methods Analyzed" value={totalMethods} />
           <StatCard label="With Intent Signals" value={withSignals} />
           <StatCard label="Avg. ISD Score" value={avgDensity.toFixed(2)} />
@@ -181,20 +182,25 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
 
         {/* Analysis coverage percentage bar */}
         {totalMethods > 0 && (
-          <div className="p-4 rounded-lg border border-border bg-surface-secondary">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-text-primary">DSTI Analysis Coverage</span>
-              <span className="text-sm font-mono text-text-secondary">
+          <div style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder, background: T.surface }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: T.text }}>DSTI Analysis Coverage</span>
+              <span style={{ fontSize: 14, fontFamily: T.mono, color: T.textMuted }}>
                 {withSignals}/{totalMethods} ({totalMethods > 0 ? Math.round((withSignals / totalMethods) * 100) : 0}%)
               </span>
             </div>
-            <div className="h-3 rounded-full bg-surface-tertiary overflow-hidden">
+            <div style={{ height: 12, borderRadius: 999, background: T.surfaceBorder, overflow: "hidden" }}>
               <div
-                className="h-full rounded-full bg-blue-500 transition-all"
-                style={{ width: `${totalMethods > 0 ? (withSignals / totalMethods) * 100 : 0}%` }}
+                style={{
+                  height: "100%",
+                  borderRadius: 999,
+                  background: T.blue,
+                  transition: "all 0.3s",
+                  width: `${totalMethods > 0 ? (withSignals / totalMethods) * 100 : 0}%`,
+                }}
               />
             </div>
-            <div className="flex justify-between mt-3 text-xs text-text-tertiary">
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, fontSize: 12, color: T.textDim }}>
               <span>Highest ISD: {highestMethods[0] ? `${getIsd(highestMethods[0]).toFixed(2)} (${shortName(highestMethods[0].qualified)})` : "N/A"}</span>
               <span>Lowest ISD: {lowestMethods[0] ? `${getIsd(lowestMethods[0]).toFixed(2)} (${shortName(lowestMethods[0].qualified)})` : "N/A"}</span>
             </div>
@@ -205,43 +211,52 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
       {/* ============================================================ */}
       {/* SECTION 2 — ISD Histogram                                     */}
       {/* ============================================================ */}
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="isd-histogram">
+      <section style={{ marginBottom: 40 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="isd-histogram">
           ISD Distribution Histogram
         </h2>
-        <p className="text-sm text-text-secondary mb-4">
+        <p style={{ fontSize: 14, color: T.textMuted, marginBottom: 16 }}>
           Distribution of Intent Signal Density scores across all methods. Higher ISD indicates richer
           semantic information available for test generation.
         </p>
 
-        <div className="p-5 rounded-lg border border-border bg-surface-secondary">
-          <div className="space-y-3">
+        <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder, background: T.surface }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {BUCKETS.map((bucket) => {
               const items = buckets.get(bucket.label) || [];
               const count = items.length;
               const pct = totalMethods > 0 ? (count / totalMethods) * 100 : 0;
 
               return (
-                <div key={bucket.label} className="flex items-center gap-3">
-                  <span className="text-xs font-mono text-text-tertiary w-16 flex-shrink-0 text-right">
+                <div key={bucket.label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 12, fontFamily: T.mono, color: T.textDim, width: 64, flexShrink: 0, textAlign: "right" }}>
                     {bucket.label}
                   </span>
-                  <div className="flex-1 h-7 rounded bg-surface-tertiary overflow-hidden relative">
+                  <div style={{ flex: 1, height: 28, borderRadius: 4, background: T.surfaceBorder, overflow: "hidden", position: "relative" }}>
                     <div
-                      className={`h-full rounded ${bucket.color} transition-all`}
-                      style={{ width: `${Math.max(pct, count > 0 ? 2 : 0)}%` }}
+                      style={{
+                        height: "100%",
+                        borderRadius: 4,
+                        background: bucket.color,
+                        transition: "all 0.3s",
+                        width: `${Math.max(pct, count > 0 ? 2 : 0)}%`,
+                      }}
                     />
-                    {count > 0 && (
-                      <span className="absolute inset-y-0 flex items-center text-xs font-medium px-2 text-white"
-                        style={{ left: `${Math.max(pct, 2)}%` }}>
-                      </span>
-                    )}
                   </div>
-                  <div className="flex items-center gap-2 w-28 flex-shrink-0">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${bucket.bgLight} ${bucket.textColor}`}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, width: 112, flexShrink: 0 }}>
+                    <span style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      background: bucket.badgeBg,
+                      color: bucket.badgeColor,
+                    }}>
                       {count}
                     </span>
-                    <span className="text-xs text-text-tertiary">
+                    <span style={{ fontSize: 12, color: T.textDim }}>
                       ({pct.toFixed(0)}%)
                     </span>
                   </div>
@@ -251,15 +266,15 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border text-xs text-text-tertiary">
-            <span className="flex items-center gap-1">
-              <span className="inline-block w-3 h-3 rounded bg-red-500" /> Low (blind spots)
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 16, paddingTop: 12, borderTop: "1px solid " + T.surfaceBorder, fontSize: 12, color: T.textDim }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 4, background: T.red }} /> Low (blind spots)
             </span>
-            <span className="flex items-center gap-1">
-              <span className="inline-block w-3 h-3 rounded bg-amber-400" /> Medium
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 4, background: T.yellow }} /> Medium
             </span>
-            <span className="flex items-center gap-1">
-              <span className="inline-block w-3 h-3 rounded bg-emerald-500" /> High (rich signals)
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 4, background: T.green }} /> High (rich signals)
             </span>
           </div>
         </div>
@@ -268,16 +283,16 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
       {/* ============================================================ */}
       {/* SECTION 3 — Generated Test Summary                            */}
       {/* ============================================================ */}
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="test-summary">
+      <section style={{ marginBottom: 40 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="test-summary">
           Generated Test Summary
         </h2>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>
           {/* Left: stats */}
-          <div className="p-5 rounded-lg border border-border">
-            <h3 className="text-sm font-medium text-text-primary mb-3">Test Generation Potential</h3>
-            <div className="space-y-3 text-sm">
+          <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+            <h3 style={{ fontSize: 14, fontWeight: 500, color: T.text, marginBottom: 12 }}>Test Generation Potential</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14 }}>
               <SummaryRow label="Total methods analyzed" value={totalMethods} />
               <SummaryRow label="Methods with test signals" value={withSignals} />
               <SummaryRow
@@ -304,27 +319,31 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
           </div>
 
           {/* Right: channel coverage breakdown */}
-          <div className="p-5 rounded-lg border border-border">
-            <h3 className="text-sm font-medium text-text-primary mb-3">
+          <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+            <h3 style={{ fontSize: 14, fontWeight: 500, color: T.text, marginBottom: 12 }}>
               Channel Coverage Breakdown
             </h3>
-            <div className="space-y-2">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {channelCoverage.map((ch) => {
                 const pct = totalMethods > 0 ? (ch.count / totalMethods) * 100 : 0;
+                const barColor = pct >= 70 ? T.green : pct >= 30 ? T.yellow : T.red;
                 return (
-                  <div key={ch.key} className="flex items-center gap-2">
-                    <span className="text-xs text-text-secondary w-36 flex-shrink-0 truncate">
+                  <div key={ch.key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: T.textMuted, width: 144, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {ch.label}
                     </span>
-                    <div className="flex-1 h-2 rounded-full bg-surface-tertiary overflow-hidden">
+                    <div style={{ flex: 1, height: 8, borderRadius: 999, background: T.surfaceBorder, overflow: "hidden" }}>
                       <div
-                        className={`h-full rounded-full transition-all ${
-                          pct >= 70 ? "bg-emerald-500" : pct >= 30 ? "bg-amber-400" : "bg-red-400"
-                        }`}
-                        style={{ width: `${pct}%` }}
+                        style={{
+                          height: "100%",
+                          borderRadius: 999,
+                          transition: "all 0.3s",
+                          background: barColor,
+                          width: `${pct}%`,
+                        }}
                       />
                     </div>
-                    <span className="text-xs font-mono text-text-tertiary w-14 text-right flex-shrink-0">
+                    <span style={{ fontSize: 12, fontFamily: T.mono, color: T.textDim, width: 56, textAlign: "right", flexShrink: 0 }}>
                       {ch.count}/{totalMethods}
                     </span>
                   </div>
@@ -338,30 +357,30 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
       {/* ============================================================ */}
       {/* SECTION 4 — Gap Report                                        */}
       {/* ============================================================ */}
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="gap-report">
+      <section style={{ marginBottom: 40 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="gap-report">
           Gap Report
         </h2>
-        <p className="text-sm text-text-secondary mb-4">
+        <p style={{ fontSize: 14, color: T.textMuted, marginBottom: 16 }}>
           Methods with lowest ISD scores and missing critical channels represent potential blind spots
           in test coverage.
         </p>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>
           {/* Lowest ISD methods */}
-          <div className="p-5 rounded-lg border border-border">
-            <h3 className="text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
+          <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+            <h3 style={{ fontSize: 14, fontWeight: 500, color: T.text, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: T.red }} />
               Lowest ISD Methods
             </h3>
             {lowestMethods.length === 0 ? (
-              <p className="text-sm text-text-tertiary">No methods found.</p>
+              <p style={{ fontSize: 14, color: T.textDim }}>No methods found.</p>
             ) : (
-              <div className="space-y-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {lowestMethods.map((m) => (
-                  <div key={m.qualified} className="flex items-center gap-2 p-2 rounded bg-surface-secondary">
+                  <div key={m.qualified} style={{ display: "flex", alignItems: "center", gap: 8, padding: 8, borderRadius: 4, background: T.surface }}>
                     <Badge variant={isdBadgeVariant(getIsd(m))}>{getIsd(m).toFixed(2)}</Badge>
-                    <code className="text-xs font-mono text-text-secondary truncate flex-1 min-w-0">
+                    <code style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
                       {shortName(m.qualified)}
                     </code>
                   </div>
@@ -371,26 +390,26 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
           </div>
 
           {/* Missing critical channels */}
-          <div className="p-5 rounded-lg border border-border">
-            <h3 className="text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
+          <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+            <h3 style={{ fontSize: 14, fontWeight: 500, color: T.text, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: T.yellow }} />
               Missing Critical Channels
             </h3>
             {methodsWithGaps.length === 0 ? (
-              <p className="text-sm text-text-tertiary">All methods have complete critical channel coverage.</p>
+              <p style={{ fontSize: 14, color: T.textDim }}>All methods have complete critical channel coverage.</p>
             ) : (
-              <div className="space-y-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {methodsWithGaps.map(({ method, missingChannels }) => (
-                  <div key={method.qualified} className="p-2 rounded bg-surface-secondary">
-                    <div className="flex items-center gap-2 mb-1">
-                      <code className="text-xs font-mono text-text-secondary truncate flex-1 min-w-0">
+                  <div key={method.qualified} style={{ padding: 8, borderRadius: 4, background: T.surface }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <code style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
                         {shortName(method.qualified)}
                       </code>
-                      <span className="text-xs text-text-tertiary flex-shrink-0">
+                      <span style={{ fontSize: 12, color: T.textDim, flexShrink: 0 }}>
                         {missingChannels.length} missing
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1">
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                       {missingChannels.map((ch) => (
                         <Badge key={ch} variant="warning">{ch}</Badge>
                       ))}
@@ -403,12 +422,12 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
         </div>
 
         {/* Recommendations */}
-        <div className="mt-4 p-5 rounded-lg border border-border bg-blue-50">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Recommendations</h3>
-          <ul className="space-y-1 text-sm text-blue-800">
+        <div style={{ marginTop: 16, padding: 20, borderRadius: 8, border: "1px solid " + T.blueBorder, background: T.blueBg }}>
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: T.blue, marginBottom: 8 }}>Recommendations</h3>
+          <ul style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 14, color: T.textMuted, listStyle: "none", padding: 0, margin: 0 }}>
             {lowestMethods.length > 0 && lowestMethods[0] && getIsd(lowestMethods[0]) < 0.2 && (
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5 flex-shrink-0">&#x2022;</span>
+              <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ color: T.blue, marginTop: 2, flexShrink: 0 }}>&#x2022;</span>
                 <span>
                   {lowestMethods.filter((m) => getIsd(m) < 0.2).length} method(s) have very low ISD
                   (&lt; 0.2). Consider adding guard clauses, validation, or descriptive naming to
@@ -417,8 +436,8 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
               </li>
             )}
             {methodsWithGaps.filter((g) => g.missingChannels.includes("guardClauses")).length > 0 && (
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5 flex-shrink-0">&#x2022;</span>
+              <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ color: T.blue, marginTop: 2, flexShrink: 0 }}>&#x2022;</span>
                 <span>
                   {methodsWithGaps.filter((g) => g.missingChannels.includes("guardClauses")).length} method(s)
                   lack guard clauses. Adding precondition checks enables automatic boundary-condition test generation.
@@ -426,8 +445,8 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
               </li>
             )}
             {methodsWithGaps.filter((g) => g.missingChannels.includes("errorHandling")).length > 0 && (
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5 flex-shrink-0">&#x2022;</span>
+              <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ color: T.blue, marginTop: 2, flexShrink: 0 }}>&#x2022;</span>
                 <span>
                   {methodsWithGaps.filter((g) => g.missingChannels.includes("errorHandling")).length} method(s)
                   have no error handling. Adding try-catch blocks enables exception-path test generation.
@@ -435,8 +454,8 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
               </li>
             )}
             {totalMethods > 0 && withSignals < totalMethods && (
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5 flex-shrink-0">&#x2022;</span>
+              <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ color: T.blue, marginTop: 2, flexShrink: 0 }}>&#x2022;</span>
                 <span>
                   {totalMethods - withSignals} method(s) have no intent signals at all. Ensure the processor
                   can access their source code.
@@ -444,8 +463,8 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
               </li>
             )}
             {totalMethods > 0 && avgDensity >= 0.5 && (
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5 flex-shrink-0">&#x2022;</span>
+              <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ color: T.blue, marginTop: 2, flexShrink: 0 }}>&#x2022;</span>
                 <span>
                   Overall average ISD is {avgDensity.toFixed(2)}, which is good. The codebase has
                   sufficient signals for meaningful auto-generated tests.
@@ -453,8 +472,8 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
               </li>
             )}
             {totalMethods === 0 && (
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-0.5 flex-shrink-0">&#x2022;</span>
+              <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <span style={{ color: T.blue, marginTop: 2, flexShrink: 0 }}>&#x2022;</span>
                 <span>
                   No methods found in the intent graph. Run the processor with DSTI enabled to populate
                   intent signals.
@@ -468,11 +487,11 @@ export function TestOverviewPage({ data }: TestOverviewPageProps) {
       {/* ============================================================ */}
       {/* SECTION 5 — Methods Table (enhanced from original)            */}
       {/* ============================================================ */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold text-text-primary mb-4" id="methods">
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="methods">
           Methods ({totalMethods})
         </h2>
-        <div className="space-y-2">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {methods.map((method) => (
             <MethodRow key={method.qualified} method={method} />
           ))}
@@ -495,10 +514,10 @@ function StatCard({
   subtitle?: string;
 }) {
   return (
-    <div className="px-4 py-3 rounded-lg bg-surface-secondary border border-border">
-      <div className="text-2xl font-bold text-text-primary">{value}</div>
-      <div className="text-xs text-text-tertiary">{label}</div>
-      {subtitle && <div className="text-xs text-text-tertiary mt-0.5 opacity-70">{subtitle}</div>}
+    <div style={{ padding: "12px 16px", borderRadius: 8, background: T.surface, border: "1px solid " + T.surfaceBorder }}>
+      <div style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{value}</div>
+      <div style={{ fontSize: 12, color: T.textDim }}>{label}</div>
+      {subtitle && <div style={{ fontSize: 12, color: T.textDim, marginTop: 2, opacity: 0.7 }}>{subtitle}</div>}
     </div>
   );
 }
@@ -518,10 +537,10 @@ function SummaryRow({
   badgeVariant?: "success" | "warning" | "error" | "info";
 }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-text-secondary">{label}</span>
-      <div className="flex items-center gap-2">
-        <span className="font-mono font-medium text-text-primary">{value}</span>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <span style={{ color: T.textMuted }}>{label}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontFamily: T.mono, fontWeight: 500, color: T.text }}>{value}</span>
         {badge && <Badge variant={badgeVariant || "default"}>{badge}</Badge>}
       </div>
     </div>
@@ -542,9 +561,9 @@ function MethodRow({ method }: { method: IntentMethod }) {
     : [];
 
   return (
-    <div className="p-4 rounded-lg border border-border">
-      <div className="flex items-center gap-3 mb-2">
-        <code className="text-sm font-mono text-text-primary flex-1 min-w-0 truncate">
+    <div style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <code style={{ fontSize: 14, fontFamily: T.mono, color: T.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {method.qualified}
         </code>
         <Badge variant={isdBadgeVariant(density)}>{density.toFixed(2)}</Badge>
@@ -554,22 +573,26 @@ function MethodRow({ method }: { method: IntentMethod }) {
       {signals && (
         <>
           {/* Density Bar */}
-          <div className="flex items-center gap-4 mb-2">
-            <div className="flex items-center gap-2 flex-1">
-              <span className="text-xs text-text-tertiary w-20 flex-shrink-0">Density</span>
-              <div className="flex-1 h-2 rounded-full bg-surface-tertiary overflow-hidden">
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
+              <span style={{ fontSize: 12, color: T.textDim, width: 80, flexShrink: 0 }}>Density</span>
+              <div style={{ flex: 1, height: 8, borderRadius: 999, background: T.surfaceBorder, overflow: "hidden" }}>
                 <div
-                  className={`h-full rounded-full ${isdColor(density)}`}
-                  style={{ width: `${Math.round(density * 100)}%` }}
+                  style={{
+                    height: "100%",
+                    borderRadius: 999,
+                    background: isdColor(density),
+                    width: `${Math.round(density * 100)}%`,
+                  }}
                 />
               </div>
-              <span className="text-xs font-mono text-text-secondary w-10 text-right flex-shrink-0">
+              <span style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted, width: 40, textAlign: "right", flexShrink: 0 }}>
                 {density.toFixed(2)}
               </span>
             </div>
 
             {/* Quick stats */}
-            <div className="flex gap-3 text-xs text-text-tertiary flex-shrink-0">
+            <div style={{ display: "flex", gap: 12, fontSize: 12, color: T.textDim, flexShrink: 0 }}>
               {signals.guardClauses !== undefined && (
                 <span>
                   {typeof signals.guardClauses === "number"
@@ -603,11 +626,20 @@ function MethodRow({ method }: { method: IntentMethod }) {
 
           {/* Channel badges */}
           {populatedChannels.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {populatedChannels.map((ch) => (
                 <span
                   key={ch.key}
-                  className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-tertiary text-text-tertiary"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                    fontSize: 10,
+                    fontWeight: 500,
+                    background: T.surfaceBorder,
+                    color: T.textDim,
+                  }}
                 >
                   {ch.label}
                 </span>

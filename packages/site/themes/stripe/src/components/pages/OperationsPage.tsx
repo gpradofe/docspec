@@ -1,5 +1,6 @@
 import React from "react";
 import type { OperationsPageData } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -19,43 +20,43 @@ export function OperationsPage({ data }: OperationsPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Operations</h1>
-      <p className="text-text-secondary mb-6">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>Operations</h1>
+      <p style={{ color: T.textMuted, marginBottom: 24 }}>
         Runtime contexts, scheduled jobs, and system-level operations
       </p>
 
-      <div className="space-y-4">
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {contexts.map(({ context, artifact }) => (
-          <div key={context.id} className="p-4 rounded-lg border border-border">
-            <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-sm font-bold text-text-primary">{context.name || context.id}</h3>
+          <div key={context.id} style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{context.name || context.id}</h3>
               <Badge>{artifact.label}</Badge>
             </div>
 
             {context.attachedTo && (
-              <div className="text-xs text-text-tertiary mb-2">
-                Attached to: <code className="font-mono">{context.attachedTo}</code>
+              <div style={{ fontSize: 12, color: T.textDim, marginBottom: 8 }}>
+                Attached to: <code style={{ fontFamily: T.mono }}>{context.attachedTo}</code>
               </div>
             )}
 
             {context.flow && (
-              <div className="mb-3 p-3 rounded bg-surface-secondary text-sm text-text-secondary whitespace-pre-line">
+              <div style={{ marginBottom: 12, padding: 12, borderRadius: 4, background: T.surface, fontSize: 14, color: T.textMuted, whiteSpace: "pre-line" }}>
                 {context.flow}
               </div>
             )}
 
             {context.inputs && context.inputs.length > 0 && (
-              <div className="mb-3">
-                <h4 className="text-xs font-semibold text-text-tertiary uppercase mb-1">Inputs</h4>
-                <div className="space-y-1">
+              <div style={{ marginBottom: 12 }}>
+                <h4 style={{ fontSize: 12, fontWeight: 600, color: T.textDim, textTransform: "uppercase", marginBottom: 4 }}>Inputs</h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {context.inputs.map((input) => (
-                    <div key={input.name} className="text-sm">
-                      <span className="font-medium text-text-primary">{input.name}</span>
+                    <div key={input.name} style={{ fontSize: 14 }}>
+                      <span style={{ fontWeight: 500, color: T.text }}>{input.name}</span>
                       {input.source && (
-                        <span className="text-text-tertiary"> from {input.source}</span>
+                        <span style={{ color: T.textDim }}> from {input.source}</span>
                       )}
                       {input.items && input.items.length > 0 && (
-                        <span className="text-text-tertiary"> [{input.items.join(", ")}]</span>
+                        <span style={{ color: T.textDim }}> [{input.items.join(", ")}]</span>
                       )}
                     </div>
                   ))}
@@ -65,15 +66,15 @@ export function OperationsPage({ data }: OperationsPageProps) {
 
             {context.uses && context.uses.length > 0 && (
               <div>
-                <h4 className="text-xs font-semibold text-text-tertiary uppercase mb-1">Uses</h4>
-                <div className="space-y-1">
+                <h4 style={{ fontSize: 12, fontWeight: 600, color: T.textDim, textTransform: "uppercase", marginBottom: 4 }}>Uses</h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {context.uses.map((use, i) => (
-                    <div key={i} className="text-sm">
-                      <code className="font-mono text-primary-600">{use.artifact}</code>
-                      <span className="text-text-tertiary"> — </span>
-                      <span className="text-text-secondary">{use.what}</span>
+                    <div key={i} style={{ fontSize: 14 }}>
+                      <code style={{ fontFamily: T.mono, color: T.accent }}>{use.artifact}</code>
+                      <span style={{ color: T.textDim }}> \u2014 </span>
+                      <span style={{ color: T.textMuted }}>{use.what}</span>
                       {use.why && (
-                        <span className="text-text-tertiary"> ({use.why})</span>
+                        <span style={{ color: T.textDim }}> ({use.why})</span>
                       )}
                     </div>
                   ))}

@@ -1,5 +1,6 @@
 import React from "react";
 import type { ObservabilityPageData, ObservabilityMetric, ObservabilityTrace, ObservabilityHealthCheck } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -31,11 +32,11 @@ export function ObservabilityPage({ data }: ObservabilityPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Observability</h1>
-      <p className="text-text-secondary mb-2">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>Observability</h1>
+      <p style={{ color: T.textMuted, marginBottom: 8 }}>
         Metrics, health checks, and trace instrumentation for {artifact.label}.
       </p>
-      <p className="text-xs text-text-tertiary mb-8">
+      <p style={{ fontSize: 12, color: T.textDim, marginBottom: 32 }}>
         {metrics.length} metric{metrics.length !== 1 ? "s" : ""} &middot;{" "}
         {healthChecks.length} health check{healthChecks.length !== 1 ? "s" : ""} &middot;{" "}
         {traces.length} trace span{traces.length !== 1 ? "s" : ""}
@@ -43,18 +44,18 @@ export function ObservabilityPage({ data }: ObservabilityPageProps) {
 
       {/* Metrics Table */}
       {metrics.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="metrics">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="metrics">
             Metrics ({metrics.length})
           </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Name</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Type</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Labels</th>
-                  <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Emitted By</th>
+                <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Name</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Type</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Labels</th>
+                  <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Emitted By</th>
                 </tr>
               </thead>
               <tbody>
@@ -69,11 +70,11 @@ export function ObservabilityPage({ data }: ObservabilityPageProps) {
 
       {/* Health Checks */}
       {healthChecks.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="health-checks">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="health-checks">
             Health Checks ({healthChecks.length})
           </h2>
-          <div className="space-y-3">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {healthChecks.map((check, i) => (
               <HealthCheckCard key={check.path || i} check={check} />
             ))}
@@ -83,17 +84,17 @@ export function ObservabilityPage({ data }: ObservabilityPageProps) {
 
       {/* Traces */}
       {traces.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="traces">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="traces">
             Trace Spans ({traces.length})
           </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Span Name</th>
-                  <th className="text-left py-2 pr-4 text-text-tertiary font-medium text-xs uppercase">Service</th>
-                  <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Parent Span</th>
+                <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Span Name</th>
+                  <th style={{ textAlign: "left", padding: "8px 16px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Service</th>
+                  <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Parent Span</th>
                 </tr>
               </thead>
               <tbody>
@@ -108,8 +109,8 @@ export function ObservabilityPage({ data }: ObservabilityPageProps) {
 
       {/* Empty state */}
       {metrics.length === 0 && healthChecks.length === 0 && traces.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-text-secondary">
+        <div style={{ textAlign: "center", padding: "48px 0" }}>
+          <p style={{ color: T.textMuted }}>
             No observability instrumentation detected. Add Micrometer, OpenTelemetry, or health check annotations to populate this page.
           </p>
         </div>
@@ -122,43 +123,43 @@ function MetricRow({ metric }: { metric: ObservabilityMetric }) {
   const variant = METRIC_TYPE_VARIANTS[metric.type] || "default";
 
   return (
-    <tr className="border-b border-border/50">
-      <td className="py-2 pr-4">
-        <code className="font-mono text-sm text-text-primary">{metric.name}</code>
+    <tr style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        <code style={{ fontFamily: T.mono, fontSize: 14, color: T.text }}>{metric.name}</code>
       </td>
-      <td className="py-2 pr-4">
+      <td style={{ padding: "8px 16px 8px 0" }}>
         <Badge variant={variant}>{metric.type}</Badge>
       </td>
-      <td className="py-2 pr-4">
+      <td style={{ padding: "8px 16px 8px 0" }}>
         {metric.labels && metric.labels.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {metric.labels.map((label) => (
               <code
                 key={label}
-                className="px-1.5 py-0.5 rounded bg-surface-secondary text-xs font-mono text-text-secondary border border-border"
+                style={{ padding: "2px 6px", borderRadius: 4, background: T.surface, fontSize: 12, fontFamily: T.mono, color: T.textMuted, border: "1px solid " + T.surfaceBorder }}
               >
                 {label}
               </code>
             ))}
           </div>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
-      <td className="py-2">
+      <td style={{ padding: "8px 0" }}>
         {metric.emittedBy && metric.emittedBy.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {metric.emittedBy.map((emitter) => (
               <code
                 key={emitter}
-                className="text-xs font-mono text-text-secondary"
+                style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}
               >
                 {emitter}
               </code>
             ))}
           </div>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
     </tr>
@@ -167,21 +168,21 @@ function MetricRow({ metric }: { metric: ObservabilityMetric }) {
 
 function HealthCheckCard({ check }: { check: ObservabilityHealthCheck }) {
   return (
-    <div className="p-4 rounded-lg border border-border">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0" />
+    <div style={{ padding: 16, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: T.green, flexShrink: 0 }} />
         {check.path ? (
-          <code className="text-sm font-mono font-semibold text-text-primary">{check.path}</code>
+          <code style={{ fontSize: 14, fontFamily: T.mono, fontWeight: 600, color: T.text }}>{check.path}</code>
         ) : (
-          <span className="text-sm font-semibold text-text-primary">Health Check</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.text }}>Health Check</span>
         )}
         <Badge variant="success">active</Badge>
       </div>
 
       {check.checks && check.checks.length > 0 && (
-        <div className="ml-5">
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Checks</h4>
-          <div className="flex flex-wrap gap-2">
+        <div style={{ marginLeft: 20 }}>
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Checks</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {check.checks.map((c) => (
               <Badge key={c}>{c}</Badge>
             ))}
@@ -194,20 +195,20 @@ function HealthCheckCard({ check }: { check: ObservabilityHealthCheck }) {
 
 function TraceRow({ trace }: { trace: ObservabilityTrace }) {
   return (
-    <tr className="border-b border-border/50">
-      <td className="py-2 pr-4">
-        <code className="font-mono text-sm text-text-primary">{trace.spanName}</code>
+    <tr style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+      <td style={{ padding: "8px 16px 8px 0" }}>
+        <code style={{ fontFamily: T.mono, fontSize: 14, color: T.text }}>{trace.spanName}</code>
       </td>
-      <td className="py-2 pr-4">
+      <td style={{ padding: "8px 16px 8px 0" }}>
         {trace.service ? (
-          <span className="text-sm text-text-secondary">{trace.service}</span>
+          <span style={{ fontSize: 14, color: T.textMuted }}>{trace.service}</span>
         ) : (
-          <span className="text-text-tertiary">—</span>
+          <span style={{ color: T.textDim }}>\u2014</span>
         )}
       </td>
-      <td className="py-2">
+      <td style={{ padding: "8px 0" }}>
         {trace.parentSpan ? (
-          <code className="text-xs font-mono text-text-secondary">{trace.parentSpan}</code>
+          <code style={{ fontSize: 12, fontFamily: T.mono, color: T.textMuted }}>{trace.parentSpan}</code>
         ) : (
           <Badge variant="primary">root</Badge>
         )}

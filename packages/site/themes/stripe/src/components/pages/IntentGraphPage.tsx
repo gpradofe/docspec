@@ -1,5 +1,6 @@
 import React from "react";
 import type { IntentGraphPageData, IntentMethod, IntentSignals } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -21,12 +22,12 @@ export function IntentGraphPage({ data }: IntentGraphPageProps) {
         ]}
       />
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Intent Graph</h1>
-      <p className="text-text-secondary mb-8">
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text, marginBottom: 8 }}>Intent Graph</h1>
+      <p style={{ color: T.textMuted, marginBottom: 32 }}>
         Detailed intent signals for each method in {artifact.label}.
       </p>
 
-      <div className="space-y-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {methods.map((method) => (
           <MethodDetailCard key={method.qualified} method={method} />
         ))}
@@ -40,10 +41,10 @@ function MethodDetailCard({ method }: { method: IntentMethod }) {
   const density = signals?.intentDensityScore || 0;
 
   return (
-    <div className="p-5 rounded-lg border border-border" id={`method-${slugify(method.qualified)}`}>
+    <div style={{ padding: 20, borderRadius: 8, border: "1px solid " + T.surfaceBorder }} id={`method-${slugify(method.qualified)}`}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-3">
-        <code className="text-sm font-mono font-semibold text-text-primary flex-1 min-w-0 truncate">
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+        <code style={{ fontSize: 14, fontFamily: T.mono, fontWeight: 600, color: T.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {method.qualified}
         </code>
         <DensityBadge score={density} />
@@ -61,27 +62,27 @@ function DensityBadge({ score }: { score: number }) {
 
 function SignalsDetail({ signals }: { signals: IntentSignals }) {
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Name Semantics */}
       {signals.nameSemantics && (
-        <div className="p-3 rounded-lg bg-surface-secondary">
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Name Semantics</h4>
-          <div className="flex flex-wrap gap-4 text-sm">
+        <div style={{ padding: 12, borderRadius: 8, background: T.surface }}>
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Name Semantics</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 14 }}>
             {signals.nameSemantics.verb && (
               <div>
-                <span className="text-text-tertiary">Verb: </span>
-                <span className="text-text-primary font-medium">{signals.nameSemantics.verb}</span>
+                <span style={{ color: T.textDim }}>Verb: </span>
+                <span style={{ color: T.text, fontWeight: 500 }}>{signals.nameSemantics.verb}</span>
               </div>
             )}
             {signals.nameSemantics.object && (
               <div>
-                <span className="text-text-tertiary">Object: </span>
-                <span className="text-text-primary font-medium">{signals.nameSemantics.object}</span>
+                <span style={{ color: T.textDim }}>Object: </span>
+                <span style={{ color: T.text, fontWeight: 500 }}>{signals.nameSemantics.object}</span>
               </div>
             )}
             {signals.nameSemantics.intent && (
               <div>
-                <span className="text-text-tertiary">Intent: </span>
+                <span style={{ color: T.textDim }}>Intent: </span>
                 <Badge variant="info">{signals.nameSemantics.intent}</Badge>
               </div>
             )}
@@ -90,7 +91,7 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
       )}
 
       {/* Control Flow Metrics */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
         {signals.guardClauses !== undefined && (
           <MetricCard label="Guard Clauses" value={typeof signals.guardClauses === "number" ? signals.guardClauses : signals.guardClauses.length} />
         )}
@@ -108,12 +109,12 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
       {/* Error Handling */}
       {signals.errorHandling?.caughtTypes && signals.errorHandling.caughtTypes.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Caught Exception Types</h4>
-          <div className="flex flex-wrap gap-2">
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Caught Exception Types</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {signals.errorHandling.caughtTypes.map((type) => (
               <code
                 key={type}
-                className="px-2 py-1 rounded bg-red-50 text-red-700 text-xs font-mono"
+                style={{ padding: "4px 8px", borderRadius: 4, background: T.redBg, color: T.red, fontSize: 12, fontFamily: T.mono }}
               >
                 {type}
               </code>
@@ -124,19 +125,19 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
 
       {/* Data Flow */}
       {signals.dataFlow && (
-        <div className="p-3 rounded-lg bg-surface-secondary">
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Data Flow</h4>
-          <div className="space-y-2 text-sm">
+        <div style={{ padding: 12, borderRadius: 8, background: T.surface }}>
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Data Flow</h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 14 }}>
             {signals.dataFlow.reads && signals.dataFlow.reads.length > 0 && (
               <div>
-                <span className="text-text-tertiary">Reads: </span>
-                <span className="text-text-secondary">{signals.dataFlow.reads.join(", ")}</span>
+                <span style={{ color: T.textDim }}>Reads: </span>
+                <span style={{ color: T.textMuted }}>{signals.dataFlow.reads.join(", ")}</span>
               </div>
             )}
             {signals.dataFlow.writes && signals.dataFlow.writes.length > 0 && (
               <div>
-                <span className="text-text-tertiary">Writes: </span>
-                <span className="text-text-secondary">{signals.dataFlow.writes.join(", ")}</span>
+                <span style={{ color: T.textDim }}>Writes: </span>
+                <span style={{ color: T.textMuted }}>{signals.dataFlow.writes.join(", ")}</span>
               </div>
             )}
           </div>
@@ -145,7 +146,7 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
 
       {/* Loop Properties */}
       {signals.loopProperties && (
-        <div className="flex flex-wrap gap-2">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {signals.loopProperties.hasStreams && <Badge variant="info">streams</Badge>}
           {signals.loopProperties.hasEnhancedFor && <Badge variant="info">enhanced-for</Badge>}
         </div>
@@ -154,12 +155,12 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
       {/* Dependencies */}
       {signals.dependencies && signals.dependencies.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Dependencies</h4>
-          <div className="flex flex-wrap gap-2">
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Dependencies</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {signals.dependencies.map((dep, i) => (
               <code
                 key={typeof dep === "string" ? dep : dep.name ?? i}
-                className="px-2 py-1 rounded bg-surface-secondary text-xs font-mono text-text-secondary border border-border"
+                style={{ padding: "4px 8px", borderRadius: 4, background: T.surface, fontSize: 12, fontFamily: T.mono, color: T.textMuted, border: "1px solid " + T.surfaceBorder }}
               >
                 {typeof dep === "string" ? dep : dep.name ?? "unknown"}
               </code>
@@ -171,8 +172,8 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
       {/* Constants */}
       {signals.constants && signals.constants.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-text-tertiary uppercase mb-2">Constants</h4>
-          <div className="flex flex-wrap gap-2">
+          <h4 style={{ fontSize: 12, fontWeight: 500, color: T.textDim, textTransform: "uppercase", marginBottom: 8 }}>Constants</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {signals.constants.map((c, i) => (
               <Badge key={typeof c === "string" ? c : c.name ?? i}>{typeof c === "string" ? c : c.name ?? "unknown"}</Badge>
             ))}
@@ -185,9 +186,9 @@ function SignalsDetail({ signals }: { signals: IntentSignals }) {
 
 function MetricCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="px-3 py-2 rounded-lg bg-surface-secondary border border-border text-center">
-      <div className="text-lg font-bold text-text-primary">{value}</div>
-      <div className="text-xs text-text-tertiary">{label}</div>
+    <div style={{ padding: "8px 12px", borderRadius: 8, background: T.surface, border: "1px solid " + T.surfaceBorder, textAlign: "center" }}>
+      <div style={{ fontSize: 18, fontWeight: 700, color: T.text }}>{value}</div>
+      <div style={{ fontSize: 12, color: T.textDim }}>{label}</div>
     </div>
   );
 }

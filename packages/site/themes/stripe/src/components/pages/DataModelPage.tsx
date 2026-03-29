@@ -1,5 +1,6 @@
 import React from "react";
 import type { DataModelPageData } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 import { ResponsePreview } from "../ui/ResponsePreview.js";
@@ -22,66 +23,66 @@ export function DataModelPage({ data, referenceIndex }: DataModelPageProps) {
         ]}
       />
 
-      <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-2xl font-bold text-text-primary">{dataModel.name}</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{dataModel.name}</h1>
         {dataModel.discoveredFrom && <Badge variant="info">{dataModel.discoveredFrom}</Badge>}
       </div>
 
-      <p className="text-sm font-mono text-text-tertiary mb-2">{dataModel.qualified}</p>
+      <p style={{ fontSize: 14, fontFamily: T.mono, color: T.textDim, marginBottom: 8 }}>{dataModel.qualified}</p>
 
       {dataModel.description && (
-        <p className="text-text-secondary mb-4">{dataModel.description}</p>
+        <p style={{ color: T.textMuted, marginBottom: 16 }}>{dataModel.description}</p>
       )}
 
       {dataModel.table && (
-        <div className="text-sm text-text-tertiary mb-8">
-          Database table: <code className="font-mono bg-surface-tertiary px-1.5 py-0.5 rounded">{dataModel.table}</code>
+        <div style={{ fontSize: 14, color: T.textDim, marginBottom: 32 }}>
+          Database table: <code style={{ fontFamily: T.mono, background: T.surface, padding: "2px 6px", borderRadius: 4 }}>{dataModel.table}</code>
         </div>
       )}
 
       {/* Fields */}
       {dataModel.fields && dataModel.fields.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="fields">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="fields">
             Fields
           </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-3 text-text-tertiary font-medium text-xs uppercase">Name</th>
-                  <th className="text-left py-2 pr-3 text-text-tertiary font-medium text-xs uppercase">Type</th>
-                  <th className="text-left py-2 pr-3 text-text-tertiary font-medium text-xs uppercase">Column</th>
-                  <th className="text-left py-2 pr-3 text-text-tertiary font-medium text-xs uppercase">PK</th>
-                  <th className="text-left py-2 pr-3 text-text-tertiary font-medium text-xs uppercase">Nullable</th>
-                  <th className="text-left py-2 text-text-tertiary font-medium text-xs uppercase">Unique</th>
+                <tr style={{ borderBottom: "1px solid " + T.surfaceBorder }}>
+                  <th style={{ textAlign: "left", padding: "8px 12px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Name</th>
+                  <th style={{ textAlign: "left", padding: "8px 12px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Type</th>
+                  <th style={{ textAlign: "left", padding: "8px 12px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Column</th>
+                  <th style={{ textAlign: "left", padding: "8px 12px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>PK</th>
+                  <th style={{ textAlign: "left", padding: "8px 12px 8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Nullable</th>
+                  <th style={{ textAlign: "left", padding: "8px 0", color: T.textDim, fontWeight: 500, fontSize: 12, textTransform: "uppercase" }}>Unique</th>
                 </tr>
               </thead>
               <tbody>
                 {dataModel.fields.map((field) => (
-                  <tr key={field.name} className="border-b border-border/50">
-                    <td className="py-2 pr-3">
-                      <code className="font-mono text-text-primary">{field.primaryKey ? "🔑 " : ""}{field.name}</code>
+                  <tr key={field.name} style={{ borderBottom: "1px solid " + T.surfaceBorder + "80" }}>
+                    <td style={{ padding: "8px 12px 8px 0" }}>
+                      <code style={{ fontFamily: T.mono, color: T.text }}>{field.primaryKey ? "\uD83D\uDD11 " : ""}{field.name}</code>
                     </td>
-                    <td className="py-2 pr-3">
-                      <code className="font-mono text-primary-600">{field.type}</code>
-                      {field.enumType && <Badge className="ml-1" variant="info">enum</Badge>}
+                    <td style={{ padding: "8px 12px 8px 0" }}>
+                      <code style={{ fontFamily: T.mono, color: T.accent }}>{field.type}</code>
+                      {field.enumType && <Badge variant="info">enum</Badge>}
                     </td>
-                    <td className="py-2 pr-3 text-text-tertiary font-mono text-xs">
-                      {field.column || "—"}
+                    <td style={{ padding: "8px 12px 8px 0", color: T.textDim, fontFamily: T.mono, fontSize: 12 }}>
+                      {field.column || "\u2014"}
                     </td>
-                    <td className="py-2 pr-3">
-                      {field.primaryKey ? <Badge variant="primary">PK</Badge> : "—"}
+                    <td style={{ padding: "8px 12px 8px 0" }}>
+                      {field.primaryKey ? <Badge variant="primary">PK</Badge> : "\u2014"}
                     </td>
-                    <td className="py-2 pr-3">
+                    <td style={{ padding: "8px 12px 8px 0" }}>
                       {field.nullable === false ? (
                         <Badge variant="warning">NOT NULL</Badge>
                       ) : field.nullable === true ? (
-                        <span className="text-text-tertiary">yes</span>
-                      ) : "—"}
+                        <span style={{ color: T.textDim }}>yes</span>
+                      ) : "\u2014"}
                     </td>
-                    <td className="py-2">
-                      {field.unique ? <Badge variant="info">unique</Badge> : "—"}
+                    <td style={{ padding: "8px 0" }}>
+                      {field.unique ? <Badge variant="info">unique</Badge> : "\u2014"}
                     </td>
                   </tr>
                 ))}
@@ -93,26 +94,26 @@ export function DataModelPage({ data, referenceIndex }: DataModelPageProps) {
 
       {/* Relationships */}
       {dataModel.relationships && dataModel.relationships.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="relationships">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="relationships">
             Relationships
           </h2>
-          <div className="space-y-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {dataModel.relationships.map((rel, i) => {
               const targetUrl = referenceIndex?.[rel.target];
               return (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-border">
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 8, border: "1px solid " + T.surfaceBorder }}>
                   <Badge>{rel.type.replace(/_/g, " ")}</Badge>
-                  <span className="text-sm text-text-tertiary">→</span>
+                  <span style={{ fontSize: 14, color: T.textDim }}>\u2192</span>
                   {targetUrl ? (
-                    <a href={`/${targetUrl}`} className="text-sm font-mono text-primary-600 hover:underline">
+                    <a href={`/${targetUrl}`} style={{ fontSize: 14, fontFamily: T.mono, color: T.accent, textDecoration: "none" }}>
                       {rel.target}
                     </a>
                   ) : (
-                    <code className="text-sm font-mono text-text-secondary">{rel.target}</code>
+                    <code style={{ fontSize: 14, fontFamily: T.mono, color: T.textMuted }}>{rel.target}</code>
                   )}
                   {rel.field && (
-                    <span className="text-xs text-text-tertiary">via {rel.field}</span>
+                    <span style={{ fontSize: 12, color: T.textDim }}>via {rel.field}</span>
                   )}
                   {rel.cascade && (
                     <Badge variant="warning">{rel.cascade}</Badge>
@@ -126,8 +127,8 @@ export function DataModelPage({ data, referenceIndex }: DataModelPageProps) {
 
       {/* JSON Shape */}
       {dataModel.jsonShape && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="json-shape">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="json-shape">
             JSON Representation
           </h2>
           <ResponsePreview jsonShape={dataModel.jsonShape} />
@@ -136,14 +137,14 @@ export function DataModelPage({ data, referenceIndex }: DataModelPageProps) {
 
       {/* Used By */}
       {dataModel.usedBy && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-text-primary mb-4" id="used-by">
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="used-by">
             Used By
           </h2>
           {dataModel.usedBy.endpoints && dataModel.usedBy.endpoints.length > 0 && (
-            <div className="mb-3">
-              <h3 className="text-sm font-medium text-text-secondary mb-2">Endpoints</h3>
-              <div className="flex flex-wrap gap-2">
+            <div style={{ marginBottom: 12 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 500, color: T.textMuted, marginBottom: 8 }}>Endpoints</h3>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {dataModel.usedBy.endpoints.map((ep) => (
                   <Badge key={ep}>{ep}</Badge>
                 ))}
@@ -152,8 +153,8 @@ export function DataModelPage({ data, referenceIndex }: DataModelPageProps) {
           )}
           {dataModel.usedBy.repositories && dataModel.usedBy.repositories.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-text-secondary mb-2">Repositories</h3>
-              <div className="flex flex-wrap gap-2">
+              <h3 style={{ fontSize: 14, fontWeight: 500, color: T.textMuted, marginBottom: 8 }}>Repositories</h3>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {dataModel.usedBy.repositories.map((repo) => (
                   <Badge key={repo}>{repo}</Badge>
                 ))}

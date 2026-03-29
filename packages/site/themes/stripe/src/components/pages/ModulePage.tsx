@@ -1,5 +1,6 @@
 import React from "react";
 import type { ModulePageData, Member } from "@docspec/core";
+import { T } from "../../lib/tokens.js";
 import { Badge } from "../ui/Badge.js";
 import { Breadcrumb } from "../layout/Breadcrumb.js";
 
@@ -29,27 +30,27 @@ export function ModulePage({ data }: ModulePageProps) {
         ]}
       />
 
-      <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-2xl font-bold text-text-primary">{mod.name || mod.id}</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{mod.name || mod.id}</h1>
         {mod.stereotype && <Badge variant="primary">{mod.stereotype}</Badge>}
         {mod.framework && <Badge variant="info">{mod.framework}</Badge>}
       </div>
 
       {mod.description && (
-        <p className="text-text-secondary mb-8">{mod.description}</p>
+        <p style={{ color: T.textMuted, marginBottom: 32 }}>{mod.description}</p>
       )}
 
       {mod.discoveredFrom && (
-        <p className="text-xs text-text-tertiary mb-6">
-          Discovered from: <span className="font-medium">{mod.discoveredFrom}</span>
+        <p style={{ fontSize: 12, color: T.textDim, marginBottom: 24 }}>
+          Discovered from: <span style={{ fontWeight: 500 }}>{mod.discoveredFrom}</span>
         </p>
       )}
 
-      <h2 className="text-lg font-semibold text-text-primary mb-4" id="members">
+      <h2 style={{ fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 16 }} id="members">
         Members ({members.length})
       </h2>
 
-      <div className="space-y-1">
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {members.map((member) => (
           <MemberRow key={member.qualified} member={member} artifactLabel={artifact.label} />
         ))}
@@ -67,14 +68,43 @@ function MemberRow({ member, artifactLabel }: { member: Member; artifactLabel: s
   return (
     <a
       href={slug}
-      className="flex items-center gap-3 px-4 py-3 rounded-lg border border-transparent hover:border-border hover:bg-surface-secondary transition-colors group"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 16px",
+        borderRadius: 8,
+        border: "1px solid transparent",
+        textDecoration: "none",
+        transition: "border-color 0.15s, background 0.15s",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = T.surfaceBorder;
+        e.currentTarget.style.background = T.surface;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "transparent";
+        e.currentTarget.style.background = "transparent";
+      }}
     >
-      <span className="w-7 h-7 rounded-md bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+      <span style={{
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        background: T.accentBg,
+        color: T.accent,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 12,
+        fontWeight: 700,
+        flexShrink: 0,
+      }}>
         {kindIcon}
       </span>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-text-primary group-hover:text-primary-600">
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 14, fontWeight: 500, color: T.text }}>
             {member.name}
           </span>
           <Badge>{member.kind}</Badge>
@@ -83,10 +113,10 @@ function MemberRow({ member, artifactLabel }: { member: Member; artifactLabel: s
           )}
         </div>
         {member.description && (
-          <p className="text-xs text-text-tertiary mt-0.5 truncate">{member.description}</p>
+          <p style={{ fontSize: 12, color: T.textDim, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.description}</p>
         )}
       </div>
-      <span className="text-xs text-text-tertiary flex-shrink-0">
+      <span style={{ fontSize: 12, color: T.textDim, flexShrink: 0 }}>
         {methodCount} method{methodCount !== 1 ? "s" : ""}
       </span>
     </a>
