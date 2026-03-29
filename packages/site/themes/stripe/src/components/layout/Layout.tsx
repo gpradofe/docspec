@@ -18,6 +18,7 @@ interface LayoutProps {
   activeArtifact?: string;
   onArtifactChange?: (label: string) => void;
   onOpenSearch?: () => void;
+  initialLens?: Lens;
   lens?: Lens;
   onLensChange?: (lens: Lens) => void;
 }
@@ -32,10 +33,11 @@ export function Layout({
   activeArtifact,
   onArtifactChange,
   onOpenSearch,
+  initialLens,
   lens: externalLens,
   onLensChange: externalOnLensChange,
 }: LayoutProps) {
-  const [internalLens, setInternalLens] = useState<Lens>("docs");
+  const [internalLens, setInternalLens] = useState<Lens>(initialLens || "docs");
   const lens = externalLens ?? internalLens;
   const setLens = externalOnLensChange ?? setInternalLens;
   const [sidebarOpen, setSidebarOpen] = useState(true);
