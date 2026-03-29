@@ -37,20 +37,21 @@ export function Layout({
   lens: externalLens,
   onLensChange: externalOnLensChange,
 }: LayoutProps) {
-  const [internalLens, setInternalLens] = useState<Lens>(() => {
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("docspec-lens");
-      if (stored === "docs" || stored === "tests") return stored as Lens;
-    }
-    return initialLens || "docs";
-  });
+  // Start with initialLens (SSR-safe), then restore from sessionStorage after hydration
+  const [internalLens, setInternalLens] = useState<Lens>(initialLens || "docs");
   const lens = externalLens ?? internalLens;
 
-  // Persist lens to sessionStorage so it survives full-page navigations
+  // After hydration, restore persisted lens from sessionStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("docspec-lens", lens);
+    const stored = sessionStorage.getItem("docspec-lens");
+    if (stored === "docs" || stored === "tests") {
+      setInternalLens(stored as Lens);
     }
+  }, []);
+
+  // Persist lens changes to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("docspec-lens", lens);
   }, [lens]);
 
   const setLens = externalOnLensChange ?? setInternalLens;
