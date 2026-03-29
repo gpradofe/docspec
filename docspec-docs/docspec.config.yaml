@@ -5,7 +5,7 @@ site:
   name: "DocSpec"
   description: "Universal documentation specification & toolchain — documenting itself"
   theme: "@docspec/theme-stripe"
-  baseUrl: http://localhost:3000
+  baseUrl: http://localhost:4000
 
 artifacts:
   - path: ./docspec-processor.json
@@ -16,20 +16,20 @@ artifacts:
     label: "Maven Plugin"
     color: "#22c55e"
 
+# Use auto: true per section — lets the navigation builder auto-populate from pages
 navigation:
-  - section: API Reference
-    items: [endpoints/auto]
-  - section: Libraries & SDKs
-    items: [modules/auto]
+  - section: Libraries
+    auto: true
+    tab: docs
+  - section: API
+    auto: true
+    tab: docs
   - section: Architecture
-    items:
-      - flows/auto
-      - data-models/auto
-      - data-stores/auto
-  - section: Testing
-    items:
-      - test-overview/auto
-      - intent-graph/auto
+    auto: true
+    tab: docs
+  - section: Tests
+    auto: true
+    tab: tests
 
 build:
   outputDir: ./out
