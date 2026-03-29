@@ -43,8 +43,8 @@ function hierarchicalLayout(
   nodes: GraphNode[],
   edges: GraphEdge[],
   width: number,
-): { layout: LayoutNode[]; height: number } {
-  if (nodes.length === 0) return { layout: [], height: 200 };
+): { layout: LayoutNode[]; height: number; width: number } {
+  if (nodes.length === 0) return { layout: [], height: 200, width: 600 };
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const children = new Map<string, string[]>();
@@ -114,16 +114,20 @@ function hierarchicalLayout(
   }
 
   // --- Step 3: Position nodes ---
-  const layerGap = 100;
-  const minNodeSpacing = 100;
-  const topPadding = 50;
+  const layerGap = 90;
+  const minNodeSpacing = 90;
+  const topPadding = 40;
+  // Compute actual needed width from widest layer
+  const maxLayerSize = Math.max(...layers.map((l) => l.length), 1);
+  const neededWidth = Math.max(maxLayerSize * minNodeSpacing + 80, 600);
+  const actualWidth = Math.min(neededWidth, width);
 
   const result: LayoutNode[] = [];
 
   for (let li = 0; li < layers.length; li++) {
     const layer = layers[li];
     const layerWidth = layer.length * minNodeSpacing;
-    const startX = (width - layerWidth) / 2 + minNodeSpacing / 2;
+    const startX = (actualWidth - layerWidth) / 2 + minNodeSpacing / 2;
     const y = topPadding + li * layerGap;
 
     for (let ni = 0; ni < layer.length; ni++) {
@@ -161,15 +165,13 @@ function hierarchicalLayout(
   }
 
   const totalHeight = topPadding + layers.length * layerGap + 40;
-  return { layout: result, height: totalHeight };
+  return { layout: result, height: totalHeight, width: actualWidth };
 }
 
 export function GraphPage({ data }: GraphPageProps) {
-  const svgWidth = 960;
-
-  const { layout: layoutData, height: svgHeight } = useMemo(
-    () => hierarchicalLayout(data.nodes, data.edges, svgWidth),
-    [data.nodes, data.edges, svgWidth],
+  const { layout: layoutData, height: svgHeight, width: svgWidth } = useMemo(
+    () => hierarchicalLayout(data.nodes, data.edges, 1200),
+    [data.nodes, data.edges],
   );
 
   const [hovered, setHovered] = useState<string | null>(null);
@@ -197,7 +199,7 @@ export function GraphPage({ data }: GraphPageProps) {
   }
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto" }}>
+    <div style={{ margin: "0 auto" }}>
       <h1 style={{ fontSize: 24, fontWeight: 750, color: T.text, letterSpacing: "-0.025em", margin: "0 0 6px" }}>
         Dependency Graph
       </h1>
@@ -211,7 +213,7 @@ export function GraphPage({ data }: GraphPageProps) {
         </div>
       ) : (
         <>
-          <div style={{ borderRadius: 12, border: `1px solid ${T.surfaceBorder}`, background: T.cardBg, overflow: "hidden", padding: 10 }}>
+          <div style={{ borderRadius: 12, border: `1px solid ${T.surfaceBorder}`, background: T.cardBg, overflowX: "auto", padding: 10 }}>
             <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: "100%", display: "block" }}>
               {/* Edges */}
               {data.edges.map((e, i) => {
