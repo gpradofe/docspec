@@ -7,10 +7,11 @@ import type { SearchEntry } from "@docspec/core";
 interface SearchDialogProps {
   entries?: SearchEntry[];
   open?: boolean;
+  onOpen?: () => void;
   onClose?: () => void;
 }
 
-export function SearchDialog({ entries = [], open: controlledOpen, onClose }: SearchDialogProps) {
+export function SearchDialog({ entries = [], open: controlledOpen, onOpen, onClose }: SearchDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchEntry[]>([]);
@@ -43,7 +44,16 @@ export function SearchDialog({ entries = [], open: controlledOpen, onClose }: Se
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (controlledOpen !== undefined) {
+          // Controlled mode: toggle via callbacks
+          if (open) {
+            onClose?.();
+          } else {
+            onOpen?.();
+          }
+        } else {
+          setIsOpen((prev) => !prev);
+        }
       }
       if (e.key === "Escape") {
         setIsOpen(false);
@@ -52,7 +62,7 @@ export function SearchDialog({ entries = [], open: controlledOpen, onClose }: Se
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  }, [controlledOpen, open, onOpen, onClose]);
 
   // Focus input when opened
   useEffect(() => {

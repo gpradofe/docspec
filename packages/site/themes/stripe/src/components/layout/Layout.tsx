@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { NavigationTree } from "@docspec/core";
 import { T } from "../../lib/tokens.js";
 import { Sidebar } from "./Sidebar.js";
@@ -37,8 +37,22 @@ export function Layout({
   lens: externalLens,
   onLensChange: externalOnLensChange,
 }: LayoutProps) {
-  const [internalLens, setInternalLens] = useState<Lens>(initialLens || "docs");
+  const [internalLens, setInternalLens] = useState<Lens>(() => {
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("docspec-lens");
+      if (stored === "docs" || stored === "tests") return stored as Lens;
+    }
+    return initialLens || "docs";
+  });
   const lens = externalLens ?? internalLens;
+
+  // Persist lens to sessionStorage so it survives full-page navigations
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("docspec-lens", lens);
+    }
+  }, [lens]);
+
   const setLens = externalOnLensChange ?? setInternalLens;
   const [sidebarOpen, setSidebarOpen] = useState(true);
 

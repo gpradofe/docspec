@@ -334,6 +334,13 @@ function DocsLens({
           }}
         >
           <div
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                sessionStorage.setItem("docspec-lens", "tests");
+                window.location.reload();
+              }
+            }}
+            title="Switch to Tests lens"
             style={{
               fontSize: 10.5,
               fontWeight: 700,
@@ -341,6 +348,7 @@ function DocsLens({
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginBottom: 12,
+              cursor: "pointer",
             }}
           >
             Class Test Health
@@ -480,6 +488,14 @@ function DocsLens({
                   )}
                   {isd > 0 && (
                     <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("docspec-lens", "tests");
+                          window.location.reload();
+                        }
+                      }}
+                      title="Switch to Tests lens"
                       style={{
                         fontSize: 10,
                         padding: "2px 6px",
@@ -488,6 +504,7 @@ function DocsLens({
                         color: T.orange,
                         fontWeight: 650,
                         fontFamily: T.mono,
+                        cursor: "pointer",
                       }}
                     >
                       ISD {isd.toFixed(1)}

@@ -419,6 +419,11 @@ function SidebarItem({
     <div>
       <a
         href={href}
+        title={
+          lens === "tests"
+            ? `${item.label}${item.testCount !== undefined ? ` \u2014 ${item.testCount} tests` : ""}${item.isdScore !== undefined ? `, ISD ${(item.isdScore * 100).toFixed(0)}%` : ""}`
+            : item.label
+        }
         onClick={(e) => {
           if (hasChildren && !item.slug) {
             e.preventDefault();
