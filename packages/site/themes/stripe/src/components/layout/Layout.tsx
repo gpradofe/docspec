@@ -56,11 +56,30 @@ export function Layout({
 
   const setLens = externalOnLensChange ?? setInternalLens;
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedArtifact, setSelectedArtifact] = useState<string | undefined>(activeArtifact);
 
+  // Filter navigation by lens tab AND by selected artifact
   const filteredNavigation: NavigationTree = {
-    sections: navigation.sections.filter(
-      (s) => !s.tab || s.tab === lens,
-    ),
+    sections: navigation.sections
+      .filter((s) => !s.tab || s.tab === lens)
+      .map((s) => {
+        if (!selectedArtifact) return s;
+        // Filter section items to only show the selected artifact's items
+        const filteredItems = s.items.filter((item) => {
+          // If item label matches selected artifact, keep it
+          if (item.label === selectedArtifact) return true;
+          // If item has no artifact association (like "Flows" container, "Dashboard"), keep it
+          if (!item.slug || item.slug === "/" || item.slug === "/tests") return true;
+          // Check if slug contains the artifact name
+          const artifactSlug = selectedArtifact.toLowerCase().replace(/\s+/g, "-");
+          if (item.slug?.includes(artifactSlug)) return true;
+          // Check children
+          if (item.children?.some((c) => c.slug?.includes(artifactSlug))) return true;
+          return false;
+        });
+        return { ...s, items: filteredItems };
+      })
+      .filter((s) => s.items.length > 0),
   };
 
   return (
@@ -84,8 +103,12 @@ export function Layout({
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           onOpenSearch={onOpenSearch}
           artifacts={artifacts}
-          activeArtifact={activeArtifact}
-          onArtifactChange={onArtifactChange}
+          activeArtifact={selectedArtifact}
+          onArtifactChange={(label) => {
+            // Toggle: clicking same artifact deselects (shows all)
+            setSelectedArtifact(selectedArtifact === label ? undefined : label);
+            onArtifactChange?.(label);
+          }}
         />
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           {sidebarOpen && (
@@ -94,8 +117,10 @@ export function Layout({
               currentSlug={currentSlug}
               lens={lens}
               artifacts={artifacts}
-              activeArtifact={activeArtifact}
-              onArtifactChange={onArtifactChange}
+              activeArtifact={selectedArtifact}
+              onArtifactChange={(label) => {
+                setSelectedArtifact(selectedArtifact === label ? undefined : label);
+              }}
             />
           )}
           <main style={{ flex: 1, overflow: "auto" }}>

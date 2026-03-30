@@ -123,10 +123,6 @@ export function ClientApp({ siteData, initialSlug }: ClientAppProps) {
           label: a.label,
           color: a.color,
         }))}
-        onArtifactChange={(label: string) => {
-          const slug = "/libraries/" + label.toLowerCase().replace(/\s+/g, "-");
-          window.location.href = slug;
-        }}
         onOpenSearch={() => setSearchOpen(true)}
       >
         {currentPage ? (
