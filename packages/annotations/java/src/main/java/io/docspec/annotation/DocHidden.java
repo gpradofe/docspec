@@ -6,19 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marker annotation that excludes the annotated element from generated
- * documentation.
- *
- * <p>Apply this to types, methods, fields, constructors, or packages that
- * should remain undocumented regardless of other visibility rules or
- * processor configuration.</p>
- *
- * <pre>{@code
- * @DocHidden
- * public void internalMigrationHelper() { ... }
- * }</pre>
- */
+@DocBoundary("Marker annotation that excludes the annotated element from generated documentation. Apply this to types, methods, fields, constructors, or packages that should remain undocumented regardless of other visibility rules or processor configuration.")
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.PACKAGE})

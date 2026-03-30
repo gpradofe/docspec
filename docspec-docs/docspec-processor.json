@@ -301,6 +301,48 @@
           "bottleneck" : "DSTI intent extraction across all methods when Trees API is available"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "annotation processor entry point"
+        }
+      }, {
+        "name" : "DocFlow",
+        "qualified" : "io.docspec.annotation.DocFlow",
+        "attributes" : {
+          "id" : "processing-pipeline",
+          "name" : "DocSpec Processing Pipeline",
+          "description" : "The 7-phase annotation processing pipeline that produces docspec.json with documentation and DSTI intent data. Triggered by mvn docspec:generate.",
+          "trigger" : "mvn docspec:generate",
+          "steps" : "@io.docspec.annotation.Step(id=\"1-discovery\", name=\"Auto-Discovery\", actor=\"AutoDiscoveryScanner\", actorQualified=\"io.docspec.processor.scanner.AutoDiscoveryScanner\", type=\"process\", description=\"Scans all public classes, detects Spring Boot/JPA/Jackson frameworks on classpath\", outputs={\"discoveredTypes\"}),@io.docspec.annotation.Step(id=\"2-read-metadata\", name=\"Read Metadata\", actor=\"AnnotationReader\", actorQualified=\"io.docspec.processor.reader.AnnotationReader\", type=\"process\", description=\"Reads @DocModule, @DocFlow, @DocMethod, JavaDoc comments. Infers descriptions from method names.\", inputs={\"discoveredTypes\"}, outputs={\"memberModels\", \"moduleModels\"}),@io.docspec.annotation.Step(id=\"3-extract-system\", name=\"Extract System Info\", actor=\"DocSpecExtractor\", actorQualified=\"io.docspec.processor.extractor.DocSpecExtractor\", type=\"process\", description=\"Runs 7 extractors: Security, Config, Observability, DataStore, ExternalDeps, Privacy, ErrorsEvents\", inputs={\"discoveredTypes\"}, outputs={\"securityModel\", \"configModel\", \"observabilityModel\", \"dataStoreModel\"}),@io.docspec.annotation.Step(id=\"4-dsti\", name=\"DSTI Intent Extraction\", actor=\"IntentGraphExtractor\", actorQualified=\"io.docspec.processor.dsti.IntentGraphExtractor\", type=\"ai\", ai=true, description=\"Runs 13 independent intent channels on every public method. Cross-verifies signals. Computes ISD scores.\", inputs={\"discoveredTypes\"}, outputs={\"intentGraph\"}),@io.docspec.annotation.Step(id=\"5-cross-ref\", name=\"Cross-Reference Resolution\", actor=\"DocSpecProcessor\", actorQualified=\"io.docspec.processor.DocSpecProcessor\", type=\"process\", description=\"Resolves @DocUses, builds error.thrownBy, dataModel.usedBy, member.referencedBy mappings\", inputs={\"memberModels\", \"moduleModels\"}, outputs={\"crossRefs\", \"referencedBy\"}),@io.docspec.annotation.Step(id=\"6-coverage\", name=\"Coverage Calculation\", actor=\"CoverageCalculator\", actorQualified=\"io.docspec.processor.metrics.CoverageCalculator\", type=\"process\", description=\"Computes documentation coverage: % of classes documented, % of methods with descriptions\", inputs={\"memberModels\"}, outputs={\"discoveryModel\"}),@io.docspec.annotation.Step(id=\"7-serialize\", name=\"Serialize Output\", actor=\"SpecSerializer\", actorQualified=\"io.docspec.processor.output.SpecSerializer\", type=\"storage\", description=\"Serializes the complete DocSpec model to target/docspec.json via Jackson ObjectMapper\", inputs={\"docSpecModel\"}, outputs={\"docspec.json\", \"intent-graph.json\"})"
+        }
+      }, {
+        "name" : "DocError",
+        "qualified" : "io.docspec.annotation.DocError",
+        "attributes" : {
+          "code" : "DOCSPEC_PROC_001",
+          "description" : "Annotation processing failed due to an unrecoverable error during type analysis or model building.",
+          "causes" : "\"A type element could not be resolved during processing\",\"Extractor threw an uncaught exception\",\"Processing environment is misconfigured\"",
+          "resolution" : "Check compiler diagnostics for the root cause. Ensure all dependencies are on the classpath."
+        }
+      }, {
+        "name" : "DocEvent",
+        "qualified" : "io.docspec.annotation.DocEvent",
+        "attributes" : {
+          "name" : "docspec.processing.started",
+          "description" : "Emitted when the DocSpec annotation processor begins its first processing round.",
+          "trigger" : "javac invocation with DocSpecProcessor on the annotation processor path",
+          "channel" : "compiler-diagnostics",
+          "since" : "3.0"
+        }
+      }, {
+        "name" : "DocUsesAll",
+        "qualified" : "io.docspec.annotation.DocUsesAll",
+        "attributes" : {
+          "value" : "@io.docspec.annotation.DocUses(artifact=\"io.docspec:docspec-annotations-java\", description=\"Reads all 42 DocSpec annotations from source code to build the documentation model\"),@io.docspec.annotation.DocUses(artifact=\"com.fasterxml.jackson.core:jackson-databind\", description=\"Serializes the DocSpec model and intent graph to JSON output files\")"
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "processing-pipeline.5-cross-ref" ]
       },
@@ -927,6 +969,13 @@
           "description" : "the signals model to populate (merge into, do not overwrite other channels)",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "DSTI channel interface"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -1301,6 +1350,13 @@
           "verified" : false
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "rules" : "\"score >= 0.0\",\"score <= 10.0\",\"channel weights sum to 1.0\""
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.isd-score" ]
       }
@@ -1372,6 +1428,29 @@
           "verified" : false
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "DSTI intent graph extraction boundary"
+        }
+      }, {
+        "name" : "DocFlow",
+        "qualified" : "io.docspec.annotation.DocFlow",
+        "attributes" : {
+          "id" : "dsti-analysis",
+          "name" : "DSTI Intent Analysis Pipeline",
+          "description" : "Analyzes every public method across 13 independent intent channels, cross-verifies signals, and computes an ISD score. Each channel is self-contained for ablation.",
+          "trigger" : "DocSpecProcessor invokes extract() on a discovered type",
+          "steps" : "@io.docspec.annotation.Step(id=\"resolve-trees\", name=\"Resolve Trees API\", actor=\"IntentGraphExtractor\", type=\"process\", description=\"Obtains com.sun.source.util.Trees via reflection for AST-level analysis; gracefully degrades if unavailable\"),@io.docspec.annotation.Step(id=\"ch1-naming\", name=\"Channel 1: Name Semantics\", actor=\"NamingChannel\", type=\"process\", description=\"Extracts verb, object, and intent category from method name via NamingAnalyzer\"),@io.docspec.annotation.Step(id=\"ch2-guards\", name=\"Channel 2: Guard Clauses\", actor=\"GuardClauseChannel\", type=\"process\", description=\"Counts if-throw guard patterns and @DocIntentional/@DocPreserves annotation-based guards\"),@io.docspec.annotation.Step(id=\"ch3-branches\", name=\"Channel 3: Branch Structure\", actor=\"BranchStructureChannel\", type=\"process\", description=\"Counts if-statements (branching complexity) from the AST\"),@io.docspec.annotation.Step(id=\"ch4-gap\", name=\"Channel 4: Name-Behavior Gap\", actor=\"NameBehaviorGapChannel\", type=\"process\", description=\"Cross-references naming intent with guard/branch signals to detect naming inconsistencies\"),@io.docspec.annotation.Step(id=\"ch5-return\", name=\"Channel 5: Return Type\", actor=\"ReturnTypeChannel\", type=\"process\", description=\"Analyzes return type for Optional, Collection, reactive, void, or scalar signals\"),@io.docspec.annotation.Step(id=\"ch6-assignment\", name=\"Channel 6: Assignment Patterns\", actor=\"AssignmentPatternChannel\", type=\"process\", description=\"Detects builder patterns, constructor calls, and data flow writes\"),@io.docspec.annotation.Step(id=\"ch7-loops\", name=\"Channel 7: Loop Patterns\", actor=\"LoopPatternChannel\", type=\"process\", description=\"Detects .stream(), enhanced-for loops, and specific stream operations (filter, map, flatMap)\"),@io.docspec.annotation.Step(id=\"ch8-errors\", name=\"Channel 8: Error Handling\", actor=\"ErrorHandlingChannel\", type=\"process\", description=\"Counts try/catch blocks and extracts caught exception types\"),@io.docspec.annotation.Step(id=\"ch9-constants\", name=\"Channel 9: Constants\", actor=\"AssignmentChainChannel\", type=\"process\", description=\"Scans for UPPER_CASE constant references in the method body\"),@io.docspec.annotation.Step(id=\"ch10-nulls\", name=\"Channel 10: Null Checks\", actor=\"ExceptionMessageChannel\", type=\"process\", description=\"Counts null check patterns: != null, == null, Objects.requireNonNull, Optional.ofNullable\"),@io.docspec.annotation.Step(id=\"ch11-assertions\", name=\"Channel 11: Assertions\", actor=\"ConstantChannel\", type=\"process\", description=\"Detects assert statements and assertion-style method calls (check*, require*, verify*)\"),@io.docspec.annotation.Step(id=\"ch12-logging\", name=\"Channel 12: Logging\", actor=\"LoggingChannel\", type=\"process\", description=\"Detects logger method calls (log, debug, info, warn, error, trace)\"),@io.docspec.annotation.Step(id=\"ch13-validation\", name=\"Channel 13: Validation Annotations\", actor=\"EqualityChannel\", type=\"process\", description=\"Counts Bean Validation annotations on parameters (@NotNull, @Valid, @Min, @Max, @Size, etc.)\"),@io.docspec.annotation.Step(id=\"cross-verify\", name=\"Cross-Verification\", actor=\"IntentGraphExtractor\", type=\"process\", description=\"Collects injected field types as dependency signals for cross-cutting analysis\"),@io.docspec.annotation.Step(id=\"isd-score\", name=\"ISD Score Calculation\", actor=\"IntentDensityCalculator\", type=\"process\", description=\"Computes weighted ISD score (0.0-1.0) from all 13 channel signals\")"
+        }
+      }, {
+        "name" : "DocUsesAll",
+        "qualified" : "io.docspec.annotation.DocUsesAll",
+        "attributes" : {
+          "value" : "@io.docspec.annotation.DocUses(artifact=\"io.docspec:docspec-processor-java\", member=\"NamingAnalyzer\", description=\"Delegates method name parsing to NamingAnalyzer for verb/object/intent extraction\"),@io.docspec.annotation.DocUses(artifact=\"io.docspec:docspec-processor-java\", member=\"IntentDensityCalculator\", description=\"Computes the weighted ISD score from merged channel signals\")"
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "processing-pipeline.4-dsti", "dsti-analysis.resolve-trees", "dsti-analysis.cross-verify" ]
       },
@@ -1407,6 +1486,14 @@
           "code" : "NamingAnalyzer analyzer = new NamingAnalyzer();\nNameSemantics result = analyzer.analyze(\"findUserByEmail\");\n// result.verb() == \"find\", result.object() == \"user by email\", result.intent() == \"query\"",
           "verified" : false
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "NamingAnalyzer",
+          "rules" : "\"VERB_INTENT_MAP SIZE > 0\",\"analyze() never returns null\""
+        }
       } ]
     }, {
       "kind" : "class",
@@ -1449,6 +1536,14 @@
         "returns" : {
           "type" : "List<io.docspec.processor.dsti.PropertyDSL.InvariantRule>",
           "description" : "list of successfully parsed rules (never null, may be empty)"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "PropertyDSL",
+          "rules" : "\"parse() returns null for unparseable expressions\",\"parseAll() never returns null\""
         }
       } ]
     } ]
@@ -1505,6 +1600,13 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
       } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
@@ -1586,6 +1688,13 @@
           "description" : "a list of mismatch descriptions; empty list means full consistency"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
+      } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
       "kind" : "class",
@@ -1635,6 +1744,13 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
       } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
@@ -1688,6 +1804,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "extractor interface boundary"
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "processing-pipeline.3-extract-system" ]
       }
@@ -1740,6 +1863,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
+      } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
       "kind" : "class",
@@ -1789,6 +1919,13 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
       } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
@@ -1853,6 +1990,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
+      } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
       "kind" : "class",
@@ -1903,6 +2047,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
+      } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
       "kind" : "class",
@@ -1952,6 +2103,13 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
       } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
@@ -2016,6 +2174,13 @@
           "description" : "list of consistency issues found"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
+      } ],
       "implements" : [ "DocSpecExtractor" ]
     }, {
       "kind" : "class",
@@ -2065,6 +2230,23 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath-safe extraction"
+        }
+      }, {
+        "name" : "DocEvent",
+        "qualified" : "io.docspec.annotation.DocEvent",
+        "attributes" : {
+          "name" : "docspec.extraction.security",
+          "description" : "Emitted when Spring Security annotations have been extracted from a type.",
+          "trigger" : "Type has @PreAuthorize, @Secured, or @RolesAllowed annotations",
+          "channel" : "compiler-diagnostics",
+          "since" : "3.0"
+        }
       } ],
       "implements" : [ "DocSpecExtractor" ]
     } ]
@@ -2120,6 +2302,13 @@
         } ],
         "returns" : {
           "type" : "FrameworkInfo"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "framework detection without compile deps"
         }
       } ]
     }, {
@@ -2183,6 +2372,13 @@
         } ],
         "returns" : {
           "type" : "JsonShapeModel"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "framework detection without compile deps"
         }
       } ],
       "implements" : [ "FrameworkDetector" ]
@@ -2259,6 +2455,13 @@
         } ],
         "returns" : {
           "type" : "DataModelInfo"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "framework detection without compile deps"
         }
       } ],
       "implements" : [ "FrameworkDetector" ]
@@ -2399,6 +2602,13 @@
           "type" : "String"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "framework detection without compile deps"
+        }
+      } ],
       "implements" : [ "FrameworkDetector" ]
     } ]
   }, {
@@ -2477,6 +2687,13 @@
           "type" : "double"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "rules" : "\"coverage >= 0\",\"coverage <= 100\""
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "processing-pipeline.6-coverage" ]
       }
@@ -2487,6 +2704,83 @@
     "audience" : "public",
     "discoveredFrom" : "auto",
     "members" : [ {
+      "kind" : "class",
+      "name" : "AnnotationModel",
+      "qualified" : "io.docspec.processor.model.AnnotationModel",
+      "description" : "annotation model.",
+      "visibility" : "public",
+      "discoveredFrom" : "auto",
+      "constructors" : [ {
+        "visibility" : "public"
+      }, {
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "name",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "qualified",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      } ],
+      "methods" : [ {
+        "name" : "getName",
+        "description" : "Gets a name.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "setName",
+        "description" : "Sets the name.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "name",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getQualified",
+        "description" : "Gets a qualified.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "setQualified",
+        "description" : "Sets the qualified.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "qualified",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getAttributes",
+        "description" : "Gets an attributes.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "Map<String,Object>"
+        }
+      }, {
+        "name" : "setAttributes",
+        "description" : "Sets the attributes.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "attributes",
+          "type" : "java.util.Map<java.lang.String,java.lang.Object>",
+          "required" : true
+        } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
+      } ]
+    }, {
       "kind" : "class",
       "name" : "ArtifactModel",
       "qualified" : "io.docspec.processor.model.ArtifactModel",
@@ -2624,6 +2918,20 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "ArtifactModel",
+          "rules" : "\"groupId NOT_BLANK\",\"artifactId NOT_BLANK\",\"language NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -2667,6 +2975,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -2838,6 +3153,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -2897,6 +3219,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -2956,6 +3285,13 @@
           "type" : "java.util.List<io.docspec.processor.model.MethodParamModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3031,6 +3367,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3138,6 +3481,20 @@
           "type" : "java.util.List<io.docspec.processor.model.ContextUsesModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "ContextModel",
+          "rules" : "\"id NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3197,6 +3554,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3304,6 +3668,20 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "CrossRefModel",
+          "rules" : "\"sourceQualified NOT_BLANK\",\"targetArtifact NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3539,6 +3917,13 @@
           "type" : "java.lang.Integer",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3710,6 +4095,13 @@
           "type" : "java.util.List<io.docspec.processor.model.DataModelInfo.IndexModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3801,6 +4193,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3860,6 +4259,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -3935,6 +4341,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -4010,6 +4423,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -4181,6 +4601,20 @@
           "type" : "java.util.List<io.docspec.processor.model.DataStoreTopicModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "DataStoreModel",
+          "rules" : "\"id NOT_BLANK\",\"type NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -4256,6 +4690,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -4491,6 +4932,20 @@
           "type" : "double",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "DiscoveryModel",
+          "rules" : "\"coveragePercent >= 0\",\"coveragePercent <= 100\",\"totalClasses >= 0\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -4790,6 +5245,26 @@
           "type" : "io.docspec.processor.model.DiscoveryModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "DocSpecModel",
+          "rules" : "\"version == \\\"3.0.0\\\"\",\"modules NOT_NULL\",\"errors NOT_NULL\",\"events NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
+      }, {
+        "name" : "JsonPropertyOrder",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonPropertyOrder",
+        "attributes" : {
+          "value" : "\"docspec\",\"artifact\",\"project\",\"modules\",\"flows\",\"contexts\",\"crossRefs\",\"errors\",\"events\",\"dataModels\",\"dataStores\",\"configuration\",\"security\",\"externalDependencies\",\"observability\",\"privacy\",\"intentGraph\",\"discovery\""
+        }
       } ]
     }, {
       "kind" : "class",
@@ -4849,6 +5324,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5004,6 +5486,20 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "ErrorModel",
+          "rules" : "\"code NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5143,6 +5639,20 @@
           "type" : "io.docspec.processor.model.EventPayloadModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "EventModel",
+          "rules" : "\"name NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5202,6 +5712,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5245,6 +5762,13 @@
           "type" : "java.util.List<io.docspec.processor.model.EventPayloadFieldModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5336,6 +5860,13 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5395,6 +5926,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5518,6 +6056,20 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "ExternalDependencyModel",
+          "rules" : "\"name NOT_BLANK\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5625,6 +6177,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5716,6 +6275,20 @@
           "type" : "java.util.List<io.docspec.processor.model.FlowStepModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "FlowModel",
+          "rules" : "\"id NOT_BLANK\",\"steps NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -5807,6 +6380,13 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6026,6 +6606,13 @@
           "type" : "io.docspec.processor.model.FlowStepObservabilityModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6069,6 +6656,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6096,6 +6690,20 @@
           "type" : "java.util.List<io.docspec.processor.model.IntentMethodModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "IntentGraphModel",
+          "rules" : "\"methods NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6139,6 +6747,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6358,6 +6973,20 @@
           "type" : "java.lang.Double",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "IntentSignalsModel",
+          "rules" : "\"intentDensityScore >= 0.0\",\"intentDensityScore <= 10.0\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6449,6 +7078,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6508,6 +7144,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6599,6 +7242,13 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -6915,6 +7565,22 @@
           "required" : true
         } ]
       }, {
+        "name" : "getAnnotations",
+        "description" : "Gets an annotations.",
+        "visibility" : "public",
+        "returns" : {
+          "type" : "List<io.docspec.processor.model.AnnotationModel>"
+        }
+      }, {
+        "name" : "setAnnotations",
+        "description" : "Sets the annotations.",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "annotations",
+          "type" : "java.util.List<io.docspec.processor.model.AnnotationModel>",
+          "required" : true
+        } ]
+      }, {
         "name" : "getReferencedBy",
         "description" : "Gets a referenced by.",
         "visibility" : "public",
@@ -7042,6 +7708,20 @@
           "type" : "java.util.List<io.docspec.processor.model.RelationModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "MemberModel",
+          "rules" : "\"name NOT_BLANK\",\"methods NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7117,6 +7797,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7384,6 +8071,20 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "MethodModel",
+          "rules" : "\"name NOT_BLANK\",\"params NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7475,6 +8176,13 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7518,6 +8226,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7673,6 +8388,20 @@
           "type" : "java.util.List<io.docspec.processor.model.MemberModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "ModuleModel",
+          "rules" : "\"id NOT_BLANK\",\"members NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7732,6 +8461,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7775,6 +8511,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7850,6 +8593,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7909,6 +8659,20 @@
           "type" : "java.util.List<io.docspec.processor.model.ObservabilityHealthCheckModel>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "ObservabilityModel",
+          "rules" : "\"metrics NOT_NULL\",\"healthChecks NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -7968,6 +8732,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8027,6 +8798,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8166,6 +8944,13 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8289,6 +9074,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8332,6 +9124,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8391,6 +9190,13 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8466,6 +9272,13 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8541,6 +9354,13 @@
           "type" : "io.docspec.processor.model.RateLimitModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8616,6 +9436,20 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocInvariant",
+        "qualified" : "io.docspec.annotation.DocInvariant",
+        "attributes" : {
+          "on" : "SecurityModel",
+          "rules" : "\"endpoints NOT_NULL\",\"roles NOT_NULL\""
+        }
+      }, {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     }, {
       "kind" : "class",
@@ -8659,6 +9493,13 @@
           "type" : "java.lang.Double",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "JsonInclude",
+        "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
+        "attributes" : {
+          "value" : "NON_EMPTY"
+        }
       } ]
     } ]
   }, {
@@ -8724,6 +9565,32 @@
         } ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "JSON serialization"
+        }
+      }, {
+        "name" : "DocError",
+        "qualified" : "io.docspec.annotation.DocError",
+        "attributes" : {
+          "code" : "DOCSPEC_SER_001",
+          "description" : "Failed to serialize the DocSpec model to JSON or write the output file.",
+          "causes" : "\"Output directory does not exist or is not writable\",\"Jackson serialization encountered a cycle or unknown type\",\"Disk is full or path is invalid\"",
+          "resolution" : "Check the docspec.output.dir configuration and ensure the target directory is writable."
+        }
+      }, {
+        "name" : "DocEvent",
+        "qualified" : "io.docspec.annotation.DocEvent",
+        "attributes" : {
+          "name" : "docspec.serialization.completed",
+          "description" : "Emitted when docspec.json has been successfully written to the output directory.",
+          "trigger" : "Successful completion of serialize()",
+          "channel" : "compiler-diagnostics",
+          "since" : "3.0"
         }
       } ],
       "referencedBy" : {
@@ -8800,9 +9667,22 @@
           "type" : "ModuleModel"
         }
       }, {
+        "name" : "applyDocMethodFull",
+        "description" : "Apply doc method full.",
+        "since" : "3.0.0",
+        "visibility" : "public",
+        "params" : [ {
+          "name" : "method",
+          "type" : "javax.lang.model.element.ExecutableElement",
+          "required" : true
+        }, {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.MethodModel",
+          "required" : true
+        } ]
+      }, {
         "name" : "applyDocMethod",
         "description" : "Apply doc method.",
-        "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
           "name" : "method",
@@ -9242,6 +10122,13 @@
           "type" : "String"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "documentation metadata reader"
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "processing-pipeline.2-read-metadata" ]
       }
@@ -9301,6 +10188,13 @@
         } ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "documentation metadata reader"
         }
       } ]
     }, {
@@ -9383,6 +10277,13 @@
         "returns" : {
           "type" : "String"
         }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "documentation metadata reader"
+        }
       } ]
     } ]
   }, {
@@ -9446,6 +10347,13 @@
         } ],
         "returns" : {
           "type" : "MethodModel"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "classpath scanner"
         }
       } ],
       "referencedBy" : {
@@ -14982,6 +15890,111 @@
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "intentDensityScore" : 2.7
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.AnnotationModel.getName",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "name",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 2.3
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.AnnotationModel.setName",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "name",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "field:name" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 2.2
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.AnnotationModel.getQualified",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "qualified",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:scalar" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 2.3
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.AnnotationModel.setQualified",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "qualified",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "field:qualified" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 2.2
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.AnnotationModel.getAttributes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "attributes",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:map" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 2.3
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.AnnotationModel.setAttributes",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "attributes",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "field:attributes" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 2.2
       }
     }, {
       "qualified" : "io.docspec.processor.model.ArtifactModel.getGroupId",
@@ -23962,6 +24975,43 @@
         "intentDensityScore" : 3.0
       }
     }, {
+      "qualified" : "io.docspec.processor.model.MemberModel.getAnnotations",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "get",
+          "object" : "annotations",
+          "intent" : "query"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:collection" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.processor.model.ReferencedByModel", "io.docspec.processor.model.OrderingModel", "io.docspec.processor.model.MonotonicModel", "io.docspec.processor.model.ConservationModel" ],
+        "intentDensityScore" : 3.1
+      }
+    }, {
+      "qualified" : "io.docspec.processor.model.MemberModel.setAnnotations",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "set",
+          "object" : "annotations",
+          "intent" : "mutation"
+        },
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "field:annotations" ]
+        },
+        "nullChecks" : 0,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "dependencies" : [ "io.docspec.processor.model.ReferencedByModel", "io.docspec.processor.model.OrderingModel", "io.docspec.processor.model.MonotonicModel", "io.docspec.processor.model.ConservationModel" ],
+        "intentDensityScore" : 3.0
+      }
+    }, {
       "qualified" : "io.docspec.processor.model.MemberModel.getReferencedBy",
       "intentSignals" : {
         "nameSemantics" : {
@@ -27514,6 +28564,29 @@
         "intentDensityScore" : 3.4
       }
     }, {
+      "qualified" : "io.docspec.processor.reader.AnnotationReader.applyDocMethodFull",
+      "intentSignals" : {
+        "nameSemantics" : {
+          "verb" : "apply",
+          "object" : "doc method full",
+          "intent" : "transformation"
+        },
+        "branches" : 18,
+        "dataFlow" : {
+          "reads" : [ "return:void" ],
+          "writes" : [ "new:ExampleModel" ]
+        },
+        "loopProperties" : {
+          "hasEnhancedFor" : true
+        },
+        "constants" : [ "DOC_METHOD" ],
+        "nullChecks" : 16,
+        "assertions" : 0,
+        "logStatements" : 0,
+        "validationAnnotations" : 0,
+        "intentDensityScore" : 4.42
+      }
+    }, {
       "qualified" : "io.docspec.processor.reader.AnnotationReader.applyDocMethod",
       "intentSignals" : {
         "nameSemantics" : {
@@ -27521,16 +28594,14 @@
           "object" : "doc method",
           "intent" : "transformation"
         },
-        "branches" : 3,
         "dataFlow" : {
           "reads" : [ "return:void" ]
         },
-        "constants" : [ "DOC_METHOD" ],
-        "nullChecks" : 3,
+        "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.9
+        "intentDensityScore" : 2.0
       }
     }, {
       "qualified" : "io.docspec.processor.reader.AnnotationReader.applyDocField",
@@ -28796,10 +29867,10 @@
           "object" : "member model",
           "intent" : "transformation"
         },
-        "branches" : 10,
+        "branches" : 12,
         "dataFlow" : {
           "reads" : [ "return:object" ],
-          "writes" : [ "new:MemberModel" ]
+          "writes" : [ "new:MemberModel", "new:AnnotationModel" ]
         },
         "loopProperties" : {
           "hasStreams" : true,
@@ -28891,7 +29962,7 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
-        "constants" : [ "CLASS", "INTERFACE", "ENUM", "RECORD", "PUBLIC" ],
+        "constants" : [ "CLASS", "INTERFACE", "ENUM", "RECORD", "ANNOTATION_TYPE", "PUBLIC" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
@@ -29065,14 +30136,14 @@
   "discovery" : {
     "mode" : "hybrid",
     "frameworks" : [ "jackson" ],
-    "totalClasses" : 102,
-    "documentedClasses" : 102,
-    "autoDiscoveredClasses" : 102,
+    "totalClasses" : 103,
+    "documentedClasses" : 103,
+    "autoDiscoveredClasses" : 103,
     "annotatedClasses" : 0,
-    "inferredDescriptions" : 958,
-    "totalMethods" : 905,
-    "documentedMethods" : 905,
-    "totalParams" : 590,
+    "inferredDescriptions" : 968,
+    "totalMethods" : 914,
+    "documentedMethods" : 914,
+    "totalParams" : 596,
     "documentedParams" : 17,
     "coveragePercent" : 100.0
   }

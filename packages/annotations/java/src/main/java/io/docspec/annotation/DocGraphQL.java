@@ -6,37 +6,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marks a GraphQL resolver or type.
- *
- * <p>Use this annotation to document GraphQL queries, mutations, and
- * subscriptions. Documentation tooling can use this metadata to generate
- * GraphQL schema references alongside the rest of the API surface.</p>
- *
- * <pre>{@code
- * @DocGraphQL(type = "Query", field = "user")
- * public User getUser(String id) { ... }
- * }</pre>
- */
+@DocBoundary("Marks a GraphQL resolver or type. Use this annotation to document GraphQL queries, mutations, and subscriptions. Documentation tooling can use this metadata to generate GraphQL schema references alongside the rest of the API surface.")
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface DocGraphQL {
 
-    /**
-     * The GraphQL type.
-     *
-     * <p>Common values are {@code "Query"}, {@code "Mutation"}, and
-     * {@code "Subscription"}.</p>
-     *
-     * @return the GraphQL type, or empty if inferred from context
-     */
+    @DocMethod("The GraphQL type, such as Query, Mutation, or Subscription")
     String type() default "";
 
-    /**
-     * The GraphQL field name.
-     *
-     * @return the field name, or empty to infer from the method name
-     */
+    @DocMethod("The GraphQL field name")
     String field() default "";
 }

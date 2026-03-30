@@ -20,45 +20,48 @@
       "kind" : "annotation",
       "name" : "ContextInput",
       "qualified" : "io.docspec.annotation.ContextInput",
-      "description" : "Describes a single runtime input within a DocContext.\n\n <p>This annotation has an empty Target and is designed exclusively\n for use as a nested annotation inside DocContext#inputs().</p>\n\n <pre>{@code\n @ContextInput(\n     name = \"apiKey\",\n     source = \"environment\",\n     description = \"API key for the LLM provider\",\n     items = {\"OPENAI_API_KEY\", \"ANTHROPIC_API_KEY\"}\n )\n }</pre>",
+      "description" : "context input.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "name",
-        "description" : "Name of the input parameter.",
+        "description" : "Name of the input parameter",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the input name, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "source",
-        "description" : "Origin or source of the input value, such as {@code \"environment\"},\n {@code \"request.body\"}, or {@code \"config\"}.",
+        "description" : "Origin or source of the input value, such as environment, request.body, or config",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the source descriptor"
+          "type" : "String"
         }
       }, {
         "name" : "description",
-        "description" : "Prose description of the input's purpose and expected format.",
+        "description" : "Prose description of the input's purpose and expected format",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the input description"
+          "type" : "String"
         }
       }, {
         "name" : "items",
-        "description" : "Enumeration of specific items, keys, or variants that this input\n accepts.",
+        "description" : "Enumeration of specific items, keys, or variants that this input accepts",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "the array of accepted items"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Describes a single runtime input within a DocContext. This annotation has an empty Target and is designed exclusively for use as a nested annotation inside DocContext#inputs()."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -66,36 +69,40 @@
       "kind" : "annotation",
       "name" : "ContextUses",
       "qualified" : "io.docspec.annotation.ContextUses",
-      "description" : "Declares a cross-project usage link within a DocContext.\n\n <p>This annotation has an empty Target and is designed exclusively\n for use as a nested annotation inside DocContext#uses().</p>\n\n <pre>{@code\n @ContextUses(\n     artifact = \"com.example:llm-client\",\n     what = \"OpenAIClient\",\n     why = \"Used for LLM inference during curriculum generation\"\n )\n }</pre>",
+      "description" : "context uses.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "artifact",
-        "description" : "Maven-style coordinates or identifier of the referenced artifact.",
+        "description" : "Maven-style coordinates or identifier of the referenced artifact",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the artifact identifier, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "what",
-        "description" : "Name of the specific component, class, or resource being used from\n the artifact.",
+        "description" : "Name of the specific component, class, or resource being used from the artifact",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the component name, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "why",
-        "description" : "Prose explanation of why this dependency exists.",
+        "description" : "Prose explanation of why this dependency exists",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the rationale"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares a cross-project usage link within a DocContext. This annotation has an empty Target and is designed exclusively for use as a nested annotation inside DocContext#uses()."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -103,27 +110,32 @@
       "kind" : "annotation",
       "name" : "DocAsyncAPI",
       "qualified" : "io.docspec.annotation.DocAsyncAPI",
-      "description" : "Marks a class that implements an AsyncAPI specification.\n\n <p>AsyncAPI describes event-driven architectures with channels, messages,\n and operations. This annotation captures the channel and operation type,\n enabling documentation tooling to generate AsyncAPI-compatible references\n and message catalogs.</p>\n\n <pre>{@code\n @DocAsyncAPI(channel = \"orders/created\", operation = \"subscribe\")\n public class OrderCreatedListener { ... }\n }</pre>",
+      "description" : "doc async API.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "channel",
-        "description" : "The AsyncAPI channel name.",
+        "description" : "The AsyncAPI channel name",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the channel name, e.g. {@code \"orders/created\"}"
+          "type" : "String"
         }
       }, {
         "name" : "operation",
-        "description" : "The operation type on this channel.\n\n <p>Common values are {@code \"publish\"} and {@code \"subscribe\"}.</p>",
+        "description" : "The operation type on this channel, such as publish or subscribe",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the operation type, or empty if not specified"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a class that implements an AsyncAPI specification. AsyncAPI describes event-driven architectures with channels, messages, and operations. This annotation captures the channel and operation type, enabling documentation tooling to generate AsyncAPI-compatible references and message catalogs."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -131,18 +143,24 @@
       "kind" : "annotation",
       "name" : "DocAudience",
       "qualified" : "io.docspec.annotation.DocAudience",
-      "description" : "Declares the intended audience visibility level for the annotated element.\n\n <p>Documentation processors use this annotation to partition API\n documentation into tiers. Supported values are:</p>\n <ul>\n   <li>{@code \"public\"} — visible to all external consumers</li>\n   <li>{@code \"partner\"} — visible only to partner integrations</li>\n   <li>{@code \"internal\"} — visible only within the organization</li>\n </ul>\n\n <pre>{@code\n @DocAudience(\"partner\")\n public class PartnerOnboardingService { ... }\n }</pre>",
+      "description" : "doc audience.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The audience level for this element.\n\n <p>Must be one of {@code \"public\"}, {@code \"partner\"}, or\n {@code \"internal\"}.</p>",
+        "description" : "The audience level for this element, must be one of public, partner, or internal",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the audience level"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares the intended audience visibility level for the annotated element. Documentation processors use this annotation to partition API documentation into tiers. Supported values are public, partner, and internal."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -150,18 +168,24 @@
       "kind" : "annotation",
       "name" : "DocBoundary",
       "qualified" : "io.docspec.annotation.DocBoundary",
-      "description" : "Marks an architectural boundary.\n\n <p>Boundaries are key structural points in a system where one subsystem\n or context meets another. Common boundary types include anti-corruption\n layers, adapters, facades, and gateway services. Documenting boundaries\n helps developers understand system decomposition and integration points.</p>\n\n <pre>{@code\n @DocBoundary(\"anti-corruption layer\")\n public class LegacyPaymentAdapter { ... }\n }</pre>",
+      "description" : "doc boundary.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "A description of the architectural boundary.\n\n <p>Common values include {@code \"anti-corruption layer\"},\n {@code \"adapter\"}, {@code \"facade\"}, and {@code \"gateway\"}.</p>",
+        "description" : "A description of the architectural boundary, such as anti-corruption layer, adapter, facade, or gateway",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the boundary description"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks an architectural boundary. Boundaries are key structural points in a system where one subsystem or context meets another. Common boundary types include anti-corruption layers, adapters, facades, and gateway services. Documenting boundaries helps developers understand system decomposition and integration points."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -169,27 +193,32 @@
       "kind" : "annotation",
       "name" : "DocCommand",
       "qualified" : "io.docspec.annotation.DocCommand",
-      "description" : "Documents a command in a CQRS (Command Query Responsibility Segregation)\n architecture.\n\n <p>Commands represent write operations that change state. This annotation\n captures the command name and the aggregate it targets, enabling\n documentation tooling to generate command catalogs and aggregate\n diagrams.</p>\n\n <pre>{@code\n @DocCommand(value = \"PlaceOrder\", aggregate = \"Order\")\n public void handle(PlaceOrderCommand command) { ... }\n }</pre>",
+      "description" : "doc command.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The command name.",
+        "description" : "The command name",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the name of the command"
+          "type" : "String"
         }
       }, {
         "name" : "aggregate",
-        "description" : "The target aggregate that this command modifies.",
+        "description" : "The target aggregate that this command modifies",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the aggregate name, or empty if not applicable"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a command in a CQRS (Command Query Responsibility Segregation) architecture. Commands represent write operations that change state. This annotation captures the command name and the aggregate it targets, enabling documentation tooling to generate command catalogs and aggregate diagrams."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -197,17 +226,24 @@
       "kind" : "annotation",
       "name" : "DocCommutative",
       "qualified" : "io.docspec.annotation.DocCommutative",
-      "description" : "Marks a method as commutative — the order of its arguments does not affect the result.\n\n <p>This annotation generates property-based tests verifying that {@code f(a, b) == f(b, a)}\n for all valid input pairs. Used by DSTI test generators.</p>\n\n <pre>{@code\n @DocCommutative(\"addition is commutative\")\n public int add(int a, int b) {\n     return a + b;\n }\n }</pre>",
+      "description" : "doc commutative.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "Optional description of the commutative property.",
+        "description" : "Optional description of the commutative property",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a method as commutative -- the order of its arguments does not affect the result. This annotation generates property-based tests verifying that f(a, b) == f(b, a) for all valid input pairs. Used by DSTI test generators."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -215,18 +251,24 @@
       "kind" : "annotation",
       "name" : "DocCompare",
       "qualified" : "io.docspec.annotation.DocCompare",
-      "description" : "Documents comparison semantics for the annotated method.\n\n <p>Use this annotation to describe how a method compares, orders, or\n evaluates equality of objects. This is particularly useful for custom\n comparators, equality checks, and sorting implementations.</p>\n\n <pre>{@code\n @DocCompare(\"natural ordering by last name, then first name\")\n public int compareTo(Person other) { ... }\n }</pre>",
+      "description" : "doc compare.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "A description of the comparison semantics.\n\n <p>Common values include {@code \"natural ordering\"},\n {@code \"by-name\"}, {@code \"by-date\"}, and\n {@code \"case-insensitive\"}.</p>",
+        "description" : "A description of the comparison semantics, such as natural ordering, by-name, by-date, or case-insensitive",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the comparison description"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents comparison semantics for the annotated method. Use this annotation to describe how a method compares, orders, or evaluates equality of objects. This is particularly useful for custom comparators, equality checks, and sorting implementations."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -234,18 +276,24 @@
       "kind" : "annotation",
       "name" : "DocConservation",
       "qualified" : "io.docspec.annotation.DocConservation",
-      "description" : "Declares a conservation law — a quantity that is preserved through a\n transformation.\n\n <p>Conservation laws are fundamental semantic properties stating that\n certain quantities remain constant before and after an operation.\n For example, a fund transfer must conserve the total balance across\n all accounts.</p>\n\n <pre>{@code\n @DocConservation(\"Total balance across all accounts remains constant\")\n public void transfer(Account from, Account to, BigDecimal amount) { ... }\n }</pre>",
+      "description" : "doc conservation.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "A description of the conservation law that holds for this method.",
+        "description" : "A description of the conservation law that holds for this method",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the conservation description"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares a conservation law -- a quantity that is preserved through a transformation. Conservation laws are fundamental semantic properties stating that certain quantities remain constant before and after an operation. For example, a fund transfer must conserve the total balance across all accounts."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -253,54 +301,56 @@
       "kind" : "annotation",
       "name" : "DocContext",
       "qualified" : "io.docspec.annotation.DocContext",
-      "description" : "Documents the runtime context for the annotated type, including its inputs,\n associated flow, and cross-project dependencies.\n\n <p>A context represents the runtime environment or configuration surface\n that a component requires to operate. Documentation tooling can use this\n to generate configuration guides and dependency matrices.</p>\n\n <pre>{@code\n @DocContext(\n     id = \"generation-context\",\n     name = \"Generation Context\",\n     inputs = {\n         @ContextInput(name = \"jobDescription\", source = \"request.body\", description = \"The job description text\")\n     },\n     flow = \"curriculum-generation\",\n     uses = {\n         @ContextUses(artifact = \"com.example:llm-client\", what = \"OpenAIClient\", why = \"LLM inference\")\n     }\n )\n public class GenerationContext { ... }\n }</pre>",
+      "description" : "doc context.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "id",
-        "description" : "Unique identifier for this context.",
+        "description" : "Unique identifier for this context",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the context identifier"
+          "type" : "String"
         }
       }, {
         "name" : "name",
-        "description" : "Human-readable display name for the context.",
+        "description" : "Human-readable display name for the context",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the context name"
+          "type" : "String"
         }
       }, {
         "name" : "inputs",
-        "description" : "Runtime inputs required by this context.",
+        "description" : "Runtime inputs required by this context",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "ContextInput[]",
-          "description" : "the array of context inputs"
+          "type" : "ContextInput[]"
         }
       }, {
         "name" : "flow",
-        "description" : "Identifier of the flow associated with this context.",
+        "description" : "Identifier of the flow associated with this context",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the flow id, or empty if not associated with a specific flow"
+          "type" : "String"
         }
       }, {
         "name" : "uses",
-        "description" : "Cross-project dependencies consumed by this context.",
+        "description" : "Cross-project dependencies consumed by this context",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "ContextUses[]",
-          "description" : "the array of usage links"
+          "type" : "ContextUses[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents the runtime context for the annotated type, including its inputs, associated flow, and cross-project dependencies. A context represents the runtime environment or configuration surface that a component requires to operate. Documentation tooling can use this to generate configuration guides and dependency matrices."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -308,17 +358,24 @@
       "kind" : "annotation",
       "name" : "DocDeterministic",
       "qualified" : "io.docspec.annotation.DocDeterministic",
-      "description" : "Marks a method as deterministic — the same inputs always produce the\n same outputs.\n\n <p>A deterministic method has no dependency on external state, randomness,\n or timing. This property enables caching, memoization, and formal\n verification.</p>\n\n <pre>{@code\n @DocDeterministic\n public int calculateHash(byte[] data) { ... }\n }</pre>",
+      "description" : "doc deterministic.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "Optional description of what makes this method deterministic.",
+        "description" : "Optional description of what makes this method deterministic",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a method as deterministic -- the same inputs always produce the same outputs. A deterministic method has no dependency on external state, randomness, or timing. This property enables caching, memoization, and formal verification."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -326,18 +383,24 @@
       "kind" : "annotation",
       "name" : "DocEndpoint",
       "qualified" : "io.docspec.annotation.DocEndpoint",
-      "description" : "Maps the annotated SDK method to its underlying REST API endpoint.\n\n <p>This annotation enables documentation tooling to cross-reference SDK\n methods with API endpoint documentation, providing consumers with a\n clear mapping between the programmatic interface and the HTTP contract.</p>\n\n <pre>{@code\n @DocEndpoint(\"POST /v1/curricula/generate\")\n public Curriculum generate(GenerateRequest request) { ... }\n }</pre>",
+      "description" : "doc endpoint.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The HTTP method and path of the API endpoint, formatted as\n {@code \"METHOD /path\"}.\n\n <p>Examples: {@code \"GET /v1/curricula\"}, {@code \"POST /v1/curricula/generate\"},\n {@code \"DELETE /v1/curricula/{id}\"}.</p>",
+        "description" : "The HTTP method and path of the API endpoint, formatted as METHOD /path",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the endpoint descriptor, must not be empty"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Maps the annotated SDK method to its underlying REST API endpoint. This annotation enables documentation tooling to cross-reference SDK methods with API endpoint documentation, providing consumers with a clear mapping between the programmatic interface and the HTTP contract."
         }
       } ],
       "kindCategory" : "controller",
@@ -346,63 +409,64 @@
       "kind" : "annotation",
       "name" : "DocError",
       "qualified" : "io.docspec.annotation.DocError",
-      "description" : "Documents an error code on the annotated type, providing structured\n information for API consumers to understand and handle failures.\n\n <p>Each annotated type represents a distinct error condition with its own\n code, HTTP status, description, possible causes, and resolution guidance.</p>\n\n <pre>{@code\n @DocError(\n     code = \"CURR_001\",\n     httpStatus = 422,\n     description = \"The job description is too short to generate a curriculum.\",\n     causes = {\"Input text has fewer than 50 characters\", \"Input text is blank after trimming\"},\n     resolution = \"Provide a job description with at least 50 characters.\",\n     since = \"1.0\"\n )\n public class JobDescriptionTooShortException extends ApiException { ... }\n }</pre>",
+      "description" : "doc error.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "code",
-        "description" : "Application-specific error code.",
+        "description" : "Application-specific error code",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the error code, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "httpStatus",
-        "description" : "HTTP status code associated with this error.\n\n <p>A value of {@code -1} (the default) indicates that no specific HTTP\n status is associated.</p>",
+        "description" : "HTTP status code associated with this error, -1 indicates no specific HTTP status",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "int",
-          "description" : "the HTTP status code, or {@code -1} if not applicable"
+          "type" : "int"
         }
       }, {
         "name" : "description",
-        "description" : "Human-readable description of the error condition.",
+        "description" : "Human-readable description of the error condition",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the error description"
+          "type" : "String"
         }
       }, {
         "name" : "causes",
-        "description" : "Possible root causes that may lead to this error.",
+        "description" : "Possible root causes that may lead to this error",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "the array of cause descriptions"
+          "type" : "String[]"
         }
       }, {
         "name" : "resolution",
-        "description" : "Guidance for the API consumer on how to resolve or avoid this error.",
+        "description" : "Guidance for the API consumer on how to resolve or avoid this error",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the resolution text"
+          "type" : "String"
         }
       }, {
         "name" : "since",
-        "description" : "Version in which this error code was first introduced.",
+        "description" : "Version in which this error code was first introduced",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the version string"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents an error code on the annotated type, providing structured information for API consumers to understand and handle failures. Each annotated type represents a distinct error condition with its own code, HTTP status, description, possible causes, and resolution guidance."
         }
       } ],
       "kindCategory" : "exception",
@@ -411,72 +475,72 @@
       "kind" : "annotation",
       "name" : "DocEvent",
       "qualified" : "io.docspec.annotation.DocEvent",
-      "description" : "Documents a webhook or event that the annotated type or method produces\n or handles.\n\n <p>This annotation captures the full contract of an event, including its\n delivery semantics, retry behavior, and the conditions under which it\n fires.</p>\n\n <pre>{@code\n @DocEvent(\n     name = \"curriculum.generated\",\n     description = \"Fired when a curriculum has been successfully generated.\",\n     trigger = \"Successful completion of the generation flow\",\n     channel = \"webhooks\",\n     deliveryGuarantee = \"at-least-once\",\n     retryPolicy = \"Exponential backoff, max 5 retries over 24 hours\",\n     since = \"1.0\"\n )\n public class CurriculumGeneratedEvent { ... }\n }</pre>",
+      "description" : "doc event.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "name",
-        "description" : "Canonical name of the event, typically in dot-separated format.",
+        "description" : "Canonical name of the event, typically in dot-separated format",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the event name, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "description",
-        "description" : "Human-readable description of what this event represents.",
+        "description" : "Human-readable description of what this event represents",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the event description"
+          "type" : "String"
         }
       }, {
         "name" : "trigger",
-        "description" : "Description of the condition or action that causes this event to fire.",
+        "description" : "Description of the condition or action that causes this event to fire",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the trigger description"
+          "type" : "String"
         }
       }, {
         "name" : "channel",
-        "description" : "The delivery channel or transport mechanism for this event, such as\n {@code \"webhooks\"}, {@code \"sns\"}, or {@code \"kafka\"}.",
+        "description" : "The delivery channel or transport mechanism for this event, such as webhooks, sns, or kafka",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the channel name"
+          "type" : "String"
         }
       }, {
         "name" : "deliveryGuarantee",
-        "description" : "Delivery guarantee semantics, such as {@code \"at-most-once\"},\n {@code \"at-least-once\"}, or {@code \"exactly-once\"}.",
+        "description" : "Delivery guarantee semantics, such as at-most-once, at-least-once, or exactly-once",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the delivery guarantee"
+          "type" : "String"
         }
       }, {
         "name" : "retryPolicy",
-        "description" : "Description of the retry policy applied when delivery fails.",
+        "description" : "Description of the retry policy applied when delivery fails",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the retry policy description"
+          "type" : "String"
         }
       }, {
         "name" : "since",
-        "description" : "Version in which this event was first introduced.",
+        "description" : "Version in which this event was first introduced",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the version string"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a webhook or event that the annotated type or method produces or handles. This annotation captures the full contract of an event, including its delivery semantics, retry behavior, and the conditions under which it fires."
         }
       } ],
       "kindCategory" : "event",
@@ -485,45 +549,48 @@
       "kind" : "annotation",
       "name" : "DocExample",
       "qualified" : "io.docspec.annotation.DocExample",
-      "description" : "Attaches a code example to a documented method or type.\n\n <p>This annotation is Repeatable, so multiple examples can be\n attached to the same element. Each example may supply code inline via\n #code() or reference an external file via #file().</p>\n\n <pre>{@code\n @DocExample(\n     title = \"Generate a curriculum\",\n     language = \"java\",\n     code = \"Curriculum c = client.curricula().generate(request);\"\n )\n @DocExample(\n     title = \"Generate from file\",\n     file = \"examples/generate-from-file.java\"\n )\n public Curriculum generate(Request request) { ... }\n }</pre>",
+      "description" : "doc example.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "title",
-        "description" : "Display title for the example.",
+        "description" : "Display title for the example",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the example title"
+          "type" : "String"
         }
       }, {
         "name" : "language",
-        "description" : "Programming language of the example code, used for syntax highlighting.",
+        "description" : "Programming language of the example code, used for syntax highlighting",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the language identifier, defaults to {@code \"java\"}"
+          "type" : "String"
         }
       }, {
         "name" : "code",
-        "description" : "Inline source code for the example.\n\n <p>Mutually exclusive with #file() in practice; if both are\n provided, processor behavior is implementation-defined.</p>",
+        "description" : "Inline source code for the example",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the example source code"
+          "type" : "String"
         }
       }, {
         "name" : "file",
-        "description" : "Path to an external file containing the example source code.\n\n <p>The path is resolved relative to the project root by documentation\n processors.</p>",
+        "description" : "Path to an external file containing the example source code",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the file path"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Attaches a code example to a documented method or type. This annotation is Repeatable, so multiple examples can be attached to the same element. Each example may supply code inline via code() or reference an external file via file()."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -531,18 +598,24 @@
       "kind" : "annotation",
       "name" : "DocExamples",
       "qualified" : "io.docspec.annotation.DocExamples",
-      "description" : "Container annotation for repeatable DocExample annotations.\n\n <p>This annotation is not intended to be used directly. When multiple\n DocExample annotations are placed on the same element, the compiler\n automatically wraps them in a {@code DocExamples} container.</p>",
+      "description" : "doc examples.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The contained DocExample annotations.",
+        "description" : "The contained DocExample annotations",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "DocExample[]",
-          "description" : "the array of examples"
+          "type" : "DocExample[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Container annotation for repeatable DocExample annotations. This annotation is not intended to be used directly. When multiple DocExample annotations are placed on the same element, the compiler automatically wraps them in a DocExamples container."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -550,27 +623,32 @@
       "kind" : "annotation",
       "name" : "DocField",
       "qualified" : "io.docspec.annotation.DocField",
-      "description" : "Marks a field for explicit inclusion in generated documentation.\n\n <p>Fields that are not annotated may still appear in documentation depending\n on the processor configuration, but annotating a field guarantees its\n inclusion and allows supplying additional metadata.</p>\n\n <pre>{@code\n @DocField(description = \"Maximum number of retries before giving up.\", since = \"1.0\")\n private int maxRetries = 3;\n }</pre>",
+      "description" : "doc field.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "description",
-        "description" : "Prose description of the field's purpose.",
+        "description" : "Prose description of the field's purpose",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the field description"
+          "type" : "String"
         }
       }, {
         "name" : "since",
-        "description" : "Version in which this field was first introduced.",
+        "description" : "Version in which this field was first introduced",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the version string"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a field for explicit inclusion in generated documentation. Fields that are not annotated may still appear in documentation depending on the processor configuration, but annotating a field guarantees its inclusion and allows supplying additional metadata."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -578,54 +656,56 @@
       "kind" : "annotation",
       "name" : "DocFlow",
       "qualified" : "io.docspec.annotation.DocFlow",
-      "description" : "Defines a multi-step documentation flow on the annotated type.\n\n <p>A flow describes a sequence of Steps that together represent a\n business process, pipeline, or workflow. Documentation tooling can render\n flows as diagrams, step-by-step guides, or interactive walkthroughs.</p>\n\n <pre>{@code\n @DocFlow(\n     id = \"curriculum-generation\",\n     name = \"Curriculum Generation\",\n     description = \"End-to-end flow for generating a curriculum from a job description.\",\n     trigger = \"User submits a generation request\",\n     steps = {\n         @Step(id = \"parse\", name = \"Parse Input\", type = \"process\"),\n         @Step(id = \"generate\", name = \"Generate via LLM\", type = \"ai\", ai = true),\n         @Step(id = \"store\", name = \"Persist Result\", type = \"storage\")\n     }\n )\n public class CurriculumGenerationFlow { ... }\n }</pre>",
+      "description" : "doc flow.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "id",
-        "description" : "Unique identifier for this flow.",
+        "description" : "Unique identifier for this flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the flow identifier, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "name",
-        "description" : "Human-readable display name for the flow.",
+        "description" : "Human-readable display name for the flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the flow name, or empty string to derive from #id()"
+          "type" : "String"
         }
       }, {
         "name" : "description",
-        "description" : "Prose description of what the flow accomplishes.",
+        "description" : "Prose description of what the flow accomplishes",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the flow description"
+          "type" : "String"
         }
       }, {
         "name" : "trigger",
-        "description" : "Description of the event or condition that initiates this flow.",
+        "description" : "Description of the event or condition that initiates this flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the trigger description"
+          "type" : "String"
         }
       }, {
         "name" : "steps",
-        "description" : "Ordered sequence of steps that compose this flow.",
+        "description" : "Ordered sequence of steps that compose this flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "Step[]",
-          "description" : "the array of steps"
+          "type" : "Step[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Defines a multi-step documentation flow on the annotated type. A flow describes a sequence of Steps that together represent a business process, pipeline, or workflow. Documentation tooling can render flows as diagrams, step-by-step guides, or interactive walkthroughs."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -633,27 +713,32 @@
       "kind" : "annotation",
       "name" : "DocGraphQL",
       "qualified" : "io.docspec.annotation.DocGraphQL",
-      "description" : "Marks a GraphQL resolver or type.\n\n <p>Use this annotation to document GraphQL queries, mutations, and\n subscriptions. Documentation tooling can use this metadata to generate\n GraphQL schema references alongside the rest of the API surface.</p>\n\n <pre>{@code\n @DocGraphQL(type = \"Query\", field = \"user\")\n public User getUser(String id) { ... }\n }</pre>",
+      "description" : "doc graph QL.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "type",
-        "description" : "The GraphQL type.\n\n <p>Common values are {@code \"Query\"}, {@code \"Mutation\"}, and\n {@code \"Subscription\"}.</p>",
+        "description" : "The GraphQL type, such as Query, Mutation, or Subscription",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the GraphQL type, or empty if inferred from context"
+          "type" : "String"
         }
       }, {
         "name" : "field",
-        "description" : "The GraphQL field name.",
+        "description" : "The GraphQL field name",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the field name, or empty to infer from the method name"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a GraphQL resolver or type. Use this annotation to document GraphQL queries, mutations, and subscriptions. Documentation tooling can use this metadata to generate GraphQL schema references alongside the rest of the API surface."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -661,27 +746,32 @@
       "kind" : "annotation",
       "name" : "DocGRPC",
       "qualified" : "io.docspec.annotation.DocGRPC",
-      "description" : "Marks a gRPC service or method.\n\n <p>Use this annotation to document gRPC service implementations and\n their individual RPC methods. Documentation tooling can use this\n metadata to generate gRPC API references alongside REST and other\n protocol documentation.</p>\n\n <pre>{@code\n @DocGRPC(service = \"PaymentService\", method = \"ProcessPayment\")\n public void processPayment(ProcessPaymentRequest request,\n                            StreamObserver<ProcessPaymentResponse> responseObserver) { ... }\n }</pre>",
+      "description" : "doc grpc.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "service",
-        "description" : "The gRPC service name.",
+        "description" : "The gRPC service name",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the service name, or empty to infer from the class name"
+          "type" : "String"
         }
       }, {
         "name" : "method",
-        "description" : "The gRPC method name.",
+        "description" : "The gRPC method name",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the method name, or empty to infer from the Java method name"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a gRPC service or method. Use this annotation to document gRPC service implementations and their individual RPC methods. Documentation tooling can use this metadata to generate gRPC API references alongside REST and other protocol documentation."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -689,26 +779,40 @@
       "kind" : "annotation",
       "name" : "DocHidden",
       "qualified" : "io.docspec.annotation.DocHidden",
-      "description" : "Marker annotation that excludes the annotated element from generated\n documentation.\n\n <p>Apply this to types, methods, fields, constructors, or packages that\n should remain undocumented regardless of other visibility rules or\n processor configuration.</p>\n\n <pre>{@code\n @DocHidden\n public void internalMigrationHelper() { ... }\n }</pre>",
+      "description" : "doc hidden.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marker annotation that excludes the annotated element from generated documentation. Apply this to types, methods, fields, constructors, or packages that should remain undocumented regardless of other visibility rules or processor configuration."
+        }
+      } ],
       "implements" : [ "Annotation" ]
     }, {
       "kind" : "annotation",
       "name" : "DocIdempotent",
       "qualified" : "io.docspec.annotation.DocIdempotent",
-      "description" : "Marks a method as idempotent.\n\n <p>An idempotent method produces the same result whether it is called\n once or multiple times with the same arguments. This is a critical\n property for retry safety, distributed systems, and API design.</p>\n\n <pre>{@code\n @DocIdempotent\n public void setAccountStatus(String accountId, Status status) { ... }\n }</pre>",
+      "description" : "doc idempotent.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "Optional description of the idempotency guarantee.",
+        "description" : "Optional description of the idempotency guarantee",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a method as idempotent. An idempotent method produces the same result whether it is called once or multiple times with the same arguments. This is a critical property for retry safety, distributed systems, and API design."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -716,27 +820,32 @@
       "kind" : "annotation",
       "name" : "DocIntentional",
       "qualified" : "io.docspec.annotation.DocIntentional",
-      "description" : "Declares the primary intent of the annotated method.\n\n <p>Intent documentation captures <em>why</em> a method exists and what it\n is meant to achieve, as opposed to its mechanical implementation. This\n enables tooling to verify that code behavior aligns with stated intent\n and to detect semantic drift over time.</p>\n\n <pre>{@code\n @DocIntentional(value = \"Transfers funds between accounts\",\n                 preserves = {\"totalBalance\", \"auditTrail\"})\n public void transfer(Account from, Account to, BigDecimal amount) { ... }\n }</pre>",
+      "description" : "doc intentional.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "A description of the method's primary intent.",
+        "description" : "A description of the method's primary intent",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the intent description"
+          "type" : "String"
         }
       }, {
         "name" : "preserves",
-        "description" : "Fields or properties that must be preserved (unchanged) through the\n method's execution.",
+        "description" : "Fields or properties that must be preserved (unchanged) through the method's execution",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of field or property names that are preserved"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares the primary intent of the annotated method. Intent documentation captures why a method exists and what it is meant to achieve, as opposed to its mechanical implementation. This enables tooling to verify that code behavior aligns with stated intent and to detect semantic drift over time."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -744,27 +853,32 @@
       "kind" : "annotation",
       "name" : "DocInvariant",
       "qualified" : "io.docspec.annotation.DocInvariant",
-      "description" : "Declares invariants that must hold on the annotated type.\n\n <p>An invariant is a condition that must be true at all observable points\n during the lifetime of an instance. Documenting invariants enables\n verification tooling and helps developers understand the contracts that\n govern a type's state.</p>\n\n <pre>{@code\n @DocInvariant(on = \"Account\", rules = {\n     \"balance >= 0\",\n     \"currency is never null\",\n     \"createdAt <= updatedAt\"\n })\n public class Account { ... }\n }</pre>",
+      "description" : "doc invariant.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "on",
-        "description" : "The entity or class the invariant applies to.\n\n <p>If empty, the invariant applies to the annotated type itself.</p>",
+        "description" : "The entity or class the invariant applies to, empty means the annotated type itself",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the target entity name, or empty to use the annotated type"
+          "type" : "String"
         }
       }, {
         "name" : "rules",
-        "description" : "The invariant rules expressed as human-readable expressions.",
+        "description" : "The invariant rules expressed as human-readable expressions",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of invariant rule expressions"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares invariants that must hold on the annotated type. An invariant is a condition that must be true at all observable points during the lifetime of an instance. Documenting invariants enables verification tooling and helps developers understand the contracts that govern a type's state."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -772,13 +886,13 @@
       "kind" : "annotation",
       "name" : "DocMethod",
       "qualified" : "io.docspec.annotation.DocMethod",
-      "description" : "Documents a method — replaces JavaDoc {@code /** * /} comments.\n\n <p>The {@code value} serves as the method description and is used by both\n DocSpec (for structured documentation) and by the {@code docspec:inject-sources}\n goal to generate standard JavaDoc comments for IDE hover and Maven JavaDoc.</p>\n\n <pre>{@code\n @DocMethod(value = \"Runs all 13 intent channels on every public method\",\n            returns = \"Populates model.intentGraph with extracted signals\",\n            params = {\n                @Param(name = \"typeElement\", value = \"The class/interface to analyze\"),\n                @Param(name = \"env\", value = \"Annotation processing environment\"),\n                @Param(name = \"model\", value = \"Output model to populate with intent signals\")\n            },\n            throwsDoc = {\n                @ThrowsDoc(type = \"NullPointerException\", value = \"If typeElement is null\")\n            })\n public void extract(TypeElement typeElement, ProcessingEnvironment env, DocSpecModel model) {\n }</pre>\n\n <p>Short form for simple methods:</p>\n <pre>{@code\n @DocMethod(\"Checks if DSTI extraction is enabled\")\n public boolean isAvailable(ProcessingEnvironment env) { ... }\n }</pre>",
+      "description" : "doc method.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "Description of what this method does. This replaces the first line\n of a JavaDoc comment.",
+        "description" : "Description of what this method does",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -786,7 +900,7 @@
         }
       }, {
         "name" : "returns",
-        "description" : "Description of the return value. Replaces {@code @return} in JavaDoc.",
+        "description" : "Description of the return value",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -794,7 +908,7 @@
         }
       }, {
         "name" : "params",
-        "description" : "Structured parameter documentation. Replaces {@code @param} tags in JavaDoc.",
+        "description" : "Structured parameter documentation",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -802,7 +916,7 @@
         }
       }, {
         "name" : "throwsDoc",
-        "description" : "Structured throws documentation. Replaces {@code @throws} tags in JavaDoc.",
+        "description" : "Structured throws documentation",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -810,7 +924,7 @@
         }
       }, {
         "name" : "since",
-        "description" : "Version in which this method was first introduced.",
+        "description" : "Version in which this method was first introduced",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -818,7 +932,7 @@
         }
       }, {
         "name" : "deprecated",
-        "description" : "Deprecation notice. Empty means not deprecated.",
+        "description" : "Deprecation notice, empty means not deprecated",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -826,11 +940,18 @@
         }
       }, {
         "name" : "example",
-        "description" : "Code example showing usage of this method.",
+        "description" : "Code example showing usage of this method",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a method -- replaces JavaDoc comments. The value serves as the method description and is used by both DocSpec (for structured documentation) and by the docspec:inject-sources goal to generate standard JavaDoc comments for IDE hover and Maven JavaDoc."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -838,54 +959,56 @@
       "kind" : "annotation",
       "name" : "DocModule",
       "qualified" : "io.docspec.annotation.DocModule",
-      "description" : "Groups annotated types or packages into a logical documentation module.\n\n <p>A module represents a cohesive unit of functionality within the API surface.\n Every type or package belonging to the same module should share the same\n #id(), allowing documentation tooling to aggregate and present them\n together.</p>\n\n <pre>{@code\n @DocModule(\n     id = \"curricula\",\n     name = \"Curricula Management\",\n     description = \"APIs for creating, updating, and querying curricula.\",\n     since = \"1.0\",\n     audience = \"public\"\n )\n public class CurriculaService { ... }\n }</pre>",
+      "description" : "doc module.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "id",
-        "description" : "Unique identifier for this module. Used to group related types across\n packages.",
+        "description" : "Unique identifier for this module, used to group related types across packages",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the module identifier, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "name",
-        "description" : "Human-readable display name for the module.",
+        "description" : "Human-readable display name for the module",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the module name, or empty string to derive from #id()"
+          "type" : "String"
         }
       }, {
         "name" : "description",
-        "description" : "Prose description of the module's purpose and scope.",
+        "description" : "Prose description of the module's purpose and scope",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the module description"
+          "type" : "String"
         }
       }, {
         "name" : "since",
-        "description" : "Version in which this module was first introduced.",
+        "description" : "Version in which this module was first introduced",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the version string, e.g. {@code \"1.0\"} or {@code \"2024-03-01\"}"
+          "type" : "String"
         }
       }, {
         "name" : "audience",
-        "description" : "Intended audience for this module's documentation.\n\n <p>Common values are {@code \"public\"}, {@code \"partner\"}, and\n {@code \"internal\"}.</p>",
+        "description" : "Intended audience for this module's documentation, such as public, partner, or internal",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the audience level, defaults to {@code \"public\"}"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Groups annotated types or packages into a logical documentation module. A module represents a cohesive unit of functionality within the API surface. Every type or package belonging to the same module should share the same id(), allowing documentation tooling to aggregate and present them together."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -893,18 +1016,24 @@
       "kind" : "annotation",
       "name" : "DocMonotonic",
       "qualified" : "io.docspec.annotation.DocMonotonic",
-      "description" : "Declares a monotonically increasing or decreasing property.\n\n <p>A monotonic value is one that only changes in a single direction over\n time. Common examples include sequence counters, timestamps, and version\n numbers. Documenting monotonicity helps reasoning about consistency and\n ordering in distributed systems.</p>\n\n <pre>{@code\n @DocMonotonic(direction = \"increasing\")\n private long sequenceNumber;\n }</pre>",
+      "description" : "doc monotonic.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "direction",
-        "description" : "The direction of monotonic change.\n\n <p>Valid values are {@code \"increasing\"} and {@code \"decreasing\"}.</p>",
+        "description" : "The direction of monotonic change, valid values are increasing and decreasing",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the direction, defaults to {@code \"increasing\"}"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares a monotonically increasing or decreasing property. A monotonic value is one that only changes in a single direction over time. Common examples include sequence counters, timestamps, and version numbers. Documenting monotonicity helps reasoning about consistency and ordering in distributed systems."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -912,27 +1041,40 @@
       "kind" : "annotation",
       "name" : "DocOptional",
       "qualified" : "io.docspec.annotation.DocOptional",
-      "description" : "Marker annotation that declares a method parameter as optional.\n\n <p>Documentation processors use this annotation to distinguish required\n parameters from optional ones when generating API references. The actual\n default value semantics are determined by the implementing method.</p>\n\n <pre>{@code\n public List<Curriculum> search(\n         String query,\n         @DocOptional int page,\n         @DocOptional int size) {\n     ...\n }\n }</pre>",
+      "description" : "doc optional.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marker annotation that declares a method parameter as optional. Documentation processors use this annotation to distinguish required parameters from optional ones when generating API references. The actual default value semantics are determined by the implementing method."
+        }
+      } ],
       "implements" : [ "Annotation" ]
     }, {
       "kind" : "annotation",
       "name" : "DocOrdering",
       "qualified" : "io.docspec.annotation.DocOrdering",
-      "description" : "Declares ordering guarantees provided by the annotated method.\n\n <p>Use this annotation to document whether a method preserves insertion\n order, returns results sorted by a particular key, or provides any other\n ordering contract that callers may depend on.</p>\n\n <pre>{@code\n @DocOrdering(\"Results are returned in descending order by creation timestamp\")\n public List<Event> getRecentEvents() { ... }\n }</pre>",
+      "description" : "doc ordering.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "A description of the ordering guarantee.",
+        "description" : "A description of the ordering guarantee",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the ordering description"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares ordering guarantees provided by the annotated method. Use this annotation to document whether a method preserves insertion order, returns results sorted by a particular key, or provides any other ordering contract that callers may depend on."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -940,27 +1082,32 @@
       "kind" : "annotation",
       "name" : "DocPerformance",
       "qualified" : "io.docspec.annotation.DocPerformance",
-      "description" : "Documents performance characteristics of the annotated method.\n\n <p>Use this annotation to capture expected latency targets, known\n bottlenecks, and other performance-related metadata. This information\n helps API consumers set appropriate timeouts and understand service\n level expectations.</p>\n\n <pre>{@code\n @DocPerformance(expectedLatency = \"< 6s at p99\",\n                 bottleneck = \"External payment gateway call\")\n public PaymentResult processPayment(PaymentRequest request) { ... }\n }</pre>",
+      "description" : "doc performance.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "expectedLatency",
-        "description" : "The expected latency for this method.",
+        "description" : "The expected latency for this method",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "a latency description, e.g. {@code \"< 6s at p99\"}"
+          "type" : "String"
         }
       }, {
         "name" : "bottleneck",
-        "description" : "A known performance bottleneck in this method.",
+        "description" : "A known performance bottleneck in this method",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "a description of the bottleneck, or empty if none known"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents performance characteristics of the annotated method. Use this annotation to capture expected latency targets, known bottlenecks, and other performance-related metadata. This information helps API consumers set appropriate timeouts and understand service level expectations."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -968,63 +1115,64 @@
       "kind" : "annotation",
       "name" : "DocPII",
       "qualified" : "io.docspec.annotation.DocPII",
-      "description" : "Marks a field as containing Personally Identifiable Information (PII).\n\n <p>This annotation signals to documentation tooling, logging frameworks, and\n data governance systems that the annotated field contains sensitive personal\n data requiring special handling under privacy regulations such as GDPR,\n CCPA, or HIPAA.</p>\n\n <pre>{@code\n @DocPII(value = \"email\", retention = \"90 days\", gdprBasis = \"consent\",\n         encrypted = true, neverLog = true)\n private String emailAddress;\n }</pre>",
+      "description" : "doc PII.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The type of PII contained in this field.\n\n <p>Common values include {@code \"email\"}, {@code \"phone\"}, {@code \"name\"},\n {@code \"address\"}, {@code \"ssn\"}, {@code \"dob\"}, {@code \"ip\"},\n {@code \"financial\"}, {@code \"health\"}, {@code \"biometric\"}, and\n {@code \"other\"}.</p>",
+        "description" : "The type of PII contained in this field, such as email, phone, name, address, ssn, dob, ip, financial, health, biometric, or other",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the PII type identifier"
+          "type" : "String"
         }
       }, {
         "name" : "retention",
-        "description" : "The retention policy governing how long this data may be stored.",
+        "description" : "The retention policy governing how long this data may be stored",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the retention policy description, e.g. {@code \"90 days\"}"
+          "type" : "String"
         }
       }, {
         "name" : "gdprBasis",
-        "description" : "The GDPR legal basis for processing this personal data.\n\n <p>Common values include {@code \"consent\"}, {@code \"contract\"},\n {@code \"legal-obligation\"}, {@code \"vital-interest\"},\n {@code \"public-task\"}, and {@code \"legitimate-interest\"}.</p>",
+        "description" : "The GDPR legal basis for processing this personal data, such as consent, contract, legal-obligation, vital-interest, public-task, or legitimate-interest",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the GDPR legal basis, or empty if not applicable"
+          "type" : "String"
         }
       }, {
         "name" : "encrypted",
-        "description" : "Whether this field is stored in encrypted form.",
+        "description" : "Whether this field is stored in encrypted form",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "boolean",
-          "description" : "{@code true} if the field value is encrypted at rest"
+          "type" : "boolean"
         }
       }, {
         "name" : "neverLog",
-        "description" : "Whether this field must never appear in log output.",
+        "description" : "Whether this field must never appear in log output",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "boolean",
-          "description" : "{@code true} if the field must be excluded from all logging"
+          "type" : "boolean"
         }
       }, {
         "name" : "neverReturn",
-        "description" : "Whether this field must never be returned in API responses.",
+        "description" : "Whether this field must never be returned in API responses",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "boolean",
-          "description" : "{@code true} if the field must be excluded from all responses"
+          "type" : "boolean"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a field as containing Personally Identifiable Information (PII). This annotation signals to documentation tooling, logging frameworks, and data governance systems that the annotated field contains sensitive personal data requiring special handling under privacy regulations such as GDPR, CCPA, or HIPAA."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1032,18 +1180,24 @@
       "kind" : "annotation",
       "name" : "DocPreserves",
       "qualified" : "io.docspec.annotation.DocPreserves",
-      "description" : "Declares fields that must be preserved through the method's execution.\n\n <p>A preserved field is one whose value must remain unchanged after the\n method completes, regardless of any intermediate mutations. This is a\n semantic contract that documentation and verification tooling can use\n to detect accidental side effects.</p>\n\n <pre>{@code\n @DocPreserves(fields = {\"account.balance\", \"account.owner\"})\n public void updateAccountMetadata(Account account, Metadata metadata) { ... }\n }</pre>",
+      "description" : "doc preserves.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "fields",
-        "description" : "The names of fields or properties that must remain unchanged after\n the method executes.",
+        "description" : "The names of fields or properties that must remain unchanged after the method executes",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of field or property names"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares fields that must be preserved through the method's execution. A preserved field is one whose value must remain unchanged after the method completes, regardless of any intermediate mutations. This is a semantic contract that documentation and verification tooling can use to detect accidental side effects."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1051,27 +1205,32 @@
       "kind" : "annotation",
       "name" : "DocRelation",
       "qualified" : "io.docspec.annotation.DocRelation",
-      "description" : "Documents a relationship between entities.\n\n <p>Use this annotation to describe how a field or method relates to\n another entity in the system. This metadata enables documentation\n tooling to render entity-relationship diagrams and dependency graphs.</p>\n\n <pre>{@code\n @DocRelation(value = \"parent-child\", target = \"Department\")\n private Department parentDepartment;\n }</pre>",
+      "description" : "doc relation.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The type of relationship.\n\n <p>Common values include {@code \"parent-child\"}, {@code \"peer\"},\n {@code \"depends-on\"}, {@code \"owns\"}, and {@code \"references\"}.</p>",
+        "description" : "The type of relationship, such as parent-child, peer, depends-on, owns, or references",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the relation type"
+          "type" : "String"
         }
       }, {
         "name" : "target",
-        "description" : "The target entity of this relationship.",
+        "description" : "The target entity of this relationship",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the target entity name, or empty to infer from the field type"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a relationship between entities. Use this annotation to describe how a field or method relates to another entity in the system. This metadata enables documentation tooling to render entity-relationship diagrams and dependency graphs."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1079,18 +1238,24 @@
       "kind" : "annotation",
       "name" : "DocSensitive",
       "qualified" : "io.docspec.annotation.DocSensitive",
-      "description" : "Marks sensitive data that should not be logged or returned in API responses.\n\n <p>Unlike DocPII, which specifically identifies personally identifiable\n information, this annotation covers any data that is sensitive for security,\n compliance, or business reasons — such as API keys, internal identifiers,\n or trade secrets.</p>\n\n <pre>{@code\n @DocSensitive(reason = \"Contains internal routing token\")\n private String routingToken;\n }</pre>",
+      "description" : "doc sensitive.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "reason",
-        "description" : "The reason this data is considered sensitive.",
+        "description" : "The reason this data is considered sensitive",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "a human-readable explanation of why this data is sensitive"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks sensitive data that should not be logged or returned in API responses. Unlike DocPII, which specifically identifies personally identifiable information, this annotation covers any data that is sensitive for security, compliance, or business reasons -- such as API keys, internal identifiers, or trade secrets."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1098,27 +1263,32 @@
       "kind" : "annotation",
       "name" : "DocSpecExample",
       "qualified" : "io.docspec.annotation.DocSpecExample",
-      "description" : "Marks a test method as a verified, executable example that should be\n attached to a specific documented element.\n\n <p>Unlike DocExample, which embeds code snippets as strings, this\n annotation designates an actual test method whose source code is extracted\n at build time and attached to the referenced element. Because the example\n is a real test, it is guaranteed to compile and pass.</p>\n\n <pre>{@code\n @Test\n @DocSpecExample(\n     attachTo = \"io.docspec.sample.CurriculaService#generate\",\n     title = \"Generate a curriculum from a job description\"\n )\n void testGenerateCurriculum() {\n     Curriculum result = service.generate(new GenerateRequest(\"Software Engineer\"));\n     assertNotNull(result);\n }\n }</pre>",
+      "description" : "doc spec example.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "attachTo",
-        "description" : "Fully qualified reference to the documented element that this example\n should be attached to.\n\n <p>The format is typically {@code \"fully.qualified.ClassName#methodName\"}\n or {@code \"fully.qualified.ClassName\"} for type-level examples.</p>",
+        "description" : "Fully qualified reference to the documented element that this example should be attached to",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the target element reference, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "title",
-        "description" : "Display title for the example.",
+        "description" : "Display title for the example",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the example title"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a test method as a verified, executable example that should be attached to a specific documented element. Unlike DocExample, which embeds code snippets as strings, this annotation designates an actual test method whose source code is extracted at build time and attached to the referenced element. Because the example is a real test, it is guaranteed to compile and pass."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1126,36 +1296,40 @@
       "kind" : "annotation",
       "name" : "DocStateMachine",
       "qualified" : "io.docspec.annotation.DocStateMachine",
-      "description" : "Documents a state machine on the annotated type.\n\n <p>Use this annotation to describe the valid states, initial state, and\n allowed transitions for an entity or service that follows a state machine\n pattern. Documentation tooling can render state diagrams from this\n metadata.</p>\n\n <pre>{@code\n @DocStateMachine(\n     states = {\"DRAFT\", \"PENDING\", \"APPROVED\", \"REJECTED\"},\n     initial = \"DRAFT\",\n     transitions = {\"DRAFT -> PENDING\", \"PENDING -> APPROVED\", \"PENDING -> REJECTED\"}\n )\n public class DocumentWorkflow { ... }\n }</pre>",
+      "description" : "doc state machine.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "states",
-        "description" : "The set of valid states in the state machine.",
+        "description" : "The set of valid states in the state machine",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of state names"
+          "type" : "String[]"
         }
       }, {
         "name" : "initial",
-        "description" : "The initial state when the state machine is created.",
+        "description" : "The initial state when the state machine is created",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the initial state name, or empty if unspecified"
+          "type" : "String"
         }
       }, {
         "name" : "transitions",
-        "description" : "The allowed transitions expressed in {@code \"FROM -> TO\"} format.",
+        "description" : "The allowed transitions expressed in FROM -> TO format",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of transition expressions"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a state machine on the annotated type. Use this annotation to describe the valid states, initial state, and allowed transitions for an entity or service that follows a state machine pattern. Documentation tooling can render state diagrams from this metadata."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1163,18 +1337,24 @@
       "kind" : "annotation",
       "name" : "DocTags",
       "qualified" : "io.docspec.annotation.DocTags",
-      "description" : "Associates searchable tags with a documented type.\n\n <p>Tags provide a lightweight taxonomy that documentation tooling can use\n for filtering, searching, and cross-referencing related types.</p>\n\n <pre>{@code\n @DocTags({\"curriculum\", \"generation\", \"ai\"})\n public class CurriculumGenerator { ... }\n }</pre>",
+      "description" : "doc tags.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "One or more tags to associate with the annotated type.",
+        "description" : "One or more tags to associate with the annotated type",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "the array of tag strings, must contain at least one element"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Associates searchable tags with a documented type. Tags provide a lightweight taxonomy that documentation tooling can use for filtering, searching, and cross-referencing related types."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1182,18 +1362,24 @@
       "kind" : "annotation",
       "name" : "DocTestSkip",
       "qualified" : "io.docspec.annotation.DocTestSkip",
-      "description" : "Marks a method where automated test generation should be skipped.\n\n <p>Some methods are inherently difficult or inappropriate for automated\n test generation — for example, methods with complex external dependencies,\n non-deterministic behavior, or destructive side effects. This annotation\n signals to test generation tooling that the method should be excluded.</p>\n\n <pre>{@code\n @DocTestSkip(reason = \"Requires physical hardware connection\")\n public void calibrateSensor() { ... }\n }</pre>",
+      "description" : "doc test skip.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "reason",
-        "description" : "The reason why automated test generation should be skipped for this\n method.",
+        "description" : "The reason why automated test generation should be skipped for this method",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "a human-readable explanation"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a method where automated test generation should be skipped. Some methods are inherently difficult or inappropriate for automated test generation, for example methods with complex external dependencies, non-deterministic behavior, or destructive side effects. This annotation signals to test generation tooling that the method should be excluded."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1201,27 +1387,32 @@
       "kind" : "annotation",
       "name" : "DocTestStrategy",
       "qualified" : "io.docspec.annotation.DocTestStrategy",
-      "description" : "Documents the test strategy for the annotated type or method.\n\n <p>This annotation captures how a component should be tested, including\n the testing level and key scenarios. Documentation tooling can use this\n to generate test coverage reports and identify gaps.</p>\n\n <pre>{@code\n @DocTestStrategy(value = \"integration\",\n                  scenarios = {\"happy path with valid input\",\n                               \"invalid input returns 400\",\n                               \"concurrent access is safe\"})\n public class PaymentService { ... }\n }</pre>",
+      "description" : "doc test strategy.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The testing strategy or level.\n\n <p>Common values include {@code \"unit\"}, {@code \"integration\"},\n {@code \"e2e\"}, and {@code \"property-based\"}.</p>",
+        "description" : "The testing strategy or level, such as unit, integration, e2e, or property-based",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the test strategy identifier"
+          "type" : "String"
         }
       }, {
         "name" : "scenarios",
-        "description" : "Key test scenarios that should be covered.",
+        "description" : "Key test scenarios that should be covered",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of scenario descriptions"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents the test strategy for the annotated type or method. This annotation captures how a component should be tested, including the testing level and key scenarios. Documentation tooling can use this to generate test coverage reports and identify gaps."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1229,54 +1420,56 @@
       "kind" : "annotation",
       "name" : "DocUses",
       "qualified" : "io.docspec.annotation.DocUses",
-      "description" : "Declares a cross-project or cross-module reference from the annotated\n element to an artifact, flow, step, or member in another project.\n\n <p>This annotation is Repeatable, allowing multiple cross-project\n references on the same element. Documentation tooling can use these\n references to build dependency graphs and cross-link documentation\n across repositories.</p>\n\n <pre>{@code\n @DocUses(\n     artifact = \"com.example:auth-service\",\n     flow = \"token-validation\",\n     step = \"verify\",\n     description = \"Validates the bearer token before processing the request.\"\n )\n public Response handleRequest(Request request) { ... }\n }</pre>",
+      "description" : "doc uses.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "artifact",
-        "description" : "Maven-style coordinates or identifier of the referenced artifact.",
+        "description" : "Maven-style coordinates or identifier of the referenced artifact",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the artifact identifier, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "flow",
-        "description" : "Identifier of the referenced flow within the artifact.",
+        "description" : "Identifier of the referenced flow within the artifact",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the flow id, or empty if not referencing a specific flow"
+          "type" : "String"
         }
       }, {
         "name" : "step",
-        "description" : "Identifier of the referenced step within the flow.",
+        "description" : "Identifier of the referenced step within the flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the step id, or empty if not referencing a specific step"
+          "type" : "String"
         }
       }, {
         "name" : "member",
-        "description" : "Name of the referenced member (method, field, class) within the artifact.",
+        "description" : "Name of the referenced member (method, field, class) within the artifact",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the member name, or empty if not referencing a specific member"
+          "type" : "String"
         }
       }, {
         "name" : "description",
-        "description" : "Prose description of why this reference exists and how the dependency\n is used.",
+        "description" : "Prose description of why this reference exists and how the dependency is used",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the usage description"
+          "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Declares a cross-project or cross-module reference from the annotated element to an artifact, flow, step, or member in another project. This annotation is Repeatable, allowing multiple cross-project references on the same element. Documentation tooling can use these references to build dependency graphs and cross-link documentation across repositories."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1284,18 +1477,24 @@
       "kind" : "annotation",
       "name" : "DocUsesAll",
       "qualified" : "io.docspec.annotation.DocUsesAll",
-      "description" : "Container annotation for repeatable DocUses annotations.\n\n <p>This annotation is not intended to be used directly. When multiple\n DocUses annotations are placed on the same element, the compiler\n automatically wraps them in a {@code DocUsesAll} container.</p>",
+      "description" : "doc uses all.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "value",
-        "description" : "The contained DocUses annotations.",
+        "description" : "The contained DocUses annotations",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "DocUses[]",
-          "description" : "the array of cross-project references"
+          "type" : "DocUses[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Container annotation for repeatable DocUses annotations. This annotation is not intended to be used directly. When multiple DocUses annotations are placed on the same element, the compiler automatically wraps them in a DocUsesAll container."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1303,27 +1502,32 @@
       "kind" : "annotation",
       "name" : "DocWebSocket",
       "qualified" : "io.docspec.annotation.DocWebSocket",
-      "description" : "Marks a WebSocket endpoint.\n\n <p>Use this annotation to document WebSocket endpoints and the message\n types they handle. Documentation tooling can use this metadata to\n generate WebSocket API references.</p>\n\n <pre>{@code\n @DocWebSocket(path = \"/ws/notifications\",\n               messages = {\"SubscribeMessage\", \"UnsubscribeMessage\", \"PingMessage\"})\n public class NotificationWebSocket { ... }\n }</pre>",
+      "description" : "doc web socket.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "path",
-        "description" : "The WebSocket endpoint path.",
+        "description" : "The WebSocket endpoint path",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the path, e.g. {@code \"/ws/notifications\"}"
+          "type" : "String"
         }
       }, {
         "name" : "messages",
-        "description" : "The message types handled by this WebSocket endpoint.",
+        "description" : "The message types handled by this WebSocket endpoint",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "an array of message type names"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Marks a WebSocket endpoint. Use this annotation to document WebSocket endpoints and the message types they handle. Documentation tooling can use this metadata to generate WebSocket API references."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1331,13 +1535,13 @@
       "kind" : "annotation",
       "name" : "Param",
       "qualified" : "io.docspec.annotation.Param",
-      "description" : "Documents a method parameter. Used inside DocMethod#params().\n\n <p>Replaces the {@code @param} tag in JavaDoc comments.</p>\n\n <pre>{@code\n @DocMethod(params = {\n     @Param(name = \"goalId\", value = \"The goal to generate a curriculum for\"),\n     @Param(name = \"options\", value = \"Generation options including difficulty and weekly hours\")\n })\n public Curriculum generate(String goalId, GenerateOptions options) { ... }\n }</pre>",
+      "description" : "param.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "name",
-        "description" : "Parameter name — must match the actual Java parameter name.",
+        "description" : "Parameter name -- must match the actual Java parameter name",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -1345,11 +1549,18 @@
         }
       }, {
         "name" : "value",
-        "description" : "Description of the parameter.",
+        "description" : "Description of the parameter",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a method parameter. Used inside DocMethod#params(). Replaces the @param tag in JavaDoc comments."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1357,99 +1568,96 @@
       "kind" : "annotation",
       "name" : "Step",
       "qualified" : "io.docspec.annotation.Step",
-      "description" : "Describes a single step within a DocFlow.\n\n <p>This annotation has an empty Target and is designed exclusively\n for use as a nested annotation inside DocFlow#steps().</p>\n\n <p>Supported #type() values are:</p>\n <ul>\n   <li>{@code \"process\"} — general processing step (default)</li>\n   <li>{@code \"ai\"} — step involving an AI/LLM call</li>\n   <li>{@code \"storage\"} — data persistence step</li>\n   <li>{@code \"trigger\"} — event trigger step</li>\n   <li>{@code \"retry\"} — retry/compensation step</li>\n   <li>{@code \"external\"} — call to an external system</li>\n   <li>{@code \"bridge\"} — integration bridge between systems</li>\n   <li>{@code \"observability\"} — logging, metrics, or tracing step</li>\n </ul>\n\n <pre>{@code\n @Step(\n     id = \"generate\",\n     name = \"Generate via LLM\",\n     actor = \"OpenAI\",\n     actorQualified = \"com.openai.Client\",\n     description = \"Sends the parsed input to the LLM for curriculum generation.\",\n     type = \"ai\",\n     ai = true,\n     inputs = {\"parsedInput\"},\n     outputs = {\"rawCurriculum\"}\n )\n }</pre>",
+      "description" : "step.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "id",
-        "description" : "Unique identifier for this step within its flow.",
+        "description" : "Unique identifier for this step within its flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the step identifier, must not be empty"
+          "type" : "String"
         }
       }, {
         "name" : "name",
-        "description" : "Human-readable display name for the step.",
+        "description" : "Human-readable display name for the step",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the step name, or empty string to derive from #id()"
+          "type" : "String"
         }
       }, {
         "name" : "actor",
-        "description" : "Short name of the actor (system, service, or role) responsible for\n executing this step.",
+        "description" : "Short name of the actor (system, service, or role) responsible for executing this step",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the actor name"
+          "type" : "String"
         }
       }, {
         "name" : "actorQualified",
-        "description" : "Fully qualified name of the actor, such as a class or service identifier.",
+        "description" : "Fully qualified name of the actor, such as a class or service identifier",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the qualified actor name"
+          "type" : "String"
         }
       }, {
         "name" : "description",
-        "description" : "Prose description of what this step does.",
+        "description" : "Prose description of what this step does",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the step description"
+          "type" : "String"
         }
       }, {
         "name" : "type",
-        "description" : "The type of this step, indicating its role in the flow.\n\n <p>Must be one of: {@code \"process\"}, {@code \"ai\"}, {@code \"storage\"},\n {@code \"trigger\"}, {@code \"retry\"}, {@code \"external\"}, {@code \"bridge\"},\n or {@code \"observability\"}.</p>",
+        "description" : "The type of this step, indicating its role in the flow",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the step type, defaults to {@code \"process\"}"
+          "type" : "String"
         }
       }, {
         "name" : "ai",
-        "description" : "Whether this step involves an AI or LLM invocation.",
+        "description" : "Whether this step involves an AI or LLM invocation",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "boolean",
-          "description" : "{@code true} if the step uses AI, {@code false} otherwise"
+          "type" : "boolean"
         }
       }, {
         "name" : "retryTarget",
-        "description" : "Identifier of the step to retry or fall back to on failure.",
+        "description" : "Identifier of the step to retry or fall back to on failure",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String",
-          "description" : "the retry target step id, or empty if no retry is configured"
+          "type" : "String"
         }
       }, {
         "name" : "inputs",
-        "description" : "Names or identifiers of the data inputs consumed by this step.",
+        "description" : "Names or identifiers of the data inputs consumed by this step",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "the array of input names"
+          "type" : "String[]"
         }
       }, {
         "name" : "outputs",
-        "description" : "Names or identifiers of the data outputs produced by this step.",
+        "description" : "Names or identifiers of the data outputs produced by this step",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
-          "type" : "String[]",
-          "description" : "the array of output names"
+          "type" : "String[]"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Describes a single step within a DocFlow. This annotation has an empty Target and is designed exclusively for use as a nested annotation inside DocFlow#steps(). Supported type values are process, ai, storage, trigger, retry, external, bridge, and observability."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1457,13 +1665,13 @@
       "kind" : "annotation",
       "name" : "ThrowsDoc",
       "qualified" : "io.docspec.annotation.ThrowsDoc",
-      "description" : "Documents a thrown exception. Used inside DocMethod#throwsDoc().\n\n <p>Replaces the {@code @throws} tag in JavaDoc comments.</p>\n\n <pre>{@code\n @DocMethod(throwsDoc = {\n     @ThrowsDoc(type = \"IllegalArgumentException\", value = \"If goalId is null or empty\"),\n     @ThrowsDoc(type = \"GoalNotFoundException\", value = \"If no goal exists with the given ID\")\n })\n public Curriculum generate(String goalId) { ... }\n }</pre>",
+      "description" : "throws doc.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "type",
-        "description" : "Fully qualified or simple name of the exception type.",
+        "description" : "Fully qualified or simple name of the exception type",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -1471,11 +1679,18 @@
         }
       }, {
         "name" : "value",
-        "description" : "Description of when this exception is thrown.",
+        "description" : "Description of when this exception is thrown",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
           "type" : "String"
+        }
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Documents a thrown exception. Used inside DocMethod#throwsDoc(). Replaces the @throws tag in JavaDoc comments."
         }
       } ],
       "implements" : [ "Annotation" ]
@@ -1844,11 +2059,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "HTTP", "API", "METHOD" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.8
       }
     }, {
       "qualified" : "io.docspec.annotation.DocError.code",
@@ -1876,11 +2092,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "HTTP" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.DocError.description",
@@ -1924,11 +2141,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "API" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.DocError.since",
@@ -2661,11 +2879,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "PII" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.DocPII.retention",
@@ -2693,11 +2912,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "GDPR" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.DocPII.encrypted",
@@ -2741,11 +2961,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "API" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.DocPreserves.fields",
@@ -2885,11 +3106,12 @@
         "dataFlow" : {
           "reads" : [ "return:object" ]
         },
+        "constants" : [ "FROM" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.DocTags.value",
@@ -3221,11 +3443,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "LLM" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.annotation.Step.retryTarget",
@@ -3316,7 +3539,7 @@
     "documentedClasses" : 45,
     "autoDiscoveredClasses" : 45,
     "annotatedClasses" : 0,
-    "inferredDescriptions" : 0,
+    "inferredDescriptions" : 45,
     "totalMethods" : 114,
     "documentedMethods" : 114,
     "totalParams" : 0,

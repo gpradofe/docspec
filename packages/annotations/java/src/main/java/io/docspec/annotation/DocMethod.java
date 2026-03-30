@@ -6,71 +6,30 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Documents a method — replaces JavaDoc {@code /** * /} comments.
- *
- * <p>The {@code value} serves as the method description and is used by both
- * DocSpec (for structured documentation) and by the {@code docspec:inject-sources}
- * goal to generate standard JavaDoc comments for IDE hover and Maven JavaDoc.</p>
- *
- * <pre>{@code
- * @DocMethod(value = "Runs all 13 intent channels on every public method",
- *            returns = "Populates model.intentGraph with extracted signals",
- *            params = {
- *                @Param(name = "typeElement", value = "The class/interface to analyze"),
- *                @Param(name = "env", value = "Annotation processing environment"),
- *                @Param(name = "model", value = "Output model to populate with intent signals")
- *            },
- *            throwsDoc = {
- *                @ThrowsDoc(type = "NullPointerException", value = "If typeElement is null")
- *            })
- * public void extract(TypeElement typeElement, ProcessingEnvironment env, DocSpecModel model) {
- * }</pre>
- *
- * <p>Short form for simple methods:</p>
- * <pre>{@code
- * @DocMethod("Checks if DSTI extraction is enabled")
- * public boolean isAvailable(ProcessingEnvironment env) { ... }
- * }</pre>
- */
+@DocBoundary("Documents a method -- replaces JavaDoc comments. The value serves as the method description and is used by both DocSpec (for structured documentation) and by the docspec:inject-sources goal to generate standard JavaDoc comments for IDE hover and Maven JavaDoc.")
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DocMethod {
 
-    /**
-     * Description of what this method does. This replaces the first line
-     * of a JavaDoc comment.
-     */
+    @DocMethod("Description of what this method does")
     String value() default "";
 
-    /**
-     * Description of the return value. Replaces {@code @return} in JavaDoc.
-     */
+    @DocMethod("Description of the return value")
     String returns() default "";
 
-    /**
-     * Structured parameter documentation. Replaces {@code @param} tags in JavaDoc.
-     */
+    @DocMethod("Structured parameter documentation")
     Param[] params() default {};
 
-    /**
-     * Structured throws documentation. Replaces {@code @throws} tags in JavaDoc.
-     */
+    @DocMethod("Structured throws documentation")
     ThrowsDoc[] throwsDoc() default {};
 
-    /**
-     * Version in which this method was first introduced.
-     */
+    @DocMethod("Version in which this method was first introduced")
     String since() default "";
 
-    /**
-     * Deprecation notice. Empty means not deprecated.
-     */
+    @DocMethod("Deprecation notice, empty means not deprecated")
     String deprecated() default "";
 
-    /**
-     * Code example showing usage of this method.
-     */
+    @DocMethod("Code example showing usage of this method")
     String example() default "";
 }
