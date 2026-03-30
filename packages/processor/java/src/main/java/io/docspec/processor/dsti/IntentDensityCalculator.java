@@ -3,22 +3,7 @@ package io.docspec.processor.dsti;
 import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 
-/**
- * Calculates the Intent Signal Density (ISD) score for a method based on
- * the collected intent signals across all 13 channels. The raw score ranges
- * from 0.0 (no intent signals) to 1.0 (maximum intent density), and is then
- * scaled to a 0.0–10.0 range for human readability.
- *
- * <p>ISD formula (weights sum to 1.0):</p>
- * <pre>
- * ISD = w1*nameSemantics + w2*guardClauses + w3*branches + w4*dataFlow
- *     + w5*returnType + w6*loops + w7*errorHandling + w8*constants
- *     + w9*nullChecks + w10*assertions + w11*logging + w12*dependencies
- *     + w13*validationAnnotations
- *
- * Final score = min(10.0, ISD * 10.0)
- * </pre>
- */
+@DocBoundary("Calculates the Intent Signal Density (ISD) score for a method based on collected intent signals across all 13 channels. Raw score ranges from 0.0 to 1.0, scaled to 0.0-10.0 for human readability. Uses weighted formula: ISD = w1*nameSemantics + w2*guardClauses + ... + w13*validationAnnotations.")
 @DocInvariant(rules = {"score >= 0.0", "score <= 10.0", "channel weights sum to 1.0"})
 public class IntentDensityCalculator {
 
@@ -37,16 +22,11 @@ public class IntentDensityCalculator {
     private static final double W_DEPENDENCIES = 0.08;
     private static final double W_VALIDATION_ANNOTATIONS = 0.05;
 
-    /**
-     * Calculates the ISD score for the given intent signals.
-     * The score is on a 0.0–10.0 scale where higher values indicate
-     * richer intent signal density.
-     *
-     * @param signals the collected intent signals for a method
-     * @return a score between 0.0 and 10.0
-     */
     @DocDeterministic
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Calculates the ISD score for the given intent signals on a 0.0-10.0 scale where higher values indicate richer intent signal density",
+               since = "3.0.0",
+               params = {@Param(name = "signals", value = "The collected intent signals for a method")},
+               returns = "A score between 0.0 and 10.0")
     @DocExample(title = "Compute ISD score from intent signals",
         language = "java",
         code = "IntentDensityCalculator calc = new IntentDensityCalculator();\nIntentSignalsModel signals = new IntentSignalsModel();\n// ... populate signals from 13 channels ...\ndouble score = calc.calculate(signals);\n// score ranges from 0.0 (no signals) to 10.0 (maximum density)")

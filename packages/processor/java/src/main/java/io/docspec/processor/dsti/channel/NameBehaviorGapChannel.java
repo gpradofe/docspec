@@ -1,17 +1,12 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-/**
- * Channel 4: Name-Behavior Gap.
- * Cross-references channel 1 (naming intent) and channel 2/3 (guard clauses/branches).
- * If the name says "validate" but no guards are found, flags a gap.
- * Does not require Trees (reads from already-populated signals).
- */
+@DocBoundary("Channel 4: Name-Behavior Gap. Cross-references naming intent with guard clause and branch signals. Flags a gap when the name says validate but no guards are found.")
 public class NameBehaviorGapChannel implements IntentChannel {
 
     @Override

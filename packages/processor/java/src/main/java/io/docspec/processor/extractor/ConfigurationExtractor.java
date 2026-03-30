@@ -10,17 +10,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Detects {@code @Value("${...}")} fields and {@code @ConfigurationProperties} classes,
- * and populates the configuration section of the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Detects @Value fields and @ConfigurationProperties classes and populates the configuration section of the DocSpec model.")
 public class ConfigurationExtractor implements DocSpecExtractor {
 
     private static final String SPRING_VALUE = "org.springframework.beans.factory.annotation.Value";
     private static final String CONFIGURATION_PROPERTIES = "org.springframework.boot.context.properties.ConfigurationProperties";
 
-    /** Pattern to extract key and optional default from @Value("${key:default}") */
+    // Pattern to extract key and optional default from @Value("${key:default}")
     private static final Pattern VALUE_PATTERN = Pattern.compile("\\$\\{([^:}]+)(?::([^}]*))?}");
 
     @Override

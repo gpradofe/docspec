@@ -18,18 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/**
- * Introspects database schema metadata from JPA entity annotations to extract
- * constraint details (check constraints, foreign keys, indexes, generation strategies,
- * unique constraints, and enumerated types) that go beyond basic column mapping.
- *
- * <p>This extractor analyzes {@code @Table}, {@code @Index}, {@code @Column},
- * {@code @Id}, {@code @GeneratedValue}, {@code @JoinColumn}, {@code @UniqueConstraint},
- * {@code @SequenceGenerator}, {@code @TableGenerator}, {@code @Enumerated}, and
- * relationship annotations ({@code @ManyToOne}, {@code @OneToMany}, {@code @OneToOne},
- * {@code @ManyToMany}) to populate the extended DataModel fields.</p>
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Introspects database schema metadata from JPA entity annotations to extract constraint details including check constraints, foreign keys, indexes, generation strategies, unique constraints, and enumerated types. Analyzes @Table, @Index, @Column, @Id, @GeneratedValue, @JoinColumn, @UniqueConstraint, @Enumerated, and relationship annotations.")
 public class DatabaseSchemaIntrospector implements DocSpecExtractor {
 
     // @Table
@@ -78,7 +67,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
     private static final String JPA_MANY_TO_MANY = "jakarta.persistence.ManyToMany";
     private static final String JAVAX_MANY_TO_MANY = "javax.persistence.ManyToMany";
 
-    /** Regex pattern to extract CHECK(...) clauses from column definitions. */
+    // Regex pattern to extract CHECK(...) clauses from column definitions.
     private static final Pattern CHECK_CONSTRAINT_PATTERN =
             Pattern.compile("CHECK\\s*\\((.+?)\\)", Pattern.CASE_INSENSITIVE);
 
@@ -117,10 +106,8 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         extractRelationshipMetadata(typeElement, dataModel, processingEnv);
     }
 
-    /**
-     * Extracts @Table metadata: table name, schema, catalog, indexes, and uniqueConstraints.
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Extracts @Table metadata including table name, schema, catalog, indexes, and uniqueConstraints",
+               since = "3.0.0")
     private void extractTableMetadata(TypeElement typeElement, DataModelInfo dataModel,
                                        ProcessingEnvironment processingEnv) {
         AnnotationMirror tableMirror = findAnnotation(typeElement, JPA_TABLE);
@@ -154,10 +141,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Parses @Index annotations from the @Table(indexes = ...) array.
-     * Each @Index has name, columnList, and unique attributes.
-     */
+    @DocMethod("Parses @Index annotations from the @Table indexes array, extracting name, columnList, and unique attributes")
     @SuppressWarnings("unchecked")
     private List<DataModelInfo.IndexModel> extractIndexAnnotations(
             Map<String, AnnotationValue> tableValues, String attributeName) {
@@ -205,10 +189,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return indexes;
     }
 
-    /**
-     * Parses @UniqueConstraint annotations from @Table(uniqueConstraints = ...).
-     * Converts them into IndexModel entries with unique=true.
-     */
+    @DocMethod("Parses @UniqueConstraint annotations from @Table uniqueConstraints array, converting to IndexModel entries with unique=true")
     @SuppressWarnings("unchecked")
     private List<DataModelInfo.IndexModel> extractUniqueConstraints(
             Map<String, AnnotationValue> tableValues) {
@@ -250,11 +231,8 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return constraints;
     }
 
-    /**
-     * Extracts per-field metadata: @Column properties, @Id, @GeneratedValue,
-     * @Enumerated, @SequenceGenerator, @TableGenerator, and CHECK constraints.
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Extracts per-field metadata including @Column properties, @Id, @GeneratedValue, @Enumerated, and CHECK constraints",
+               since = "3.0.0")
     private void extractFieldMetadata(TypeElement typeElement, DataModelInfo dataModel,
                                        ProcessingEnvironment processingEnv) {
         for (Element enclosed : typeElement.getEnclosedElements()) {
@@ -282,10 +260,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts @Column attributes: name, nullable, unique, length, precision, scale,
-     * columnDefinition (including embedded CHECK constraints), insertable, updatable.
-     */
+    @DocMethod("Extracts @Column attributes including name, nullable, unique, length, precision, scale, and embedded CHECK constraints")
     private void extractColumnDetails(Element field, DataModelFieldModel fieldModel,
                                        ProcessingEnvironment processingEnv) {
         AnnotationMirror columnMirror = findAnnotation(field, JPA_COLUMN);
@@ -329,10 +304,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts CHECK constraint expressions from a column definition string.
-     * For example, "VARCHAR(50) CHECK (length > 0)" yields "length > 0".
-     */
+    @DocMethod("Extracts CHECK constraint expressions from a column definition string")
     private String extractCheckConstraint(String columnDefinition) {
         Matcher matcher = CHECK_CONSTRAINT_PATTERN.matcher(columnDefinition);
         if (matcher.find()) {
@@ -341,9 +313,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return null;
     }
 
-    /**
-     * Marks a field as a primary key if it has @Id.
-     */
+    @DocMethod("Marks a field as a primary key if it has @Id")
     private void extractPrimaryKey(Element field, DataModelFieldModel fieldModel) {
         if (hasAnnotation(field, JPA_ID) || hasAnnotation(field, JAVAX_ID)) {
             if (fieldModel.getPrimaryKey() == null) {
@@ -352,10 +322,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts @GeneratedValue metadata (strategy) and marks the field as generated.
-     * Also reads @SequenceGenerator and @TableGenerator for ID generation configuration.
-     */
+    @DocMethod("Extracts @GeneratedValue metadata and marks the field as generated, also reads @SequenceGenerator and @TableGenerator")
     private void extractGeneratedValue(Element field, DataModelFieldModel fieldModel,
                                         ProcessingEnvironment processingEnv) {
         AnnotationMirror genMirror = findAnnotation(field, JPA_GENERATED_VALUE);
@@ -414,9 +381,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts @Enumerated type (ORDINAL vs STRING).
-     */
+    @DocMethod("Extracts @Enumerated type, ORDINAL vs STRING")
     private void extractEnumeratedType(Element field, DataModelFieldModel fieldModel,
                                         ProcessingEnvironment processingEnv) {
         AnnotationMirror enumMirror = findAnnotation(field, JPA_ENUMERATED);
@@ -439,10 +404,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts @JoinColumn metadata: foreign key column name, referenced column,
-     * and ON DELETE behavior from the optional foreignKey attribute.
-     */
+    @DocMethod("Extracts @JoinColumn metadata including foreign key column name, referenced column, and ON DELETE behavior")
     @SuppressWarnings("unchecked")
     private void extractJoinColumn(Element field, DataModelFieldModel fieldModel,
                                     ProcessingEnvironment processingEnv) {
@@ -507,9 +469,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts the ON DELETE action from a foreign key definition string.
-     */
+    @DocMethod("Extracts the ON DELETE action from a foreign key definition string")
     private String extractOnDeleteAction(String foreignKeyDefinition) {
         String upper = foreignKeyDefinition.toUpperCase();
         int idx = upper.indexOf("ON DELETE");
@@ -526,12 +486,8 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return afterOnDelete.split("\\s+")[0];
     }
 
-    /**
-     * Extracts relationship metadata from @ManyToOne, @OneToMany, @OneToOne,
-     * @ManyToMany annotations including cascade, fetch, mappedBy, and orphanRemoval.
-     * Updates existing relationship entries in the data model.
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Extracts relationship metadata from @ManyToOne, @OneToMany, @OneToOne, @ManyToMany including cascade, fetch, mappedBy, and orphanRemoval",
+               since = "3.0.0")
     private void extractRelationshipMetadata(TypeElement typeElement, DataModelInfo dataModel,
                                               ProcessingEnvironment processingEnv) {
         String[][] relationshipAnnotations = {
@@ -602,10 +558,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Extracts cascade type values from a relationship annotation's cascade attribute.
-     * Returns a comma-separated string of cascade type names (e.g., "ALL", "PERSIST,MERGE").
-     */
+    @DocMethod("Extracts cascade type values from a relationship annotation cascade attribute as comma-separated names")
     @SuppressWarnings("unchecked")
     private String extractCascadeTypes(Map<String, AnnotationValue> relValues) {
         AnnotationValue cascadeValue = relValues.get("cascade");
@@ -633,23 +586,15 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return dot >= 0 ? val.substring(dot + 1) : val;
     }
 
-    /**
-     * Compares JPA entity annotations against a live database schema accessed via JDBC.
-     * Returns a consistency report listing mismatches between the annotation-declared
-     * schema and the actual database structure.
-     *
-     * <p>This method connects to the specified database, reads its metadata through
-     * {@code java.sql.DatabaseMetaData}, and compares table names, column names,
-     * nullability, types, indexes, and foreign keys against what was extracted from
-     * annotations.</p>
-     *
-     * @param jdbcUrl   the JDBC connection URL (e.g., "jdbc:postgresql://localhost:5432/mydb")
-     * @param username  the database username for authentication
-     * @param password  the database password for authentication
-     * @param model     the DocSpec model containing annotation-extracted data models
-     * @return a list of mismatch descriptions; empty list means full consistency
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Compares JPA entity annotations against a live database schema via JDBC, returning a consistency report listing mismatches",
+               since = "3.0.0",
+               params = {
+                   @Param(name = "jdbcUrl", value = "JDBC connection URL, e.g. jdbc:postgresql://localhost:5432/mydb"),
+                   @Param(name = "username", value = "Database username for authentication"),
+                   @Param(name = "password", value = "Database password for authentication"),
+                   @Param(name = "model", value = "DocSpec model containing annotation-extracted data models")
+               },
+               returns = "List of mismatch descriptions; empty list means full consistency")
     public List<SchemaConsistencyReport> compareWithLiveSchema(
             String jdbcUrl, String username, String password, DocSpecModel model) {
         List<SchemaConsistencyReport> reports = new ArrayList<>();
@@ -702,9 +647,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return null;
     }
 
-    /**
-     * Gets all annotation values including defaults using the processing environment.
-     */
+    @DocMethod("Gets all annotation values including defaults using the processing environment")
     private Map<String, AnnotationValue> getAnnotationValues(
             AnnotationMirror mirror, ProcessingEnvironment processingEnv) {
         Map<String, AnnotationValue> result = new LinkedHashMap<>();
@@ -713,10 +656,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return result;
     }
 
-    /**
-     * Gets only explicitly set annotation values (without defaults), used for nested
-     * annotation mirrors where the processing environment context may not apply.
-     */
+    @DocMethod("Gets only explicitly set annotation values without defaults, used for nested annotation mirrors")
     private Map<String, AnnotationValue> getRawAnnotationValues(AnnotationMirror mirror) {
         Map<String, AnnotationValue> result = new LinkedHashMap<>();
         mirror.getElementValues().forEach(
@@ -760,9 +700,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return null;
     }
 
-    /**
-     * Extracts a string array from an annotation value that holds a list.
-     */
+    @DocMethod("Extracts a string array from an annotation value that holds a list")
     @SuppressWarnings("unchecked")
     private List<String> extractStringArray(AnnotationValue arrayValue) {
         Object raw = arrayValue.getValue();
@@ -780,10 +718,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         return result;
     }
 
-    /**
-     * Extracts an AnnotationMirror from an annotation value (handles both direct
-     * AnnotationMirror and AnnotationValue wrapper).
-     */
+    @DocMethod("Extracts an AnnotationMirror from an annotation value, handling both direct AnnotationMirror and AnnotationValue wrapper")
     private AnnotationMirror extractAnnotationMirror(Object item) {
         if (item instanceof AnnotationMirror am) {
             return am;
@@ -820,11 +755,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
 
     // ---- Report model ----
 
-    /**
-     * Report of schema consistency comparison for a single entity/table pair.
-     * Contains the entity name, table name, and a list of detected mismatches
-     * between the JPA annotations and the live database schema.
-     */
+    @DocBoundary("Report of schema consistency comparison for a single entity/table pair with entity name, table name, and detected mismatches")
     public static class SchemaConsistencyReport {
 
         private String entityName;
@@ -860,11 +791,7 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * A single mismatch between the JPA annotation declaration and the live schema.
-     * Captures the kind of mismatch, the affected element, and both the expected
-     * (annotation-declared) and actual (database) values.
-     */
+    @DocBoundary("A single mismatch between JPA annotation declaration and live schema, capturing mismatch kind, affected element, and expected vs actual values")
     public static class SchemaMismatch {
 
         private MismatchKind kind;
@@ -905,31 +832,29 @@ public class DatabaseSchemaIntrospector implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Categories of schema mismatches that can be detected during live comparison.
-     */
+    @DocBoundary("Categories of schema mismatches detectable during live comparison")
     public enum MismatchKind {
-        /** Table declared in annotations but missing from database. */
+        // Table declared in annotations but missing from database
         MISSING_TABLE,
-        /** Column declared in annotations but missing from database table. */
+        // Column declared in annotations but missing from database table
         MISSING_COLUMN,
-        /** Column exists in database but not declared in JPA entity. */
+        // Column exists in database but not declared in JPA entity
         EXTRA_COLUMN,
-        /** Column type in database differs from JPA annotation declaration. */
+        // Column type in database differs from JPA annotation declaration
         TYPE_MISMATCH,
-        /** Column nullability in database differs from @Column(nullable=...). */
+        // Column nullability in database differs from @Column(nullable=...)
         NULLABLE_MISMATCH,
-        /** Column length in database differs from @Column(length=...). */
+        // Column length in database differs from @Column(length=...)
         LENGTH_MISMATCH,
-        /** Index declared in annotations but missing from database. */
+        // Index declared in annotations but missing from database
         MISSING_INDEX,
-        /** Index exists in database but not declared in JPA annotations. */
+        // Index exists in database but not declared in JPA annotations
         EXTRA_INDEX,
-        /** Foreign key declared via @JoinColumn but missing from database. */
+        // Foreign key declared via @JoinColumn but missing from database
         MISSING_FOREIGN_KEY,
-        /** Primary key configuration differs between annotations and database. */
+        // Primary key configuration differs between annotations and database
         PRIMARY_KEY_MISMATCH,
-        /** Unique constraint differs between annotations and database. */
+        // Unique constraint differs between annotations and database
         UNIQUE_CONSTRAINT_MISMATCH
     }
 }

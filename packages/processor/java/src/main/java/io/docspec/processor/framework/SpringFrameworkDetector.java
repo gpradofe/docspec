@@ -74,10 +74,8 @@ public class SpringFrameworkDetector implements FrameworkDetector {
         return FrameworkInfo.NONE;
     }
 
-    /**
-     * Applies method-level Spring annotations (@Transactional, @Cacheable) to the method model.
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Applies method-level Spring annotations such as @Transactional and @Cacheable to the method model",
+               since = "3.0.0")
     public void applyMethodAnnotations(ExecutableElement method, MethodModel methodModel) {
         List<String> tags = methodModel.getTags() != null ? new ArrayList<>(methodModel.getTags()) : new ArrayList<>();
         boolean changed = false;
@@ -104,9 +102,7 @@ public class SpringFrameworkDetector implements FrameworkDetector {
         return hasAnnotation(method, EVENT_LISTENER);
     }
 
-    /**
-     * Gets the class-level @RequestMapping base path for a controller.
-     */
+    @DocMethod("Gets the class-level @RequestMapping base path for a controller")
     public String getClassBasePath(TypeElement typeElement) {
         AnnotationMirror requestMapping = findAnnotation(typeElement,
                 "org.springframework.web.bind.annotation.RequestMapping");
@@ -116,11 +112,9 @@ public class SpringFrameworkDetector implements FrameworkDetector {
         return "";
     }
 
-    /**
-     * Extracts an EndpointMappingModel from Spring @GetMapping/@PostMapping/etc.
-     * Returns null if the method has no Spring mapping annotation.
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Extracts an EndpointMappingModel from Spring @GetMapping/@PostMapping and other HTTP mapping annotations",
+               since = "3.0.0",
+               returns = "The endpoint mapping, or null if the method has no Spring mapping annotation")
     public EndpointMappingModel extractEndpointMapping(ExecutableElement method, String basePath) {
         Map<String, String> MAPPING_TO_METHOD = Map.of(
                 "org.springframework.web.bind.annotation.GetMapping", "GET",
@@ -232,9 +226,7 @@ public class SpringFrameworkDetector implements FrameworkDetector {
         return result.isEmpty() ? "/" : result;
     }
 
-    /**
-     * Extracts cron or fixedRate info from @Scheduled annotation.
-     */
+    @DocMethod("Extracts cron or fixedRate info from @Scheduled annotation")
     public String getScheduleInfo(ExecutableElement method) {
         AnnotationMirror scheduled = findAnnotation(method, SCHEDULED);
         if (scheduled == null) return null;

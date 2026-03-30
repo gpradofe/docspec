@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -8,12 +8,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
-/**
- * Channel 13: Validation Annotations (Equality).
- * Counts validation annotations on method parameters ({@code @NotNull}, {@code @Valid},
- * {@code @Min}, {@code @Max}, {@code @Size}, etc.).
- * Sets the validationAnnotations count on signals.
- */
+@DocBoundary("Channel 13: Validation Annotations. Counts validation annotations on method parameters such as @NotNull, @Valid, @Min, @Max, @Size and other Bean Validation annotations.")
 public class EqualityChannel implements IntentChannel {
 
     @Override

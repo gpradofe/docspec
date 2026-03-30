@@ -1,17 +1,13 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.dsti.NamingAnalyzer;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-/**
- * Channel 1: Name Semantics.
- * Uses {@link NamingAnalyzer} to extract verb, object, and intent category
- * from the method name using camelCase conventions.
- */
+@DocBoundary("Channel 1: Name Semantics. Uses NamingAnalyzer to extract verb, object, and intent category from method names using camelCase conventions.")
 public class NamingChannel implements IntentChannel {
 
     private final NamingAnalyzer namingAnalyzer;

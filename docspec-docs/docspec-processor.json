@@ -357,7 +357,7 @@
       "kind" : "class",
       "name" : "AbstractTreesChannel",
       "qualified" : "io.docspec.processor.dsti.channel.AbstractTreesChannel",
-      "description" : "Base class for channels that need AST (Trees) access.\n Provides helper methods for reflective Tree API access.",
+      "description" : "abstract trees channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
@@ -372,12 +372,19 @@
           "type" : "boolean"
         }
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Base class for channels that need AST Trees access. Provides helper methods for reflective Tree API access."
+        }
+      } ],
       "implements" : [ "IntentChannel" ]
     }, {
       "kind" : "class",
       "name" : "AssignmentChainChannel",
       "qualified" : "io.docspec.processor.dsti.channel.AssignmentChainChannel",
-      "description" : "Channel 9: Constants (Assignment Chain).\n Scans for UPPER_CASE constant references in the method body.\n Falls back to detecting static final fields in the enclosing class when Trees is unavailable.\n Sets the constants list on signals.",
+      "description" : "assignment chain channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -434,6 +441,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 9: Constants. Scans for UPPER_CASE constant references in the method body. Falls back to detecting static final fields in the enclosing class when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch9-constants" ]
@@ -443,7 +457,7 @@
       "kind" : "class",
       "name" : "AssignmentPatternChannel",
       "qualified" : "io.docspec.processor.dsti.channel.AssignmentPatternChannel",
-      "description" : "Channel 6: Assignment Patterns (Data Flow).\n Traces data flow in the method body: builder patterns, constructor calls,\n and assignment chains. Populates the data flow writes list.\n Falls back to parameter type analysis when Trees is unavailable.",
+      "description" : "assignment pattern channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -500,6 +514,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 6: Assignment Patterns. Traces data flow in the method body including builder patterns, constructor calls, and assignment chains. Populates data flow writes. Falls back to parameter type analysis when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch6-assignment" ]
@@ -509,7 +530,7 @@
       "kind" : "class",
       "name" : "BranchStructureChannel",
       "qualified" : "io.docspec.processor.dsti.channel.BranchStructureChannel",
-      "description" : "Channel 3: Branch Structure.\n Counts if-statements (branches) from the Trees AST when available.\n Falls back to heuristic branch estimation from method signature when Trees is unavailable:\n methods returning boolean or Optional, or having multiple parameters, likely contain branches.",
+      "description" : "branch structure channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -566,6 +587,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 3: Branch Structure. Counts if-statements and switch-statements from the Trees AST. Falls back to heuristic branch estimation from method signature when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch3-branches" ]
@@ -575,7 +603,7 @@
       "kind" : "class",
       "name" : "ConstantChannel",
       "qualified" : "io.docspec.processor.dsti.channel.ConstantChannel",
-      "description" : "Channel 11: Assertions (Constant).\n Detects assert statements from the AST and assertion-style method calls\n ({@code check*}, {@code require*}, {@code verify*}) from the method source.\n Falls back to detecting assertion-related annotations when Trees is unavailable.\n Sets the assertions count on signals.",
+      "description" : "constant channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -632,6 +660,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 11: Assertions. Detects assert statements from the AST and assertion-style method calls such as check*, require*, verify* from source. Falls back to detecting assertion-related annotations when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch11-assertions" ]
@@ -641,7 +676,7 @@
       "kind" : "class",
       "name" : "EqualityChannel",
       "qualified" : "io.docspec.processor.dsti.channel.EqualityChannel",
-      "description" : "Channel 13: Validation Annotations (Equality).\n Counts validation annotations on method parameters ({@code @NotNull}, {@code @Valid},\n {@code @Min}, {@code @Max}, {@code @Size}, etc.).\n Sets the validationAnnotations count on signals.",
+      "description" : "equality channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -698,6 +733,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 13: Validation Annotations. Counts validation annotations on method parameters such as @NotNull, @Valid, @Min, @Max, @Size and other Bean Validation annotations."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch13-validation" ]
@@ -707,7 +749,7 @@
       "kind" : "class",
       "name" : "ErrorHandlingChannel",
       "qualified" : "io.docspec.processor.dsti.channel.ErrorHandlingChannel",
-      "description" : "Channel 8: Error Handling.\n Counts try/catch blocks and extracts caught exception types from Trees AST.\n Falls back to declared thrown types when Trees is unavailable.\n Sets the errorHandling model on signals.",
+      "description" : "error handling channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -764,6 +806,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 8: Error Handling. Counts try/catch blocks and extracts caught exception types from Trees AST. Falls back to declared thrown types when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch8-errors" ]
@@ -773,7 +822,7 @@
       "kind" : "class",
       "name" : "ExceptionMessageChannel",
       "qualified" : "io.docspec.processor.dsti.channel.ExceptionMessageChannel",
-      "description" : "Channel 10: Null Checks (Exception Messages).\n Counts null check patterns ({@code != null}, {@code == null},\n {@code Objects.requireNonNull}, {@code Optional.ofNullable}, {@code Optional.of}) from source.\n Falls back to counting @NonNull/@Nullable annotations on parameters when Trees is unavailable.\n Sets the nullChecks count on signals.",
+      "description" : "exception message channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -830,6 +879,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 10: Null Checks. Counts null check patterns such as != null, == null, Objects.requireNonNull, Optional.ofNullable from source. Falls back to counting @NonNull/@Nullable annotations when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch10-nulls" ]
@@ -839,7 +895,7 @@
       "kind" : "class",
       "name" : "GuardClauseChannel",
       "qualified" : "io.docspec.processor.dsti.channel.GuardClauseChannel",
-      "description" : "Channel 2: Guard Clauses.\n Counts if-throw patterns in the method body as guard clauses.\n Also counts {@code @DocIntentional} and {@code @DocPreserves} annotation-based guards.\n Requires Trees for body analysis, but has an annotation-based fallback.",
+      "description" : "guard clause channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -896,6 +952,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 2: Guard Clauses. Counts if-throw patterns in the method body as guard clauses. Also counts @DocIntentional and @DocPreserves annotation-based guards. Has an annotation-based fallback when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch2-guards" ]
@@ -905,13 +968,13 @@
       "kind" : "interface",
       "name" : "IntentChannel",
       "qualified" : "io.docspec.processor.dsti.channel.IntentChannel",
-      "description" : "Interface for individual DSTI intent extraction channels.\n Each channel analyzes one specific aspect of method behavior.\n Channels are independent and can be enabled/disabled for ablation studies.",
+      "description" : "intent channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "channelName",
-        "description" : "Human-readable channel name (e.g., \"naming\", \"guard-clauses\").",
+        "description" : "Human-readable channel name, e.g. naming or guard-clauses",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -919,7 +982,7 @@
         }
       }, {
         "name" : "channelNumber",
-        "description" : "Channel number (1-13) per the DSTI specification.",
+        "description" : "Channel number 1-13 per the DSTI specification",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -927,7 +990,7 @@
         }
       }, {
         "name" : "requiresTrees",
-        "description" : "Whether this channel requires the com.sun.source.util.Trees API for AST analysis.",
+        "description" : "Whether this channel requires the com.sun.source.util.Trees API for AST analysis",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -935,38 +998,38 @@
         }
       }, {
         "name" : "extract",
-        "description" : "Extract intent signals from the given method and merge them into the signals model.",
+        "description" : "Extracts intent signals from the given method and merges them into the signals model",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "params" : [ {
           "name" : "method",
           "type" : "javax.lang.model.element.ExecutableElement",
-          "description" : "the method to analyze",
+          "description" : "The method to analyze",
           "required" : true
         }, {
           "name" : "owner",
           "type" : "javax.lang.model.element.TypeElement",
-          "description" : "the enclosing type",
+          "description" : "The enclosing type",
           "required" : true
         }, {
           "name" : "trees",
           "type" : "java.lang.Object",
-          "description" : "the Trees instance (may be null if requiresTrees() returns false)",
+          "description" : "The Trees instance, may be null if requiresTrees returns false",
           "required" : true
         }, {
           "name" : "methodTree",
           "type" : "java.lang.Object",
-          "description" : "the method's tree representation from Trees.getTree() (may be null)",
+          "description" : "The method tree representation from Trees.getTree, may be null",
           "required" : true
         }, {
           "name" : "env",
           "type" : "javax.annotation.processing.ProcessingEnvironment",
-          "description" : "the processing environment",
+          "description" : "The processing environment",
           "required" : true
         }, {
           "name" : "signals",
           "type" : "io.docspec.processor.model.IntentSignalsModel",
-          "description" : "the signals model to populate (merge into, do not overwrite other channels)",
+          "description" : "The signals model to populate, merge into without overwriting other channels",
           "required" : true
         } ]
       } ],
@@ -974,14 +1037,14 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "DSTI channel interface"
+          "value" : "Interface for individual DSTI intent extraction channels. Each channel analyzes one specific aspect of method behavior. Channels are independent and can be enabled/disabled for ablation studies."
         }
       } ]
     }, {
       "kind" : "class",
       "name" : "LoggingChannel",
       "qualified" : "io.docspec.processor.dsti.channel.LoggingChannel",
-      "description" : "Channel 12: Logging.\n Detects logger method calls ({@code log}, {@code debug}, {@code info},\n {@code warn}, {@code error}, {@code trace}) from method source.\n Falls back to detecting Logger-typed fields in the enclosing class when Trees is unavailable.\n Sets the logStatements count on signals.",
+      "description" : "logging channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1038,6 +1101,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 12: Logging. Detects logger method calls such as log, debug, info, warn, error, trace from method source. Falls back to detecting Logger-typed fields when Trees is unavailable."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch12-logging" ]
@@ -1047,7 +1117,7 @@
       "kind" : "class",
       "name" : "LoopPatternChannel",
       "qualified" : "io.docspec.processor.dsti.channel.LoopPatternChannel",
-      "description" : "Channel 7: Loop Patterns.\n Detects {@code .stream()}, {@code Stream.}, enhanced-for loops from Trees AST.\n Falls back to parameter/return type analysis when Trees is unavailable:\n collection parameters or return types suggest iteration.\n Sets loopProperties (hasStreams, hasEnhancedFor, streamOps).",
+      "description" : "loop pattern channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1104,6 +1174,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 7: Loop Patterns. Detects .stream(), Stream., enhanced-for loops from Trees AST. Falls back to parameter/return type analysis when Trees is unavailable. Sets loopProperties with hasStreams, hasEnhancedFor, and streamOps."
+        }
       } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch7-loops" ]
@@ -1113,7 +1190,7 @@
       "kind" : "class",
       "name" : "NameBehaviorGapChannel",
       "qualified" : "io.docspec.processor.dsti.channel.NameBehaviorGapChannel",
-      "description" : "Channel 4: Name-Behavior Gap.\n Cross-references channel 1 (naming intent) and channel 2/3 (guard clauses/branches).\n If the name says \"validate\" but no guards are found, flags a gap.\n Does not require Trees (reads from already-populated signals).",
+      "description" : "name behavior gap channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1171,6 +1248,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 4: Name-Behavior Gap. Cross-references naming intent with guard clause and branch signals. Flags a gap when the name says validate but no guards are found."
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch4-gap" ]
       },
@@ -1179,7 +1263,7 @@
       "kind" : "class",
       "name" : "NamingChannel",
       "qualified" : "io.docspec.processor.dsti.channel.NamingChannel",
-      "description" : "Channel 1: Name Semantics.\n Uses NamingAnalyzer to extract verb, object, and intent category\n from the method name using camelCase conventions.",
+      "description" : "naming channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1242,6 +1326,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 1: Name Semantics. Uses NamingAnalyzer to extract verb, object, and intent category from method names using camelCase conventions."
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch1-naming" ]
       },
@@ -1250,7 +1341,7 @@
       "kind" : "class",
       "name" : "ReturnTypeChannel",
       "qualified" : "io.docspec.processor.dsti.channel.ReturnTypeChannel",
-      "description" : "Channel 5: Return Type.\n Analyzes the method's return type for signals (Optional, List, void, etc.).\n Populates data flow reads/writes based on return type characteristics.",
+      "description" : "return type channel.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1308,6 +1399,13 @@
           "required" : true
         } ]
       } ],
+      "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Channel 5: Return Type. Analyzes the method return type for signals such as Optional, List, void, reactive types. Populates data flow reads based on return type characteristics."
+        }
+      } ],
       "referencedBy" : {
         "flows" : [ "dsti-analysis.ch5-return" ]
       },
@@ -1322,7 +1420,7 @@
       "kind" : "class",
       "name" : "IntentDensityCalculator",
       "qualified" : "io.docspec.processor.dsti.IntentDensityCalculator",
-      "description" : "Calculates the Intent Signal Density (ISD) score for a method based on\n the collected intent signals across all 13 channels. The raw score ranges\n from 0.0 (no intent signals) to 1.0 (maximum intent density), and is then\n scaled to a 0.0–10.0 range for human readability.\n\n <p>ISD formula (weights sum to 1.0):</p>\n <pre>\n ISD = w1*nameSemantics + w2*guardClauses + w3*branches + w4*dataFlow\n     + w5*returnType + w6*loops + w7*errorHandling + w8*constants\n     + w9*nullChecks + w10*assertions + w11*logging + w12*dependencies\n     + w13*validationAnnotations\n\n Final score = min(10.0, ISD * 10.0)\n </pre>",
+      "description" : "intent density calculator.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1330,18 +1428,18 @@
       } ],
       "methods" : [ {
         "name" : "calculate",
-        "description" : "Calculates the ISD score for the given intent signals.\n The score is on a 0.0–10.0 scale where higher values indicate\n richer intent signal density.",
+        "description" : "Calculates the ISD score for the given intent signals on a 0.0-10.0 scale where higher values indicate richer intent signal density",
         "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
           "name" : "signals",
           "type" : "io.docspec.processor.model.IntentSignalsModel",
-          "description" : "the collected intent signals for a method",
+          "description" : "The collected intent signals for a method",
           "required" : true
         } ],
         "returns" : {
           "type" : "double",
-          "description" : "a score between 0.0 and 10.0"
+          "description" : "A score between 0.0 and 10.0"
         },
         "examples" : [ {
           "title" : "Compute ISD score from intent signals",
@@ -1351,6 +1449,12 @@
         } ]
       } ],
       "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Calculates the Intent Signal Density (ISD) score for a method based on collected intent signals across all 13 channels. Raw score ranges from 0.0 to 1.0, scaled to 0.0-10.0 for human readability. Uses weighted formula: ISD = w1*nameSemantics + w2*guardClauses + ... + w13*validationAnnotations."
+        }
+      }, {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
         "attributes" : {
@@ -1364,7 +1468,7 @@
       "kind" : "class",
       "name" : "IntentGraphExtractor",
       "qualified" : "io.docspec.processor.dsti.IntentGraphExtractor",
-      "description" : "Orchestrates DSTI (Documentation Semantic & Temporal Intelligence) analysis.\n For each method in a type, iterates through 13 independent IntentChannel\n implementations and merges their signals, then calculates the ISD score.\n\n <p>Each channel is self-contained and can be enabled/disabled individually\n for ablation studies. The orchestrator resolves the Trees API once and passes\n it to all channels that require AST access.</p>\n\n <p>This extractor is only active when the DSTI config flag is enabled. It optionally\n uses {@code com.sun.source.util.Trees} for deeper AST analysis, but gracefully\n degrades if that API is unavailable.</p>",
+      "description" : "intent graph extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1397,28 +1501,31 @@
         }
       }, {
         "name" : "getChannels",
-        "description" : "Returns the immutable list of all 13 DSTI channels used by this extractor.\n Useful for ablation studies and channel-level diagnostics.",
+        "description" : "Returns the immutable list of all 13 DSTI channels used by this extractor, useful for ablation studies and channel-level diagnostics",
         "visibility" : "public",
         "returns" : {
           "type" : "List<io.docspec.processor.dsti.channel.IntentChannel>",
-          "description" : "the list of intent channels"
+          "description" : "The list of intent channels"
         }
       }, {
         "name" : "extract",
-        "description" : "Extract.",
+        "description" : "Runs all 13 intent channels on every public method in the type, cross-verifies signals, and computes ISD scores",
         "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
           "name" : "typeElement",
           "type" : "javax.lang.model.element.TypeElement",
+          "description" : "The class or interface to analyze",
           "required" : true
         }, {
           "name" : "processingEnv",
           "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "description" : "The annotation processing environment",
           "required" : true
         }, {
           "name" : "model",
           "type" : "io.docspec.processor.model.DocSpecModel",
+          "description" : "Output model to populate with intent signals",
           "required" : true
         } ],
         "examples" : [ {
@@ -1432,7 +1539,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "DSTI intent graph extraction boundary"
+          "value" : "Orchestrates DSTI analysis across 13 independent IntentChannel implementations, merging their signals and calculating ISD scores. Each channel is self-contained for ablation studies. Resolves Trees API once and passes it to all channels requiring AST access. Only active when DSTI config flag is enabled; gracefully degrades if com.sun.source.util.Trees is unavailable."
         }
       }, {
         "name" : "DocFlow",
@@ -1459,7 +1566,7 @@
       "kind" : "class",
       "name" : "NamingAnalyzer",
       "qualified" : "io.docspec.processor.dsti.NamingAnalyzer",
-      "description" : "Parses method names to extract semantic verbs and objects using camelCase conventions.\n Used by the DSTI (Documentation Semantic & Temporal Intelligence) system to infer\n developer intent from naming patterns.\n\n <p>Supports 150+ verb prefixes mapped to 10 intent categories. The verb dictionary\n is ordered longest-first to avoid prefix collisions (e.g., \"initialize\" before \"init\").</p>",
+      "description" : "naming analyzer.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1467,18 +1574,18 @@
       } ],
       "methods" : [ {
         "name" : "analyze",
-        "description" : "Analyzes a method name and extracts its semantic components.\n\n <p>The algorithm tries verb-prefix matching first. For each known verb, it checks\n whether the method name starts with the verb followed by an uppercase letter\n (standard camelCase, e.g., \"getUser\") OR matches the verb exactly (single-word\n methods like \"execute\", \"run\", \"close\").</p>\n\n <p>For two-letter verbs (\"is\", \"of\", \"on\", \"do\", \"to\"), we also accept the\n pattern verb + lowercase (e.g., \"isEmpty\" would not match normally because 'E'\n is uppercase, but \"is\" + \"Empty\" does match). Actually \"isEmpty\" does match\n because 'E' IS uppercase. The special case is for verbs where the remaining\n portion starts lowercase, like \"isempty\" — but that's non-standard Java.</p>",
+        "description" : "Analyzes a method name and extracts its semantic components using verb-prefix matching with camelCase boundary detection",
         "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
           "name" : "methodName",
           "type" : "java.lang.String",
-          "description" : "the simple name of the method",
+          "description" : "The simple name of the method",
           "required" : true
         } ],
         "returns" : {
           "type" : "NameSemantics",
-          "description" : "a NameSemantics record with verb, object, and intent category"
+          "description" : "A NameSemantics record with verb, object, and intent category"
         },
         "examples" : [ {
           "title" : "Extract verb and intent from method name",
@@ -1488,6 +1595,12 @@
         } ]
       } ],
       "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Parses method names to extract semantic verbs and objects using camelCase conventions. Used by DSTI to infer developer intent from naming patterns. Supports 150+ verb prefixes mapped to 10 intent categories, ordered longest-first to avoid prefix collisions."
+        }
+      }, {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
         "attributes" : {
@@ -1499,7 +1612,7 @@
       "kind" : "class",
       "name" : "PropertyDSL",
       "qualified" : "io.docspec.processor.dsti.PropertyDSL",
-      "description" : "Parses {@code @DocInvariant} rule expressions into structured InvariantRule objects.\n\n <p>Supported syntax:</p>\n <ul>\n   <li>{@code \"field NOT_NULL\"} — field must not be null</li>\n   <li>{@code \"field SIZE > 0\"} — collection/array size check</li>\n   <li>{@code \"field IN [val1, val2, val3]\"} — value must be one of the listed values</li>\n   <li>{@code \"field BETWEEN 1 AND 100\"} — numeric range check</li>\n   <li>{@code \"field MATCHES pattern\"} — regex pattern check</li>\n   <li>{@code \"field > 0\"}, {@code \"field >= 0\"}, {@code \"field < 100\"} — comparison</li>\n   <li>{@code \"field == value\"}, {@code \"field != value\"} — equality/inequality</li>\n   <li>{@code \"field NOT_EMPTY\"} — string/collection must not be empty</li>\n   <li>{@code \"field NOT_BLANK\"} — string must not be blank</li>\n </ul>",
+      "description" : "property DSL.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1507,38 +1620,44 @@
       } ],
       "methods" : [ {
         "name" : "parse",
-        "description" : "Parse a rule expression string into an InvariantRule.",
+        "description" : "Parses a rule expression string into an InvariantRule",
         "since" : "3.0.0",
         "visibility" : "public",
         "modifiers" : [ "static" ],
         "params" : [ {
           "name" : "expression",
           "type" : "java.lang.String",
-          "description" : "the rule expression (e.g. {@code \"balance >= 0\"})",
+          "description" : "The rule expression, e.g. 'balance >= 0'",
           "required" : true
         } ],
         "returns" : {
           "type" : "InvariantRule",
-          "description" : "the parsed rule, or {@code null} if the expression cannot be parsed"
+          "description" : "The parsed rule, or null if the expression cannot be parsed"
         }
       }, {
         "name" : "parseAll",
-        "description" : "Parse multiple rule expressions (e.g. from {@code @DocInvariant(rules = {...})}).",
+        "description" : "Parses multiple rule expressions from @DocInvariant rules arrays",
         "since" : "3.0.0",
         "visibility" : "public",
         "modifiers" : [ "static" ],
         "params" : [ {
           "name" : "expressions",
           "type" : "java.lang.String[]",
-          "description" : "array of rule expression strings",
+          "description" : "Array of rule expression strings",
           "required" : true
         } ],
         "returns" : {
           "type" : "List<io.docspec.processor.dsti.PropertyDSL.InvariantRule>",
-          "description" : "list of successfully parsed rules (never null, may be empty)"
+          "description" : "List of successfully parsed rules, never null, may be empty"
         }
       } ],
       "annotations" : [ {
+        "name" : "DocBoundary",
+        "qualified" : "io.docspec.annotation.DocBoundary",
+        "attributes" : {
+          "value" : "Parses @DocInvariant rule expressions into structured InvariantRule objects. Supports NOT_NULL, NOT_EMPTY, NOT_BLANK, SIZE comparisons, IN lists, BETWEEN ranges, MATCHES regex, and standard comparison operators."
+        }
+      }, {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
         "attributes" : {
@@ -1556,7 +1675,7 @@
       "kind" : "class",
       "name" : "ConfigurationExtractor",
       "qualified" : "io.docspec.processor.extractor.ConfigurationExtractor",
-      "description" : "Detects {@code @Value(\"${...}\")} fields and {@code @ConfigurationProperties} classes,\n and populates the configuration section of the DocSpec model.",
+      "description" : "configuration extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1605,7 +1724,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Detects @Value fields and @ConfigurationProperties classes and populates the configuration section of the DocSpec model."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -1613,7 +1732,7 @@
       "kind" : "class",
       "name" : "DatabaseSchemaIntrospector",
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector",
-      "description" : "Introspects database schema metadata from JPA entity annotations to extract\n constraint details (check constraints, foreign keys, indexes, generation strategies,\n unique constraints, and enumerated types) that go beyond basic column mapping.\n\n <p>This extractor analyzes {@code @Table}, {@code @Index}, {@code @Column},\n {@code @Id}, {@code @GeneratedValue}, {@code @JoinColumn}, {@code @UniqueConstraint},\n {@code @SequenceGenerator}, {@code @TableGenerator}, {@code @Enumerated}, and\n relationship annotations ({@code @ManyToOne}, {@code @OneToMany}, {@code @OneToOne},\n {@code @ManyToMany}) to populate the extended DataModel fields.</p>",
+      "description" : "database schema introspector.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1659,40 +1778,40 @@
         } ]
       }, {
         "name" : "compareWithLiveSchema",
-        "description" : "Compares JPA entity annotations against a live database schema accessed via JDBC.\n Returns a consistency report listing mismatches between the annotation-declared\n schema and the actual database structure.\n\n <p>This method connects to the specified database, reads its metadata through\n {@code java.sql.DatabaseMetaData}, and compares table names, column names,\n nullability, types, indexes, and foreign keys against what was extracted from\n annotations.</p>",
+        "description" : "Compares JPA entity annotations against a live database schema via JDBC, returning a consistency report listing mismatches",
         "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
           "name" : "jdbcUrl",
           "type" : "java.lang.String",
-          "description" : "the JDBC connection URL (e.g., \"jdbc:postgresql://localhost:5432/mydb\")",
+          "description" : "JDBC connection URL, e.g. jdbc:postgresql://localhost:5432/mydb",
           "required" : true
         }, {
           "name" : "username",
           "type" : "java.lang.String",
-          "description" : "the database username for authentication",
+          "description" : "Database username for authentication",
           "required" : true
         }, {
           "name" : "password",
           "type" : "java.lang.String",
-          "description" : "the database password for authentication",
+          "description" : "Database password for authentication",
           "required" : true
         }, {
           "name" : "model",
           "type" : "io.docspec.processor.model.DocSpecModel",
-          "description" : "the DocSpec model containing annotation-extracted data models",
+          "description" : "DocSpec model containing annotation-extracted data models",
           "required" : true
         } ],
         "returns" : {
           "type" : "List<io.docspec.processor.extractor.DatabaseSchemaIntrospector.SchemaConsistencyReport>",
-          "description" : "a list of mismatch descriptions; empty list means full consistency"
+          "description" : "List of mismatch descriptions; empty list means full consistency"
         }
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Introspects database schema metadata from JPA entity annotations to extract constraint details including check constraints, foreign keys, indexes, generation strategies, unique constraints, and enumerated types. Analyzes @Table, @Index, @Column, @Id, @GeneratedValue, @JoinColumn, @UniqueConstraint, @Enumerated, and relationship annotations."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -1700,7 +1819,7 @@
       "kind" : "class",
       "name" : "DataStoreExtractor",
       "qualified" : "io.docspec.processor.extractor.DataStoreExtractor",
-      "description" : "Detects JPA entities (tables), Spring Data repositories, and Redis/Kafka types,\n and populates the data stores section of the DocSpec model.",
+      "description" : "data store extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1749,7 +1868,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Detects JPA entities, Spring Data repositories, and Redis/Kafka types and populates the data stores section of the DocSpec model."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -1757,13 +1876,13 @@
       "kind" : "interface",
       "name" : "DocSpecExtractor",
       "qualified" : "io.docspec.processor.extractor.DocSpecExtractor",
-      "description" : "Interface for extractors that analyze types and populate the DocSpec model\n with domain-specific documentation (security, configuration, observability, etc.).",
+      "description" : "doc spec extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "abstract" ],
       "methods" : [ {
         "name" : "isAvailable",
-        "description" : "Checks whether this extractor can operate in the current environment.\n Typically verifies that required framework classes are on the classpath.",
+        "description" : "Checks whether this extractor can operate in the current environment, typically verifying required framework classes are on the classpath",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "params" : [ {
@@ -1776,7 +1895,7 @@
         }
       }, {
         "name" : "extractorName",
-        "description" : "Returns the human-readable name of this extractor for diagnostic messages.",
+        "description" : "Returns the human-readable name of this extractor for diagnostic messages",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "returns" : {
@@ -1784,23 +1903,23 @@
         }
       }, {
         "name" : "extract",
-        "description" : "Analyzes a single type element and populates the model with extracted data.",
+        "description" : "Analyzes a single type element and populates the model with extracted data",
         "visibility" : "public",
         "modifiers" : [ "abstract" ],
         "params" : [ {
           "name" : "typeElement",
           "type" : "javax.lang.model.element.TypeElement",
-          "description" : "the type to analyze",
+          "description" : "The type to analyze",
           "required" : true
         }, {
           "name" : "processingEnv",
           "type" : "javax.annotation.processing.ProcessingEnvironment",
-          "description" : "the annotation processing environment",
+          "description" : "The annotation processing environment",
           "required" : true
         }, {
           "name" : "model",
           "type" : "io.docspec.processor.model.DocSpecModel",
-          "description" : "the DocSpec model to populate",
+          "description" : "The DocSpec model to populate",
           "required" : true
         } ]
       } ],
@@ -1808,7 +1927,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "extractor interface boundary"
+          "value" : "Interface for extractors that analyze types and populate the DocSpec model with domain-specific documentation including security, configuration, observability, data stores, external dependencies, and privacy."
         }
       } ],
       "referencedBy" : {
@@ -1818,7 +1937,7 @@
       "kind" : "class",
       "name" : "ExternalDependencyExtractor",
       "qualified" : "io.docspec.processor.extractor.ExternalDependencyExtractor",
-      "description" : "Detects external service calls via {@code RestTemplate}, {@code WebClient},\n {@code RestClient}, and {@code @FeignClient} annotations, and populates the\n external dependencies section of the DocSpec model.",
+      "description" : "external dependency extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1867,7 +1986,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Detects external service calls via RestTemplate, WebClient, RestClient, and @FeignClient annotations and populates the external dependencies section of the DocSpec model."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -1875,7 +1994,7 @@
       "kind" : "class",
       "name" : "ObservabilityExtractor",
       "qualified" : "io.docspec.processor.extractor.ObservabilityExtractor",
-      "description" : "Detects Micrometer annotations ({@code @Timed}, {@code @Counted}) and\n Spring Actuator health indicators, populating the observability section\n of the DocSpec model.",
+      "description" : "observability extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1924,7 +2043,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Detects Micrometer annotations @Timed and @Counted plus Spring Actuator health indicators, populating the observability section of the DocSpec model."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -1932,7 +2051,7 @@
       "kind" : "class",
       "name" : "OpenApiMerger",
       "qualified" : "io.docspec.processor.extractor.OpenApiMerger",
-      "description" : "Scans for OpenAPI specification files (openapi.json, openapi.yaml) on the classpath\n and merges endpoint descriptions into the DocSpec model.",
+      "description" : "open api merger.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -1978,7 +2097,7 @@
         } ]
       }, {
         "name" : "finalizeExtraction",
-        "description" : "Merge OpenAPI endpoint descriptions into the model.\n Called during processor finalization, not per-type.",
+        "description" : "Merges OpenAPI endpoint descriptions into the model during processor finalization",
         "visibility" : "public",
         "params" : [ {
           "name" : "processingEnv",
@@ -1994,7 +2113,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Scans for OpenAPI specification files on the classpath and merges endpoint descriptions into the DocSpec model."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -2002,7 +2121,7 @@
       "kind" : "class",
       "name" : "PrivacyExtractor",
       "qualified" : "io.docspec.processor.extractor.PrivacyExtractor",
-      "description" : "Detects {@code @DocPII} and {@code @DocSensitive} annotations on fields\n and populates the privacy section of the DocSpec model.",
+      "description" : "privacy extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -2051,7 +2170,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Detects @DocPII and @DocSensitive annotations on fields and populates the privacy section of the DocSpec model."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -2059,7 +2178,7 @@
       "kind" : "class",
       "name" : "QueryIndexAnalyzer",
       "qualified" : "io.docspec.processor.extractor.QueryIndexAnalyzer",
-      "description" : "Analyzes Spring Data repository method names and {@code @Query} annotations\n to infer which database indexes are needed for efficient query execution.\n\n <p>For example, {@code findByEmailAndStatus(String, Status)} implies an index\n on {@code (email, status)} columns.</p>",
+      "description" : "query index analyzer.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -2108,7 +2227,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Analyzes Spring Data repository method names and @Query annotations to infer which database indexes are needed for efficient query execution."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -2116,7 +2235,7 @@
       "kind" : "class",
       "name" : "SchemaConsistencyChecker",
       "qualified" : "io.docspec.processor.extractor.SchemaConsistencyChecker",
-      "description" : "Compares JPA entity definitions against database schema metadata to detect\n inconsistencies such as missing columns, type mismatches, or constraint differences.\n\n <p>This runs as a post-processing step after all entities have been extracted,\n comparing the DataModel entries against known schema information.</p>",
+      "description" : "schema consistency checker.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -2162,7 +2281,7 @@
         } ]
       }, {
         "name" : "checkConsistency",
-        "description" : "Check schema consistency across all data models.\n Called during processor finalization.",
+        "description" : "Checks schema consistency across all data models during processor finalization",
         "visibility" : "public",
         "params" : [ {
           "name" : "model",
@@ -2171,14 +2290,14 @@
         } ],
         "returns" : {
           "type" : "List<String>",
-          "description" : "list of consistency issues found"
+          "description" : "List of consistency issues found"
         }
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Compares JPA entity definitions against database schema metadata to detect inconsistencies such as missing columns, type mismatches, or constraint differences. Runs as a post-processing step."
         }
       } ],
       "implements" : [ "DocSpecExtractor" ]
@@ -2186,7 +2305,7 @@
       "kind" : "class",
       "name" : "SecurityExtractor",
       "qualified" : "io.docspec.processor.extractor.SecurityExtractor",
-      "description" : "Detects Spring Security annotations ({@code @PreAuthorize}, {@code @Secured},\n {@code @RolesAllowed}) on types and methods and populates the security section\n of the DocSpec model.",
+      "description" : "security extractor.",
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "constructors" : [ {
@@ -2235,7 +2354,7 @@
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
         "attributes" : {
-          "value" : "classpath-safe extraction"
+          "value" : "Detects Spring Security annotations @PreAuthorize, @Secured, @RolesAllowed on types and methods and populates the security section of the DocSpec model."
         }
       }, {
         "name" : "DocEvent",
@@ -2512,7 +2631,7 @@
         }
       }, {
         "name" : "applyMethodAnnotations",
-        "description" : "Applies method-level Spring annotations (@Transactional, @Cacheable) to the method model.",
+        "description" : "Applies method-level Spring annotations such as @Transactional and @Cacheable to the method model",
         "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
@@ -2550,7 +2669,7 @@
         }
       }, {
         "name" : "getClassBasePath",
-        "description" : "Gets the class-level @RequestMapping base path for a controller.",
+        "description" : "Gets the class-level @RequestMapping base path for a controller",
         "visibility" : "public",
         "params" : [ {
           "name" : "typeElement",
@@ -2562,7 +2681,7 @@
         }
       }, {
         "name" : "extractEndpointMapping",
-        "description" : "Extracts an EndpointMappingModel from Spring @GetMapping/@PostMapping/etc.\n Returns null if the method has no Spring mapping annotation.",
+        "description" : "Extracts an EndpointMappingModel from Spring @GetMapping/@PostMapping and other HTTP mapping annotations",
         "since" : "3.0.0",
         "visibility" : "public",
         "params" : [ {
@@ -2575,7 +2694,8 @@
           "required" : true
         } ],
         "returns" : {
-          "type" : "EndpointMappingModel"
+          "type" : "EndpointMappingModel",
+          "description" : "The endpoint mapping, or null if the method has no Spring mapping annotation"
         }
       }, {
         "name" : "getRequestMappingPath",
@@ -2591,7 +2711,7 @@
         }
       }, {
         "name" : "getScheduleInfo",
-        "description" : "Extracts cron or fixedRate info from @Scheduled annotation.",
+        "description" : "Extracts cron or fixedRate info from @Scheduled annotation",
         "visibility" : "public",
         "params" : [ {
           "name" : "method",
@@ -11595,7 +11715,7 @@
           "object" : "statements",
           "intent" : "query"
         },
-        "branches" : 2,
+        "branches" : 3,
         "dataFlow" : {
           "reads" : [ "return:collection" ]
         },
@@ -11603,7 +11723,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.4
+        "intentDensityScore" : 3.6
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.AbstractTreesChannel.getMethodSource",
@@ -11613,7 +11733,7 @@
           "object" : "method source",
           "intent" : "query"
         },
-        "branches" : 1,
+        "branches" : 2,
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
@@ -11621,7 +11741,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.0
+        "intentDensityScore" : 3.4
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.AbstractTreesChannel.countOccurrences",
@@ -12245,7 +12365,7 @@
           "object" : "guard clause",
           "intent" : "predicate"
         },
-        "branches" : 1,
+        "branches" : 2,
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
@@ -12256,7 +12376,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.5
+        "intentDensityScore" : 3.9
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.GuardClauseChannel.findAnnotation",
@@ -12326,11 +12446,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "DSTI" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.5
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.IntentChannel.requiresTrees",
@@ -12342,11 +12463,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
+        "constants" : [ "API", "AST" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.3
+        "intentDensityScore" : 2.7
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.IntentChannel.extract",
@@ -12355,6 +12477,7 @@
           "verb" : "extract",
           "intent" : "transformation"
         },
+        "branches" : 1,
         "dataFlow" : {
           "reads" : [ "return:void" ]
         },
@@ -12362,7 +12485,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.0
+        "intentDensityScore" : 2.4
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.LoggingChannel.channelName",
@@ -12441,7 +12564,7 @@
           "object" : "logger field",
           "intent" : "predicate"
         },
-        "branches" : 2,
+        "branches" : 3,
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
@@ -12453,7 +12576,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.62
+        "intentDensityScore" : 3.82
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.channel.LoopPatternChannel.channelName",
@@ -12812,12 +12935,13 @@
         "dataFlow" : {
           "reads" : [ "return:collection" ]
         },
+        "constants" : [ "DSTI" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "dependencies" : [ "io.docspec.processor.dsti.NamingAnalyzer", "io.docspec.processor.dsti.IntentDensityCalculator" ],
-        "intentDensityScore" : 3.0
+        "intentDensityScore" : 3.2
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.IntentGraphExtractor.extract",
@@ -12834,7 +12958,7 @@
         "loopProperties" : {
           "hasEnhancedFor" : true
         },
-        "constants" : [ "DSTI", "ISD", "METHOD" ],
+        "constants" : [ "ISD", "DSTI", "METHOD" ],
         "nullChecks" : 2,
         "assertions" : 0,
         "logStatements" : 0,
@@ -12850,15 +12974,17 @@
           "object" : "trees",
           "intent" : "query"
         },
+        "branches" : 1,
         "dataFlow" : {
           "reads" : [ "return:object" ]
         },
+        "constants" : [ "AST" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "dependencies" : [ "io.docspec.processor.dsti.NamingAnalyzer", "io.docspec.processor.dsti.IntentDensityCalculator" ],
-        "intentDensityScore" : 3.0
+        "intentDensityScore" : 3.6
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.IntentGraphExtractor.resolveMethodTree",
@@ -12868,16 +12994,17 @@
           "object" : "method tree",
           "intent" : "query"
         },
-        "branches" : 1,
+        "branches" : 2,
         "dataFlow" : {
           "reads" : [ "return:object" ]
         },
+        "constants" : [ "API" ],
         "nullChecks" : 1,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "dependencies" : [ "io.docspec.processor.dsti.NamingAnalyzer", "io.docspec.processor.dsti.IntentDensityCalculator" ],
-        "intentDensityScore" : 3.7
+        "intentDensityScore" : 4.3
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.IntentGraphExtractor.extractDependencies",
@@ -12894,13 +13021,13 @@
         "loopProperties" : {
           "hasEnhancedFor" : true
         },
-        "constants" : [ "FIELD", "STATIC" ],
+        "constants" : [ "JDK", "FIELD", "STATIC" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "dependencies" : [ "io.docspec.processor.dsti.NamingAnalyzer", "io.docspec.processor.dsti.IntentDensityCalculator" ],
-        "intentDensityScore" : 4.72
+        "intentDensityScore" : 4.82
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.NamingAnalyzer.addVerb",
@@ -12950,7 +13077,7 @@
           "object" : "first camel case word",
           "intent" : "transformation"
         },
-        "branches" : 2,
+        "branches" : 3,
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
@@ -12961,7 +13088,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.42
+        "intentDensityScore" : 3.62
       }
     }, {
       "qualified" : "io.docspec.processor.dsti.NamingAnalyzer.inferFallbackIntent",
@@ -13006,7 +13133,7 @@
           "verb" : "parse",
           "intent" : "transformation"
         },
-        "branches" : 15,
+        "branches" : 16,
         "dataFlow" : {
           "reads" : [ "return:object" ],
           "writes" : [ "new:InvariantRule" ]
@@ -13329,12 +13456,12 @@
           "hasEnhancedFor" : true,
           "streamOps" : [ "filter", "findFirst" ]
         },
-        "constants" : [ "FIELD", "STATIC" ],
+        "constants" : [ "CHECK", "FIELD", "STATIC" ],
         "nullChecks" : 1,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 4.5
+        "intentDensityScore" : 4.6
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector.extractColumnDetails",
@@ -13348,12 +13475,12 @@
         "dataFlow" : {
           "reads" : [ "return:void" ]
         },
-        "constants" : [ "JPA_COLUMN", "JAVAX_COLUMN" ],
+        "constants" : [ "CHECK", "JPA_COLUMN", "JAVAX_COLUMN" ],
         "nullChecks" : 13,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 4.1
+        "intentDensityScore" : 4.2
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector.extractCheckConstraint",
@@ -13367,12 +13494,12 @@
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
-        "constants" : [ "CHECK_CONSTRAINT_PATTERN" ],
+        "constants" : [ "CHECK", "CHECK_CONSTRAINT_PATTERN" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 2.9
+        "intentDensityScore" : 3.1
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector.extractPrimaryKey",
@@ -13382,7 +13509,7 @@
           "object" : "primary key",
           "intent" : "transformation"
         },
-        "branches" : 2,
+        "branches" : 3,
         "dataFlow" : {
           "reads" : [ "return:void" ]
         },
@@ -13391,7 +13518,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.5
+        "intentDensityScore" : 3.7
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector.extractGeneratedValue",
@@ -13424,12 +13551,12 @@
         "dataFlow" : {
           "reads" : [ "return:void" ]
         },
-        "constants" : [ "JPA_ENUMERATED", "JAVAX_ENUMERATED" ],
+        "constants" : [ "ORDINAL", "STRING", "JPA_ENUMERATED", "JAVAX_ENUMERATED" ],
         "nullChecks" : 4,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 4.1
+        "intentDensityScore" : 4.2
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector.extractJoinColumn",
@@ -13443,7 +13570,7 @@
         "dataFlow" : {
           "reads" : [ "return:void" ]
         },
-        "constants" : [ "JPA_JOIN_COLUMN", "JAVAX_JOIN_COLUMN", "NO_CONSTRAINT" ],
+        "constants" : [ "DELETE", "JPA_JOIN_COLUMN", "JAVAX_JOIN_COLUMN", "NO_CONSTRAINT" ],
         "nullChecks" : 11,
         "assertions" : 0,
         "logStatements" : 0,
@@ -13531,11 +13658,12 @@
         "loopProperties" : {
           "hasEnhancedFor" : true
         },
+        "constants" : [ "JPA", "JDBC", "URL" ],
         "nullChecks" : 1,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.52
+        "intentDensityScore" : 4.02
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DatabaseSchemaIntrospector.hasAnnotation",
@@ -13877,7 +14005,7 @@
           "object" : "data store if absent",
           "intent" : "mutation"
         },
-        "branches" : 1,
+        "branches" : 2,
         "dataFlow" : {
           "reads" : [ "return:object" ],
           "writes" : [ "new:DataStoreModel" ]
@@ -13889,7 +14017,7 @@
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
-        "intentDensityScore" : 3.22
+        "intentDensityScore" : 3.62
       }
     }, {
       "qualified" : "io.docspec.processor.extractor.DataStoreExtractor.hasAnnotation",
@@ -15624,7 +15752,7 @@
           "object" : "endpoint mapping",
           "intent" : "transformation"
         },
-        "branches" : 3,
+        "branches" : 4,
         "dataFlow" : {
           "reads" : [ "return:map" ],
           "writes" : [ "new:EndpointMappingModel" ]
@@ -15632,7 +15760,7 @@
         "loopProperties" : {
           "hasEnhancedFor" : true
         },
-        "constants" : [ "MAPPING_TO_METHOD", "GET", "POST", "PUT", "DELETE", "PATCH" ],
+        "constants" : [ "HTTP", "MAPPING_TO_METHOD", "GET", "POST", "PUT", "DELETE", "PATCH" ],
         "nullChecks" : 2,
         "assertions" : 0,
         "logStatements" : 0,
@@ -30140,11 +30268,11 @@
     "documentedClasses" : 103,
     "autoDiscoveredClasses" : 103,
     "annotatedClasses" : 0,
-    "inferredDescriptions" : 968,
+    "inferredDescriptions" : 997,
     "totalMethods" : 914,
     "documentedMethods" : 914,
     "totalParams" : 596,
-    "documentedParams" : 17,
+    "documentedParams" : 20,
     "coveragePercent" : 100.0
   }
 }

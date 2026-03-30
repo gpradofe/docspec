@@ -14,15 +14,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Reads the generated {@code docspec.json} and enforces a minimum
- * documentation coverage threshold.
- *
- * <p>The coverage percentage is expected to be present at
- * {@code discovery.coveragePercent} inside the specification file (as
- * written by the DocSpec annotation processor). This mojo compares that
- * value against the configured minimum and optionally fails the build.</p>
- */
 @Mojo(
         name = "coverage",
         defaultPhase = LifecyclePhase.VERIFY
@@ -34,7 +25,7 @@ import java.io.IOException;
         @ContextInput(name = "minimumPercent", source = "config", description = "Minimum coverage percentage threshold (default 0)")
     }
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Reads the generated docspec.json and enforces a minimum documentation coverage threshold. Compares discovery.coveragePercent against the configured minimum and optionally fails the build.")
 @DocError(code = "DOCSPEC_COV_001",
     description = "Documentation coverage is below the configured minimum threshold.",
     causes = {"Too many classes lack descriptions", "Methods are missing JavaDoc or @DocMethod annotations", "Description inference is disabled"},
@@ -42,18 +33,14 @@ import java.io.IOException;
 )
 public class CoverageMojo extends AbstractMojo {
 
-    /**
-     * Path to the DocSpec specification file.
-     */
+    // Path to the DocSpec specification file
     @Parameter(
             property = "docspec.spec.file",
             defaultValue = "${project.build.directory}/docspec.json"
     )
     private File specFile;
 
-    /**
-     * Coverage enforcement configuration.
-     */
+    // Coverage enforcement configuration
     @Parameter(property = "docspec.coverage")
     private CoverageConfig coverage;
 
@@ -134,9 +121,7 @@ public class CoverageMojo extends AbstractMojo {
         }
     }
 
-    /**
-     * Prints a detailed coverage report extracted from the discovery node.
-     */
+    @DocMethod("Prints a detailed coverage report extracted from the discovery node")
     private void printCoverageReport(JsonNode discoveryNode, int coveragePercent) {
         getLog().info("");
         getLog().info("========================================");

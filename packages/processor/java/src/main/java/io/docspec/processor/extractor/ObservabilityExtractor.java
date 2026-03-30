@@ -11,12 +11,7 @@ import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.*;
 
-/**
- * Detects Micrometer annotations ({@code @Timed}, {@code @Counted}) and
- * Spring Actuator health indicators, populating the observability section
- * of the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Detects Micrometer annotations @Timed and @Counted plus Spring Actuator health indicators, populating the observability section of the DocSpec model.")
 public class ObservabilityExtractor implements DocSpecExtractor {
 
     private static final String TIMED = "io.micrometer.core.annotation.Timed";

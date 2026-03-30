@@ -5,14 +5,7 @@ import io.docspec.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Parses method names to extract semantic verbs and objects using camelCase conventions.
- * Used by the DSTI (Documentation Semantic & Temporal Intelligence) system to infer
- * developer intent from naming patterns.
- *
- * <p>Supports 150+ verb prefixes mapped to 10 intent categories. The verb dictionary
- * is ordered longest-first to avoid prefix collisions (e.g., "initialize" before "init").</p>
- */
+@DocBoundary("Parses method names to extract semantic verbs and objects using camelCase conventions. Used by DSTI to infer developer intent from naming patterns. Supports 150+ verb prefixes mapped to 10 intent categories, ordered longest-first to avoid prefix collisions.")
 @DocInvariant(on = "NamingAnalyzer", rules = {
     "VERB_INTENT_MAP SIZE > 0",
     "analyze() never returns null"
@@ -21,11 +14,9 @@ public class NamingAnalyzer {
 
     public record NameSemantics(String verb, String object, String intent) {}
 
-    /**
-     * Verb-to-intent mapping. Ordered longest-first within each group to avoid
-     * prefix collisions (e.g., "unregister" before "un", "initialize" before "init").
-     * Linked map preserves insertion order for deterministic iteration.
-     */
+    // Verb-to-intent mapping. Ordered longest-first within each group to avoid
+    // prefix collisions (e.g., "unregister" before "un", "initialize" before "init").
+    // Linked map preserves insertion order for deterministic iteration.
     private static final Map<String, String> VERB_INTENT_MAP = new LinkedHashMap<>();
 
     static {
@@ -211,25 +202,11 @@ public class NamingAnalyzer {
         VERB_INTENT_MAP.put(verb, intent);
     }
 
-    /**
-     * Analyzes a method name and extracts its semantic components.
-     *
-     * <p>The algorithm tries verb-prefix matching first. For each known verb, it checks
-     * whether the method name starts with the verb followed by an uppercase letter
-     * (standard camelCase, e.g., "getUser") OR matches the verb exactly (single-word
-     * methods like "execute", "run", "close").</p>
-     *
-     * <p>For two-letter verbs ("is", "of", "on", "do", "to"), we also accept the
-     * pattern verb + lowercase (e.g., "isEmpty" would not match normally because 'E'
-     * is uppercase, but "is" + "Empty" does match). Actually "isEmpty" does match
-     * because 'E' IS uppercase. The special case is for verbs where the remaining
-     * portion starts lowercase, like "isempty" — but that's non-standard Java.</p>
-     *
-     * @param methodName the simple name of the method
-     * @return a {@link NameSemantics} record with verb, object, and intent category
-     */
     @DocDeterministic
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Analyzes a method name and extracts its semantic components using verb-prefix matching with camelCase boundary detection",
+               since = "3.0.0",
+               params = {@Param(name = "methodName", value = "The simple name of the method")},
+               returns = "A NameSemantics record with verb, object, and intent category")
     @DocExample(title = "Extract verb and intent from method name",
         language = "java",
         code = "NamingAnalyzer analyzer = new NamingAnalyzer();\nNameSemantics result = analyzer.analyze(\"findUserByEmail\");\n// result.verb() == \"find\", result.object() == \"user by email\", result.intent() == \"query\"")
@@ -282,13 +259,9 @@ public class NamingAnalyzer {
         return new NameSemantics(methodName, "", fallbackIntent);
     }
 
-    /**
-     * Extracts the first lowercase word from a camelCase identifier.
-     * E.g., "extractMethodIntent" returns "extract".
-     *
-     * @param name the camelCase identifier
-     * @return the first word, or null if the name starts with uppercase
-     */
+    @DocMethod(value = "Extracts the first lowercase word from a camelCase identifier",
+               params = {@Param(name = "name", value = "The camelCase identifier")},
+               returns = "The first word, or null if the name starts with uppercase")
     private String extractFirstCamelCaseWord(String name) {
         if (name.isEmpty() || Character.isUpperCase(name.charAt(0))) {
             return null;
@@ -301,10 +274,7 @@ public class NamingAnalyzer {
         return null; // single word, no camelCase split possible
     }
 
-    /**
-     * Infers a fallback intent for method names that don't match any known verb.
-     * Uses common Java conventions to avoid returning "unknown".
-     */
+    @DocMethod(value = "Infers a fallback intent for method names that do not match any known verb, using common Java conventions to avoid returning unknown")
     private String inferFallbackIntent(String methodName) {
         // Standard Object methods
         if ("toString".equals(methodName) || "toArray".equals(methodName)) return "transformation";

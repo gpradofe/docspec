@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -11,13 +11,7 @@ import javax.lang.model.element.VariableElement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Channel 12: Logging.
- * Detects logger method calls ({@code log}, {@code debug}, {@code info},
- * {@code warn}, {@code error}, {@code trace}) from method source.
- * Falls back to detecting Logger-typed fields in the enclosing class when Trees is unavailable.
- * Sets the logStatements count on signals.
- */
+@DocBoundary("Channel 12: Logging. Detects logger method calls such as log, debug, info, warn, error, trace from method source. Falls back to detecting Logger-typed fields when Trees is unavailable.")
 public class LoggingChannel extends AbstractTreesChannel {
 
     private static final Pattern LOG_PATTERN = Pattern.compile(
@@ -66,9 +60,7 @@ public class LoggingChannel extends AbstractTreesChannel {
         }
     }
 
-    /**
-     * Checks if the enclosing type has a field whose type looks like a logger.
-     */
+    @DocMethod("Checks if the enclosing type has a field whose type looks like a logger")
     private boolean hasLoggerField(TypeElement owner) {
         for (Element element : owner.getEnclosedElements()) {
             if (element.getKind() == ElementKind.FIELD && element instanceof VariableElement field) {

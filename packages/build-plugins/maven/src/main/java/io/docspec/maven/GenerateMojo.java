@@ -28,15 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Runs the DocSpec annotation processor against the project source code to
- * generate a {@code docspec.json} specification file.
- *
- * <p>This mojo programmatically invokes {@code javac} with {@code -proc:only}
- * so that only annotation processing is performed (no class file output).
- * All discovery and framework settings are forwarded to the processor as
- * {@code -A} compiler options.</p>
- */
 @Mojo(
         name = "generate",
         defaultPhase = LifecyclePhase.COMPILE,
@@ -54,7 +45,7 @@ import java.util.stream.Collectors;
         @ContextUses(artifact = "io.docspec:docspec-processor-java", what = "DocSpecProcessor", why = "Annotation processor that generates the docspec.json specification")
     }
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Runs the DocSpec annotation processor against the project source code to generate docspec.json. Programmatically invokes javac with -proc:only so only annotation processing is performed. All discovery and framework settings are forwarded as -A compiler options.")
 @DocError(code = "DOCSPEC_GEN_001",
     description = "Source compilation or annotation processing failed during docspec:generate.",
     causes = {"No JDK available (running with a JRE)", "Source files contain compilation errors", "Annotation processor threw an exception", "File manager could not be initialized"},
@@ -195,10 +186,7 @@ public class GenerateMojo extends AbstractMojo {
     // Helper methods
     // ---------------------------------------------------------------
 
-    /**
-     * Recursively collects all {@code .java} files from the project's
-     * compile source roots.
-     */
+    @DocMethod("Recursively collects all .java files from the project compile source roots")
     private List<File> collectSourceFiles() throws MojoExecutionException {
         List<File> sourceFiles = new ArrayList<>();
         for (String root : project.getCompileSourceRoots()) {
@@ -225,10 +213,7 @@ public class GenerateMojo extends AbstractMojo {
         return sourceFiles;
     }
 
-    /**
-     * Builds the compile classpath string from the project's resolved
-     * artifacts and the project output directory.
-     */
+    @DocMethod("Builds the compile classpath string from the project resolved artifacts and output directory")
     private String buildClasspath() {
         List<String> classpathEntries = new ArrayList<>();
 
@@ -250,11 +235,7 @@ public class GenerateMojo extends AbstractMojo {
         return String.join(File.pathSeparator, classpathEntries);
     }
 
-    /**
-     * Builds the list of {@code -A} processor options from the plugin
-     * configuration, matching the keys expected by
-     * {@link io.docspec.processor.config.ProcessorConfig#from(java.util.Map)}.
-     */
+    @DocMethod("Builds the list of -A processor options from the plugin configuration matching keys expected by ProcessorConfig")
     private List<String> buildProcessorOptions() {
         List<String> opts = new ArrayList<>();
 

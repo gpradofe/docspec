@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -10,11 +10,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Channel 5: Return Type.
- * Analyzes the method's return type for signals (Optional, List, void, etc.).
- * Populates data flow reads/writes based on return type characteristics.
- */
+@DocBoundary("Channel 5: Return Type. Analyzes the method return type for signals such as Optional, List, void, reactive types. Populates data flow reads based on return type characteristics.")
 public class ReturnTypeChannel implements IntentChannel {
 
     @Override

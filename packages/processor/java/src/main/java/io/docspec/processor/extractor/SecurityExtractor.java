@@ -9,12 +9,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import java.util.*;
 
-/**
- * Detects Spring Security annotations ({@code @PreAuthorize}, {@code @Secured},
- * {@code @RolesAllowed}) on types and methods and populates the security section
- * of the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Detects Spring Security annotations @PreAuthorize, @Secured, @RolesAllowed on types and methods and populates the security section of the DocSpec model.")
 @DocEvent(name = "docspec.extraction.security",
     description = "Emitted when Spring Security annotations have been extracted from a type.",
     trigger = "Type has @PreAuthorize, @Secured, or @RolesAllowed annotations",

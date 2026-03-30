@@ -28,33 +28,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Verifies that example source files annotated with {@code @DocSpecExample}
- * compile successfully against the project's test classpath.
- *
- * <p>This is a Phase 1 implementation that performs compilation verification
- * only. Future phases may also extract example source code and attach it to
- * the corresponding documented elements in the specification.</p>
- *
- * <p>Example files are expected to live under the configured examples
- * directory (default: {@code src/test/examples}) and contain methods
- * annotated with {@link io.docspec.annotation.DocSpecExample}.</p>
- */
 @Mojo(
         name = "verify-examples",
         defaultPhase = LifecyclePhase.TEST,
         requiresDependencyResolution = ResolutionScope.TEST
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Verifies that example source files annotated with @DocSpecExample compile successfully against the project test classpath. Example files are expected under src/test/examples.")
 public class VerifyExamplesMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    /**
-     * Directory containing example source files annotated with
-     * {@code @DocSpecExample}.
-     */
+    // Directory containing example source files annotated with @DocSpecExample
     @Parameter(
             property = "docspec.examples.dir",
             defaultValue = "${project.basedir}/src/test/examples"
@@ -193,9 +178,7 @@ public class VerifyExamplesMojo extends AbstractMojo {
     // Helper methods
     // ---------------------------------------------------------------
 
-    /**
-     * Recursively collects all {@code .java} files from the examples directory.
-     */
+    @DocMethod("Recursively collects all .java files from the examples directory")
     private List<File> collectExampleFiles() throws MojoExecutionException {
         List<File> files = new ArrayList<>();
         Path root = examplesDir.toPath();
@@ -216,10 +199,7 @@ public class VerifyExamplesMojo extends AbstractMojo {
         return files;
     }
 
-    /**
-     * Builds the test classpath including compiled classes, test classes,
-     * and all resolved artifacts (including test-scoped ones).
-     */
+    @DocMethod("Builds the test classpath including compiled classes, test classes, and all resolved artifacts")
     private String buildTestClasspath() {
         List<String> entries = new ArrayList<>();
 
@@ -247,10 +227,7 @@ public class VerifyExamplesMojo extends AbstractMojo {
         return String.join(File.pathSeparator, entries);
     }
 
-    /**
-     * Builds the source path from project source roots, test source roots,
-     * and the examples directory itself.
-     */
+    @DocMethod("Builds the source path from project source roots, test source roots, and the examples directory")
     private String buildSourcePath() {
         List<String> roots = new ArrayList<>();
 

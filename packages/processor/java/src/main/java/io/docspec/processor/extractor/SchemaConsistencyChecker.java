@@ -9,14 +9,7 @@ import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Compares JPA entity definitions against database schema metadata to detect
- * inconsistencies such as missing columns, type mismatches, or constraint differences.
- *
- * <p>This runs as a post-processing step after all entities have been extracted,
- * comparing the DataModel entries against known schema information.</p>
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Compares JPA entity definitions against database schema metadata to detect inconsistencies such as missing columns, type mismatches, or constraint differences. Runs as a post-processing step.")
 public class SchemaConsistencyChecker implements DocSpecExtractor {
 
     private static final String JPA_ENTITY = "jakarta.persistence.Entity";
@@ -40,12 +33,8 @@ public class SchemaConsistencyChecker implements DocSpecExtractor {
         // Per-type extraction is a no-op; consistency checking is a global operation.
     }
 
-    /**
-     * Check schema consistency across all data models.
-     * Called during processor finalization.
-     *
-     * @return list of consistency issues found
-     */
+    @DocMethod(value = "Checks schema consistency across all data models during processor finalization",
+               returns = "List of consistency issues found")
     public List<String> checkConsistency(DocSpecModel model) {
         List<String> issues = new ArrayList<>();
 

@@ -1,52 +1,35 @@
 package io.docspec.maven.config;
 
+import io.docspec.annotation.DocBoundary;
+
 import java.util.List;
 
-/**
- * Configuration POJO for discovery settings in the DocSpec Maven plugin.
- * Maps to the {@code <discovery>} element in the plugin configuration.
- */
+@DocBoundary("Configuration POJO for discovery settings in the DocSpec Maven plugin. Maps to the discovery element in the plugin configuration.")
 public class DiscoveryConfig {
 
-    /**
-     * Discovery mode: "auto", "annotated-only", or "hybrid".
-     */
+    // Discovery mode: "auto", "annotated-only", or "hybrid"
     private String mode = "hybrid";
 
-    /**
-     * Package patterns to include in discovery.
-     */
+    // Package patterns to include in discovery
     private List<String> includes;
 
-    /**
-     * Package patterns to exclude from discovery.
-     */
+    // Package patterns to exclude from discovery
     private List<String> excludes;
 
-    /**
-     * Framework detection toggles.
-     */
+    // Framework detection toggles
     private FrameworksConfig frameworks = new FrameworksConfig();
 
-    /**
-     * Whether to infer descriptions from naming conventions when no
-     * JavaDoc or annotation description is present.
-     */
+    // Whether to infer descriptions from naming conventions when no
+    // JavaDoc or annotation description is present
     private boolean inferDescriptions = true;
 
-    /**
-     * How to group discovered types into modules: "package" or "stereotype".
-     */
+    // How to group discovered types into modules: "package" or "stereotype"
     private String groupBy = "package";
 
-    /**
-     * Whether to include @Deprecated members in the spec output.
-     */
+    // Whether to include @Deprecated members in the spec output
     private boolean includeDeprecated = true;
 
-    /**
-     * Whether to include protected members in the spec output.
-     */
+    // Whether to include protected members in the spec output
     private boolean includeProtected = false;
 
     // v3 sub-configs
@@ -137,9 +120,7 @@ public class DiscoveryConfig {
     public boolean isObservabilityEnabled() { return observabilityEnabled; }
     public void setObservabilityEnabled(boolean observabilityEnabled) { this.observabilityEnabled = observabilityEnabled; }
 
-    /**
-     * Database introspection configuration.
-     */
+    @DocBoundary("Database introspection configuration")
     public static class DatabaseConfig {
         private boolean introspect = false;
         private String connectionUrl = "";
@@ -151,9 +132,7 @@ public class DiscoveryConfig {
         public void setConnectionUrl(String connectionUrl) { this.connectionUrl = connectionUrl; }
     }
 
-    /**
-     * DSTI (Deep Semantic Test Intelligence) configuration.
-     */
+    @DocBoundary("DSTI configuration for Deep Structural and Textual Intent analysis")
     public static class DstiConfig {
         private boolean enabled = false;
 
@@ -161,11 +140,7 @@ public class DiscoveryConfig {
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
     }
 
-    /**
-     * Framework detection toggles. Each boolean controls whether the
-     * processor should attempt to detect and extract metadata from the
-     * corresponding framework.
-     */
+    @DocBoundary("Framework detection toggles controlling whether the processor detects and extracts metadata from each framework")
     public static class FrameworksConfig {
 
         private boolean spring = true;

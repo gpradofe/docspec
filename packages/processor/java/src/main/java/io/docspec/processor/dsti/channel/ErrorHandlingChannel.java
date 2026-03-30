@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -9,12 +9,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Channel 8: Error Handling.
- * Counts try/catch blocks and extracts caught exception types from Trees AST.
- * Falls back to declared thrown types when Trees is unavailable.
- * Sets the errorHandling model on signals.
- */
+@DocBoundary("Channel 8: Error Handling. Counts try/catch blocks and extracts caught exception types from Trees AST. Falls back to declared thrown types when Trees is unavailable.")
 public class ErrorHandlingChannel extends AbstractTreesChannel {
 
     @Override

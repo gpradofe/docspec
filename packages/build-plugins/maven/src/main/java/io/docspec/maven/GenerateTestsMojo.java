@@ -18,18 +18,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Reads {@code intent-graph.json} and generates JUnit 5 test class stubs
- * into {@code target/generated-test-sources/docspec-tests/}.
- *
- * <p>Each method in the intent graph gets a test class with skeleton tests
- * derived from its intent signals (guard clauses, error handling, branches).</p>
- */
 @Mojo(
         name = "generate-tests",
         defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Reads intent-graph.json and generates JUnit 5 test class stubs into target/generated-test-sources/docspec-tests/. Each method gets a test class with skeleton tests derived from its intent signals.")
 @DocContext(id = "generate-tests-context",
     name = "Generate Tests Mojo Context",
     inputs = {
@@ -218,10 +211,7 @@ public class GenerateTestsMojo extends AbstractMojo {
         return sb.toString();
     }
 
-    /**
-     * Appends verb-specific assertion suggestions to the test body based on the
-     * method's naming semantics.
-     */
+    @DocMethod("Appends verb-specific assertion suggestions to the test body based on the method naming semantics")
     private void appendVerbBasedAssertions(StringBuilder sb, String verb, String methodName, String className) {
         if (verb == null) {
             sb.append("        // TODO: Implement happy path test\n");

@@ -13,49 +13,31 @@ import org.apache.maven.project.MavenProjectHelper;
 
 import java.io.File;
 
-/**
- * Attaches the generated {@code docspec.json} as a classified artifact to
- * the Maven project so it is deployed alongside the main JAR.
- *
- * <p>After this mojo runs, the specification file can be resolved from a
- * Maven repository using the configured classifier (default
- * {@code "docspec"}) and type {@code "json"}. For example:</p>
- *
- * <pre>
- *   com.example:my-service:1.0.0:json:docspec
- * </pre>
- */
 @Mojo(
         name = "publish",
         defaultPhase = LifecyclePhase.DEPLOY
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Attaches the generated docspec.json as a classified artifact to the Maven project so it is deployed alongside the main JAR. Resolvable from Maven repositories using the docspec classifier and json type.")
 public class PublishMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    /**
-     * Path to the DocSpec specification file to attach.
-     */
+    // Path to the DocSpec specification file to attach
     @Parameter(
             property = "docspec.spec.file",
             defaultValue = "${project.build.directory}/docspec.json"
     )
     private File specFile;
 
-    /**
-     * Maven classifier used when attaching the specification artifact.
-     */
+    // Maven classifier used when attaching the specification artifact
     @Parameter(
             property = "docspec.classifier",
             defaultValue = "docspec"
     )
     private String classifier;
 
-    /**
-     * Maven project helper used to attach the artifact.
-     */
+    // Maven project helper used to attach the artifact
     @Component
     private MavenProjectHelper projectHelper;
 

@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -12,12 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Channel 6: Assignment Patterns (Data Flow).
- * Traces data flow in the method body: builder patterns, constructor calls,
- * and assignment chains. Populates the data flow writes list.
- * Falls back to parameter type analysis when Trees is unavailable.
- */
+@DocBoundary("Channel 6: Assignment Patterns. Traces data flow in the method body including builder patterns, constructor calls, and assignment chains. Populates data flow writes. Falls back to parameter type analysis when Trees is unavailable.")
 public class AssignmentPatternChannel extends AbstractTreesChannel {
 
     private static final Pattern BUILDER_PATTERN = Pattern.compile(

@@ -9,11 +9,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.InputStream;
 
-/**
- * Scans for OpenAPI specification files (openapi.json, openapi.yaml) on the classpath
- * and merges endpoint descriptions into the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Scans for OpenAPI specification files on the classpath and merges endpoint descriptions into the DocSpec model.")
 public class OpenApiMerger implements DocSpecExtractor {
 
     private static final String[] OPENAPI_FILES = {
@@ -55,10 +51,7 @@ public class OpenApiMerger implements DocSpecExtractor {
         // Per-type extract is a no-op; actual merging happens in finalizeExtraction().
     }
 
-    /**
-     * Merge OpenAPI endpoint descriptions into the model.
-     * Called during processor finalization, not per-type.
-     */
+    @DocMethod("Merges OpenAPI endpoint descriptions into the model during processor finalization")
     public void finalizeExtraction(ProcessingEnvironment processingEnv, DocSpecModel model) {
         for (String fileName : OPENAPI_FILES) {
             try {

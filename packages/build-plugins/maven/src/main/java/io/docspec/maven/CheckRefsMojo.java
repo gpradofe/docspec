@@ -14,13 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Verifies that all cross-references in the DocSpec specification resolve to valid targets.
- * Checks that sourceQualified, targetArtifact, targetFlow, targetStep, and targetMember
- * references point to entities that exist in the spec.
- */
 @Mojo(name = "check-refs", defaultPhase = LifecyclePhase.VERIFY)
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Verifies that all cross-references in the DocSpec specification resolve to valid targets. Checks sourceQualified, targetArtifact, targetFlow, targetStep, and targetMember references.")
 public class CheckRefsMojo extends AbstractMojo {
 
     @Parameter(property = "docspec.spec.file", defaultValue = "${project.build.directory}/docspec.json")

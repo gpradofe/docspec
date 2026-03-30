@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -11,12 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Channel 2: Guard Clauses.
- * Counts if-throw patterns in the method body as guard clauses.
- * Also counts {@code @DocIntentional} and {@code @DocPreserves} annotation-based guards.
- * Requires Trees for body analysis, but has an annotation-based fallback.
- */
+@DocBoundary("Channel 2: Guard Clauses. Counts if-throw patterns in the method body as guard clauses. Also counts @DocIntentional and @DocPreserves annotation-based guards. Has an annotation-based fallback when Trees is unavailable.")
 public class GuardClauseChannel extends AbstractTreesChannel {
 
     private static final String DOC_INTENTIONAL = "io.docspec.annotation.DocIntentional";
@@ -86,9 +81,7 @@ public class GuardClauseChannel extends AbstractTreesChannel {
         }
     }
 
-    /**
-     * Heuristic: checks if a statement looks like a guard clause (if-then-throw).
-     */
+    @DocMethod("Checks if a statement looks like a guard clause using if-then-throw heuristic")
     private boolean isGuardClause(Object ifStmt) {
         try {
             java.lang.reflect.Method getThenStatement = ifStmt.getClass().getMethod("getThenStatement");

@@ -13,20 +13,7 @@ import javax.lang.model.element.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Orchestrates DSTI (Documentation Semantic & Temporal Intelligence) analysis.
- * For each method in a type, iterates through 13 independent {@link IntentChannel}
- * implementations and merges their signals, then calculates the ISD score.
- *
- * <p>Each channel is self-contained and can be enabled/disabled individually
- * for ablation studies. The orchestrator resolves the Trees API once and passes
- * it to all channels that require AST access.</p>
- *
- * <p>This extractor is only active when the DSTI config flag is enabled. It optionally
- * uses {@code com.sun.source.util.Trees} for deeper AST analysis, but gracefully
- * degrades if that API is unavailable.</p>
- */
-@DocBoundary("DSTI intent graph extraction boundary")
+@DocBoundary("Orchestrates DSTI analysis across 13 independent IntentChannel implementations, merging their signals and calculating ISD scores. Each channel is self-contained for ablation studies. Resolves Trees API once and passes it to all channels requiring AST access. Only active when DSTI config flag is enabled; gracefully degrades if com.sun.source.util.Trees is unavailable.")
 @DocFlow(id = "dsti-analysis",
     name = "DSTI Intent Analysis Pipeline",
     description = "Analyzes every public method across 13 independent intent channels, cross-verifies signals, and computes an ISD score. Each channel is self-contained for ablation.",
@@ -109,18 +96,20 @@ public class IntentGraphExtractor implements DocSpecExtractor {
         return "intent-graph";
     }
 
-    /**
-     * Returns the immutable list of all 13 DSTI channels used by this extractor.
-     * Useful for ablation studies and channel-level diagnostics.
-     *
-     * @return the list of intent channels
-     */
+    @DocMethod(value = "Returns the immutable list of all 13 DSTI channels used by this extractor, useful for ablation studies and channel-level diagnostics",
+               returns = "The list of intent channels")
     public List<IntentChannel> getChannels() {
         return channels;
     }
 
     @Override
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Runs all 13 intent channels on every public method in the type, cross-verifies signals, and computes ISD scores",
+               since = "3.0.0",
+               params = {
+                   @Param(name = "typeElement", value = "The class or interface to analyze"),
+                   @Param(name = "processingEnv", value = "The annotation processing environment"),
+                   @Param(name = "model", value = "Output model to populate with intent signals")
+               })
     @DocBoundary("DSTI extraction entry point")
     @DocExample(title = "Extract intent signals for a type",
         language = "java",
@@ -186,12 +175,9 @@ public class IntentGraphExtractor implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Attempts to obtain the {@code com.sun.source.util.Trees} instance via reflection.
-     *
-     * @param processingEnv the annotation processing environment
-     * @return the Trees instance, or null if unavailable
-     */
+    @DocMethod(value = "Obtains the com.sun.source.util.Trees instance via reflection for AST-level analysis",
+               params = {@Param(name = "processingEnv", value = "The annotation processing environment")},
+               returns = "The Trees instance, or null if unavailable")
     private Object resolveTrees(ProcessingEnvironment processingEnv) {
         try {
             Class<?> treesClass = Class.forName("com.sun.source.util.Trees");
@@ -203,13 +189,12 @@ public class IntentGraphExtractor implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Resolves the method tree for a given method element using the Trees API.
-     *
-     * @param trees  the Trees instance (may be null)
-     * @param method the method element
-     * @return the method tree, or null if Trees is unavailable or resolution fails
-     */
+    @DocMethod(value = "Resolves the method tree for a given method element using the Trees API",
+               params = {
+                   @Param(name = "trees", value = "The Trees instance, may be null"),
+                   @Param(name = "method", value = "The method element to resolve")
+               },
+               returns = "The method tree, or null if Trees is unavailable or resolution fails")
     private Object resolveMethodTree(Object trees, ExecutableElement method) {
         if (trees == null) return null;
         try {
@@ -221,13 +206,9 @@ public class IntentGraphExtractor implements DocSpecExtractor {
         }
     }
 
-    /**
-     * Collects injected (non-static, non-JDK) field types from the enclosing type
-     * as dependency signals.
-     *
-     * @param typeElement the enclosing type to scan
-     * @return the list of dependency type names
-     */
+    @DocMethod(value = "Collects injected non-static, non-JDK field types from the enclosing type as dependency signals",
+               params = {@Param(name = "typeElement", value = "The enclosing type to scan")},
+               returns = "The list of dependency type names")
     private List<String> extractDependencies(TypeElement typeElement) {
         List<String> dependencies = new ArrayList<>();
         for (Element ownerEnclosed : typeElement.getEnclosedElements()) {

@@ -15,12 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Checks that all methods meet a minimum Intent Signal Density (ISD) threshold.
- * Fails the build if any public method's ISD score falls below the configured threshold.
- */
 @Mojo(name = "dsti-check", defaultPhase = LifecyclePhase.VERIFY)
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Checks that all methods meet a minimum Intent Signal Density (ISD) threshold. Fails the build if any public method ISD score falls below the configured threshold.")
 @DocError(code = "DOCSPEC_DSTI_001",
     description = "One or more methods have an ISD score below the configured minimum threshold.",
     causes = {"Method body lacks structural signals (branches, loops, error handling)", "Method name does not follow naming conventions recognized by NamingAnalyzer", "DSTI was not enabled during generation"},

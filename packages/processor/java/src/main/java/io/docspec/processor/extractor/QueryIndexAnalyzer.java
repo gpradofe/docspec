@@ -6,14 +6,7 @@ import io.docspec.processor.model.DocSpecModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 
-/**
- * Analyzes Spring Data repository method names and {@code @Query} annotations
- * to infer which database indexes are needed for efficient query execution.
- *
- * <p>For example, {@code findByEmailAndStatus(String, Status)} implies an index
- * on {@code (email, status)} columns.</p>
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Analyzes Spring Data repository method names and @Query annotations to infer which database indexes are needed for efficient query execution.")
 public class QueryIndexAnalyzer implements DocSpecExtractor {
 
     private static final String SPRING_REPOSITORY = "org.springframework.data.repository.Repository";

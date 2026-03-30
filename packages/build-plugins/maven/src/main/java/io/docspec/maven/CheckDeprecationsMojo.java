@@ -15,12 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Reports deprecated members and methods that lack a replacement or migration path.
- * Helps ensure that deprecations are documented with proper guidance.
- */
 @Mojo(name = "check-deprecations", defaultPhase = LifecyclePhase.VERIFY)
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Reports deprecated members and methods that lack a replacement or migration path. Ensures deprecations are documented with proper guidance.")
 public class CheckDeprecationsMojo extends AbstractMojo {
 
     @Parameter(property = "docspec.spec.file", defaultValue = "${project.build.directory}/docspec.json")

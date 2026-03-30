@@ -18,19 +18,11 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Compares JPA entity fields from {@code docspec.json} against Flyway SQL
- * migration files to detect schema mismatches.
- *
- * <p>This goal reads the generated {@code docspec.json} to extract data model
- * fields and compares them against {@code CREATE TABLE} and {@code ALTER TABLE}
- * statements found in Flyway migration files.</p>
- */
 @Mojo(
         name = "schema-sync",
         defaultPhase = LifecyclePhase.VALIDATE
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Compares JPA entity fields from docspec.json against Flyway SQL migration files to detect schema mismatches. Reads CREATE TABLE and ALTER TABLE statements from migration files.")
 @DocError(code = "DOCSPEC_SYNC_001",
     description = "JPA entity fields do not match the Flyway migration schema.",
     causes = {"A JPA entity field was added without a corresponding migration", "A migration column was added without a matching entity field", "Column type mismatch between entity and migration"},

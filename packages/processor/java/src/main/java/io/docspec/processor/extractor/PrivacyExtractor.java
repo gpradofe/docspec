@@ -8,11 +8,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import java.util.*;
 
-/**
- * Detects {@code @DocPII} and {@code @DocSensitive} annotations on fields
- * and populates the privacy section of the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Detects @DocPII and @DocSensitive annotations on fields and populates the privacy section of the DocSpec model.")
 public class PrivacyExtractor implements DocSpecExtractor {
 
     private static final String DOC_PII = "io.docspec.annotation.DocPII";

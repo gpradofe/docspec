@@ -1,16 +1,13 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 
-/**
- * Base class for channels that need AST (Trees) access.
- * Provides helper methods for reflective Tree API access.
- */
+@DocBoundary("Base class for channels that need AST Trees access. Provides helper methods for reflective Tree API access.")
 public abstract class AbstractTreesChannel implements IntentChannel {
 
     @Override
@@ -18,13 +15,10 @@ public abstract class AbstractTreesChannel implements IntentChannel {
         return true;
     }
 
-    /**
-     * Extracts the list of statements from a method tree's body block.
-     *
-     * @param methodTree the method tree obtained from Trees.getTree()
-     * @return the list of statement tree objects, or an empty list if unavailable
-     */
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Extracts the list of statements from a method tree body block",
+               since = "3.0.0",
+               params = {@Param(name = "methodTree", value = "The method tree obtained from Trees.getTree()")},
+               returns = "The list of statement tree objects, or an empty list if unavailable")
     protected List<?> getStatements(Object methodTree) {
         try {
             java.lang.reflect.Method getBody = methodTree.getClass().getMethod("getBody");
@@ -38,23 +32,19 @@ public abstract class AbstractTreesChannel implements IntentChannel {
         }
     }
 
-    /**
-     * Returns the full source text of a method tree.
-     *
-     * @param methodTree the method tree obtained from Trees.getTree()
-     * @return the source text, or empty string if null
-     */
+    @DocMethod(value = "Returns the full source text of a method tree",
+               params = {@Param(name = "methodTree", value = "The method tree obtained from Trees.getTree()")},
+               returns = "The source text, or empty string if null")
     protected String getMethodSource(Object methodTree) {
         return methodTree != null ? methodTree.toString() : "";
     }
 
-    /**
-     * Counts non-overlapping occurrences of a substring within a string.
-     *
-     * @param text      the text to search
-     * @param substring the substring to count
-     * @return the number of occurrences
-     */
+    @DocMethod(value = "Counts non-overlapping occurrences of a substring within a string",
+               params = {
+                   @Param(name = "text", value = "The text to search"),
+                   @Param(name = "substring", value = "The substring to count")
+               },
+               returns = "The number of occurrences")
     protected int countOccurrences(String text, String substring) {
         int count = 0;
         int idx = 0;

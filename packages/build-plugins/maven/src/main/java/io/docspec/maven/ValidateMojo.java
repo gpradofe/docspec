@@ -19,18 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-/**
- * Validates the generated {@code docspec.json} against the DocSpec JSON Schema.
- *
- * <p>The schema ({@code docspec.schema.json}) is expected to be bundled inside
- * the {@code docspec-processor-java} JAR on the plugin classpath. Validation
- * uses the <a href="https://github.com/networknt/json-schema-validator">networknt
- * json-schema-validator</a> library.</p>
- *
- * <p>If the specification file does not exist, the mojo fails with a clear
- * error message. If schema validation errors are found, each violation is
- * logged individually and the build is failed.</p>
- */
 @Mojo(
         name = "validate",
         defaultPhase = LifecyclePhase.VERIFY
@@ -42,7 +30,7 @@ import java.util.Set;
         @ContextInput(name = "schema", source = "classpath", description = "DocSpec JSON Schema bundled in the processor JAR")
     }
 )
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Validates the generated docspec.json against the DocSpec JSON Schema bundled in the processor JAR. Uses networknt json-schema-validator. Fails the build if schema validation errors are found.")
 @DocError(code = "DOCSPEC_VAL_001",
     description = "Schema validation of docspec.json failed against the DocSpec JSON Schema.",
     causes = {"Generated specification does not conform to the v3 schema", "Specification file is missing or malformed JSON", "Schema file not found on plugin classpath"},
@@ -50,9 +38,7 @@ import java.util.Set;
 )
 public class ValidateMojo extends AbstractMojo {
 
-    /**
-     * Path to the DocSpec specification file to validate.
-     */
+    // Path to the DocSpec specification file to validate
     @Parameter(
             property = "docspec.spec.file",
             defaultValue = "${project.build.directory}/docspec.json"
@@ -125,9 +111,7 @@ public class ValidateMojo extends AbstractMojo {
         }
     }
 
-    /**
-     * Loads the DocSpec JSON Schema from the classpath.
-     */
+    @DocMethod("Loads the DocSpec JSON Schema from the classpath")
     private JsonSchema loadSchema() throws MojoExecutionException {
         InputStream schemaStream = getClass().getClassLoader().getResourceAsStream(SCHEMA_CLASSPATH);
         if (schemaStream == null) {

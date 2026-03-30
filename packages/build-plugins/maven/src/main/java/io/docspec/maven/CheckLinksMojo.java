@@ -16,12 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Verifies that all internal links (e.g. references to other members, flows, endpoints)
- * within description fields resolve to valid targets in the specification.
- */
 @Mojo(name = "check-links", defaultPhase = LifecyclePhase.VERIFY)
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Verifies that all internal links such as references to other members, flows, and endpoints within description fields resolve to valid targets in the specification.")
 public class CheckLinksMojo extends AbstractMojo {
 
     @Parameter(property = "docspec.spec.file", defaultValue = "${project.build.directory}/docspec.json")

@@ -11,11 +11,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.*;
 
-/**
- * Detects JPA entities (tables), Spring Data repositories, and Redis/Kafka types,
- * and populates the data stores section of the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Detects JPA entities, Spring Data repositories, and Redis/Kafka types and populates the data stores section of the DocSpec model.")
 public class DataStoreExtractor implements DocSpecExtractor {
 
     private static final String JPA_ENTITY_JAVAX = "javax.persistence.Entity";
@@ -178,10 +174,7 @@ public class DataStoreExtractor implements DocSpecExtractor {
         return false;
     }
 
-    /**
-     * Adds a DataStoreModel with the given id if one does not already exist.
-     * Returns the existing or newly created store.
-     */
+    @DocMethod("Adds a DataStoreModel with the given id if one does not already exist, returns the existing or newly created store")
     private DataStoreModel addDataStoreIfAbsent(DocSpecModel model, String id, String name, String type) {
         for (DataStoreModel existing : model.getDataStores()) {
             if (id.equals(existing.getId())) {

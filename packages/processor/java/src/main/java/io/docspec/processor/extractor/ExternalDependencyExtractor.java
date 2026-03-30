@@ -9,12 +9,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import java.util.*;
 
-/**
- * Detects external service calls via {@code RestTemplate}, {@code WebClient},
- * {@code RestClient}, and {@code @FeignClient} annotations, and populates the
- * external dependencies section of the DocSpec model.
- */
-@DocBoundary("classpath-safe extraction")
+@DocBoundary("Detects external service calls via RestTemplate, WebClient, RestClient, and @FeignClient annotations and populates the external dependencies section of the DocSpec model.")
 public class ExternalDependencyExtractor implements DocSpecExtractor {
 
     private static final String REST_TEMPLATE = "org.springframework.web.client.RestTemplate";

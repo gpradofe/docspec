@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -8,12 +8,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import java.util.List;
 
-/**
- * Channel 3: Branch Structure.
- * Counts if-statements (branches) from the Trees AST when available.
- * Falls back to heuristic branch estimation from method signature when Trees is unavailable:
- * methods returning boolean or Optional, or having multiple parameters, likely contain branches.
- */
+@DocBoundary("Channel 3: Branch Structure. Counts if-statements and switch-statements from the Trees AST. Falls back to heuristic branch estimation from method signature when Trees is unavailable.")
 public class BranchStructureChannel extends AbstractTreesChannel {
 
     @Override
@@ -98,10 +93,7 @@ public class BranchStructureChannel extends AbstractTreesChannel {
         }
     }
 
-    /**
-     * Counts occurrences of a keyword followed by space/paren in source code.
-     * Simple heuristic that avoids matching inside string literals in most cases.
-     */
+    @DocMethod("Counts occurrences of a keyword followed by space/paren in source code, avoiding matches inside identifiers")
     private int countKeywordOccurrences(String source, String keyword) {
         int count = 0;
         int idx = 0;
@@ -115,9 +107,7 @@ public class BranchStructureChannel extends AbstractTreesChannel {
         return count;
     }
 
-    /**
-     * Counts ternary operator occurrences (? :) in method source.
-     */
+    @DocMethod("Counts ternary operator occurrences in method source")
     private int countTernaryOps(String source) {
         int count = 0;
         int idx = 0;

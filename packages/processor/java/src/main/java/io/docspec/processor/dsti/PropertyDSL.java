@@ -6,22 +6,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Parses {@code @DocInvariant} rule expressions into structured {@link InvariantRule} objects.
- *
- * <p>Supported syntax:</p>
- * <ul>
- *   <li>{@code "field NOT_NULL"} — field must not be null</li>
- *   <li>{@code "field SIZE > 0"} — collection/array size check</li>
- *   <li>{@code "field IN [val1, val2, val3]"} — value must be one of the listed values</li>
- *   <li>{@code "field BETWEEN 1 AND 100"} — numeric range check</li>
- *   <li>{@code "field MATCHES pattern"} — regex pattern check</li>
- *   <li>{@code "field > 0"}, {@code "field >= 0"}, {@code "field < 100"} — comparison</li>
- *   <li>{@code "field == value"}, {@code "field != value"} — equality/inequality</li>
- *   <li>{@code "field NOT_EMPTY"} — string/collection must not be empty</li>
- *   <li>{@code "field NOT_BLANK"} — string must not be blank</li>
- * </ul>
- */
+@DocBoundary("Parses @DocInvariant rule expressions into structured InvariantRule objects. Supports NOT_NULL, NOT_EMPTY, NOT_BLANK, SIZE comparisons, IN lists, BETWEEN ranges, MATCHES regex, and standard comparison operators.")
 @DocInvariant(on = "PropertyDSL", rules = {
     "parse() returns null for unparseable expressions",
     "parseAll() never returns null"
@@ -30,58 +15,56 @@ public class PropertyDSL {
 
     // -- Patterns (compiled once) -------------------------------------------
 
-    /** {@code field NOT_NULL} */
+    // Pattern: field NOT_NULL
     private static final Pattern NOT_NULL_PATTERN =
             Pattern.compile("^(\\S+)\\s+NOT_NULL$", Pattern.CASE_INSENSITIVE);
 
-    /** {@code field NOT_EMPTY} */
+    // Pattern: field NOT_EMPTY
     private static final Pattern NOT_EMPTY_PATTERN =
             Pattern.compile("^(\\S+)\\s+NOT_EMPTY$", Pattern.CASE_INSENSITIVE);
 
-    /** {@code field NOT_BLANK} */
+    // Pattern: field NOT_BLANK
     private static final Pattern NOT_BLANK_PATTERN =
             Pattern.compile("^(\\S+)\\s+NOT_BLANK$", Pattern.CASE_INSENSITIVE);
 
-    /** {@code field SIZE > N}, {@code field SIZE >= N}, etc. */
+    // Pattern: field SIZE > N, field SIZE >= N, etc.
     private static final Pattern SIZE_PATTERN =
             Pattern.compile("^(\\S+)\\s+SIZE\\s*(>=?|<=?|==|!=)\\s*(-?\\d+(?:\\.\\d+)?)$",
                     Pattern.CASE_INSENSITIVE);
 
-    /** {@code field IN [a, b, c]} */
+    // Pattern: field IN [a, b, c]
     private static final Pattern IN_PATTERN =
             Pattern.compile("^(\\S+)\\s+IN\\s*\\[(.+)]$", Pattern.CASE_INSENSITIVE);
 
-    /** {@code field BETWEEN x AND y} */
+    // Pattern: field BETWEEN x AND y
     private static final Pattern BETWEEN_PATTERN =
             Pattern.compile("^(\\S+)\\s+BETWEEN\\s+(-?\\d+(?:\\.\\d+)?)\\s+AND\\s+(-?\\d+(?:\\.\\d+)?)$",
                     Pattern.CASE_INSENSITIVE);
 
-    /** {@code field MATCHES pattern} */
+    // Pattern: field MATCHES pattern
     private static final Pattern MATCHES_PATTERN =
             Pattern.compile("^(\\S+)\\s+MATCHES\\s+(.+)$", Pattern.CASE_INSENSITIVE);
 
-    /** {@code field > N}, {@code field >= N}, {@code field < N}, {@code field <= N}, {@code field == N}, {@code field != N} */
+    // Pattern: field > N, field >= N, field < N, field <= N, field == N, field != N
     private static final Pattern COMPARISON_PATTERN =
             Pattern.compile("^(\\S+)\\s*(>=|<=|!=|==|>|<)\\s*(.+)$");
 
     // -- Public API ---------------------------------------------------------
 
-    /**
-     * A parsed invariant rule.
-     */
+    @DocBoundary("A parsed invariant rule with field, operator, value(s), and range bounds")
     public static class InvariantRule {
         private String field;
-        /** One of: NOT_NULL, NOT_EMPTY, NOT_BLANK, SIZE, IN, BETWEEN, MATCHES, GT, GTE, LT, LTE, EQ, NEQ */
+        // One of: NOT_NULL, NOT_EMPTY, NOT_BLANK, SIZE, IN, BETWEEN, MATCHES, GT, GTE, LT, LTE, EQ, NEQ
         private String operator;
-        /** For simple comparisons and MATCHES */
+        // For simple comparisons and MATCHES
         private String value;
-        /** For IN operator */
+        // For IN operator
         private List<String> values;
-        /** For BETWEEN (lower bound, inclusive) */
+        // For BETWEEN (lower bound, inclusive)
         private String minValue;
-        /** For BETWEEN (upper bound, inclusive) */
+        // For BETWEEN (upper bound, inclusive)
         private String maxValue;
-        /** For SIZE: the comparison operator applied to the size (e.g. ">", ">=") */
+        // For SIZE: the comparison operator applied to the size (e.g. ">", ">=")
         private String sizeOperator;
 
         // -- Getters --
@@ -157,14 +140,11 @@ public class PropertyDSL {
         }
     }
 
-    /**
-     * Parse a rule expression string into an {@link InvariantRule}.
-     *
-     * @param expression the rule expression (e.g. {@code "balance >= 0"})
-     * @return the parsed rule, or {@code null} if the expression cannot be parsed
-     */
     @DocDeterministic
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Parses a rule expression string into an InvariantRule",
+               since = "3.0.0",
+               params = {@Param(name = "expression", value = "The rule expression, e.g. 'balance >= 0'")},
+               returns = "The parsed rule, or null if the expression cannot be parsed")
     public static InvariantRule parse(String expression) {
         if (expression == null || expression.isBlank()) {
             return null;
@@ -318,14 +298,11 @@ public class PropertyDSL {
         return null;
     }
 
-    /**
-     * Parse multiple rule expressions (e.g. from {@code @DocInvariant(rules = {...})}).
-     *
-     * @param expressions array of rule expression strings
-     * @return list of successfully parsed rules (never null, may be empty)
-     */
     @DocDeterministic
-    @DocMethod(since = "3.0.0")
+    @DocMethod(value = "Parses multiple rule expressions from @DocInvariant rules arrays",
+               since = "3.0.0",
+               params = {@Param(name = "expressions", value = "Array of rule expression strings")},
+               returns = "List of successfully parsed rules, never null, may be empty")
     public static List<InvariantRule> parseAll(String[] expressions) {
         if (expressions == null) {
             return Collections.emptyList();

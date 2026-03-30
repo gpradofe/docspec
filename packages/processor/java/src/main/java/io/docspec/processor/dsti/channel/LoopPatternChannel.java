@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -11,13 +11,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Channel 7: Loop Patterns.
- * Detects {@code .stream()}, {@code Stream.}, enhanced-for loops from Trees AST.
- * Falls back to parameter/return type analysis when Trees is unavailable:
- * collection parameters or return types suggest iteration.
- * Sets loopProperties (hasStreams, hasEnhancedFor, streamOps).
- */
+@DocBoundary("Channel 7: Loop Patterns. Detects .stream(), Stream., enhanced-for loops from Trees AST. Falls back to parameter/return type analysis when Trees is unavailable. Sets loopProperties with hasStreams, hasEnhancedFor, and streamOps.")
 public class LoopPatternChannel extends AbstractTreesChannel {
 
     private static final Pattern STREAM_OP_PATTERN = Pattern.compile(

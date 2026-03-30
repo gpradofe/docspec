@@ -18,19 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Aggregates {@code docspec.json} files from all reactor modules into a single
- * {@code docspec-aggregate.json} specification file.
- *
- * <p>This mojo iterates over every module collected by the reactor, looks for
- * a {@code docspec.json} in each module's build output directory, and merges
- * the top-level arrays ({@code modules}, {@code flows}, {@code errors},
- * {@code events}, {@code dataModels}, {@code contexts}, {@code crossRefs},
- * {@code dataStores}, {@code configuration}, {@code externalDependencies},
- * {@code privacy}) into one unified document.</p>
- */
 @Mojo(name = "aggregate", defaultPhase = LifecyclePhase.PACKAGE, aggregator = true)
-@DocBoundary("Maven plugin entry point")
+@DocBoundary("Aggregates docspec.json files from all reactor modules into a single docspec-aggregate.json. Merges top-level arrays: modules, flows, errors, events, dataModels, contexts, crossRefs, dataStores, configuration, externalDependencies, and privacy.")
 public class AggregateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
@@ -175,10 +164,7 @@ public class AggregateMojo extends AbstractMojo {
     // Helper methods
     // ---------------------------------------------------------------
 
-    /**
-     * Merges all elements from the named JSON array field in the given
-     * document into the target {@link ArrayNode}.
-     */
+    @DocMethod("Merges all elements from the named JSON array field in the given document into the target ArrayNode")
     private void mergeArray(JsonNode doc, String fieldName, ArrayNode target) {
         JsonNode array = doc.get(fieldName);
         if (array != null && array.isArray()) {

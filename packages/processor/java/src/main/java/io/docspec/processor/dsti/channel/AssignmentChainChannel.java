@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -14,12 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Channel 9: Constants (Assignment Chain).
- * Scans for UPPER_CASE constant references in the method body.
- * Falls back to detecting static final fields in the enclosing class when Trees is unavailable.
- * Sets the constants list on signals.
- */
+@DocBoundary("Channel 9: Constants. Scans for UPPER_CASE constant references in the method body. Falls back to detecting static final fields in the enclosing class when Trees is unavailable.")
 public class AssignmentChainChannel extends AbstractTreesChannel {
 
     private static final Pattern CONSTANT_PATTERN = Pattern.compile(

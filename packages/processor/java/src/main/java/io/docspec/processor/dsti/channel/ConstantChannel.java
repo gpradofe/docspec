@@ -1,6 +1,6 @@
 package io.docspec.processor.dsti.channel;
 
-import io.docspec.annotation.DocMethod;
+import io.docspec.annotation.*;
 import io.docspec.processor.model.IntentSignalsModel;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -10,13 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Channel 11: Assertions (Constant).
- * Detects assert statements from the AST and assertion-style method calls
- * ({@code check*}, {@code require*}, {@code verify*}) from the method source.
- * Falls back to detecting assertion-related annotations when Trees is unavailable.
- * Sets the assertions count on signals.
- */
+@DocBoundary("Channel 11: Assertions. Detects assert statements from the AST and assertion-style method calls such as check*, require*, verify* from source. Falls back to detecting assertion-related annotations when Trees is unavailable.")
 public class ConstantChannel extends AbstractTreesChannel {
 
     private static final Pattern ASSERTION_CALL_PATTERN = Pattern.compile(

@@ -611,9 +611,8 @@ public class DocSpecProcessor extends AbstractProcessor {
         note("DocSpec v3 generation complete. Coverage: " + coverageCalculator.getCoveragePercent() + "%");
     }
 
-    /**
-     * v3 Step 21: Assign kindCategory to Members based on naming, annotations, and framework info.
-     */
+    @DocMethod(value = "Assigns kindCategory to Members based on naming, annotations, and framework info",
+               since = "3.0.0")
     private void assignKindCategories() {
         for (ModuleModel module : model.getModules()) {
             for (MemberModel member : module.getMembers()) {
@@ -653,13 +652,8 @@ public class DocSpecProcessor extends AbstractProcessor {
         }
     }
 
-    /**
-     * Post-processing pass that builds reverse cross-references:
-     * - Error.thrownBy / Error.endpoints
-     * - DataModel.usedBy (repositories, endpoints)
-     * - Member.referencedBy (flows, contexts, endpoints)
-     * - Module.framework
-     */
+    @DocMethod(value = "Builds reverse cross-references: Error.thrownBy/endpoints, DataModel.usedBy, Member.referencedBy, Module.framework",
+               since = "3.0.0")
     private void buildCrossReferences() {
         // Build lookup maps for efficient cross-referencing
         Map<String, MemberModel> memberByQualified = new LinkedHashMap<>();
@@ -825,10 +819,8 @@ public class DocSpecProcessor extends AbstractProcessor {
         return false;
     }
 
-    /**
-     * Step 10: OpenAPI merge. Scans for openapi.json in the output directory
-     * and merges endpoint descriptions into discovered controller methods.
-     */
+    @DocMethod(value = "Scans for openapi.json in the output directory and merges endpoint descriptions into discovered controller methods",
+               since = "3.0.0")
     private void mergeOpenApiIfPresent() {
         // Determine OpenAPI file path
         java.io.File openApiFile = null;
