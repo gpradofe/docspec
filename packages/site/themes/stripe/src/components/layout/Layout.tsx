@@ -58,10 +58,29 @@ export function Layout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedArtifact, setSelectedArtifact] = useState<string | undefined>(activeArtifact);
 
+  // After hydration, restore persisted artifact selection from sessionStorage
+  useEffect(() => {
+    const stored = sessionStorage.getItem("docspec-artifact");
+    if (stored && stored !== "all") {
+      setSelectedArtifact(stored);
+    }
+  }, []);
+
+  // Persist artifact selection changes to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("docspec-artifact", selectedArtifact || "all");
+  }, [selectedArtifact]);
+
   // Filter navigation by lens tab AND by selected artifact
+  // In tests lens: show Tests section AND Libraries section (same class tree with test badges)
+  // In docs lens: show all docs sections, hide Tests
   const filteredNavigation: NavigationTree = {
     sections: navigation.sections
-      .filter((s) => !s.tab || s.tab === lens)
+      .filter((s) => {
+        if (!s.tab) return true;
+        if (lens === "tests") return s.tab === "tests" || s.title === "Libraries";
+        return s.tab === "docs";
+      })
       .map((s) => {
         if (!selectedArtifact) return s;
         // Filter section items to only show the selected artifact's items

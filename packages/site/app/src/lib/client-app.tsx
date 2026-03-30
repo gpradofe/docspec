@@ -52,17 +52,29 @@ function buildSearchEntries(pages: GeneratedPage[]): SearchEntry[] {
 /* ------------------------------------------------------------------ */
 /*  Breadcrumb helper                                                   */
 /* ------------------------------------------------------------------ */
+/** Match the slugify logic from @docspec/core slug.ts */
+function slugifyLabel(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function computeBreadcrumb(page: GeneratedPage): Array<{ label: string; href?: string }> {
   const parts: Array<{ label: string; href?: string }> = [];
 
   if (page.artifactLabel) {
-    const artifactSlug = "/libraries/" + page.artifactLabel.toLowerCase().replace(/\s+/g, "-");
-    parts.push({ label: page.artifactLabel, href: artifactSlug });
+    const artifactHref = "/libraries/" + slugifyLabel(page.artifactLabel);
+    parts.push({ label: page.artifactLabel, href: artifactHref });
   }
 
   if (page.type === "member") {
     const data = page.data as any;
-    if (data.member?.moduleId) {
+    if (data.member?.moduleId && page.artifactLabel) {
+      const moduleHref = `/libraries/${slugifyLabel(page.artifactLabel)}/modules/${slugifyLabel(data.member.moduleId)}`;
+      parts.push({ label: data.member.moduleId, href: moduleHref });
+    } else if (data.member?.moduleId) {
       parts.push({ label: data.member.moduleId });
     }
     parts.push({ label: page.title });

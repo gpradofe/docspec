@@ -15,6 +15,8 @@
 
 import type { ResolvedArtifact } from "../resolver/types.js";
 import type { GeneratedPage } from "../types/page.js";
+import { PageType } from "../types/page.js";
+import { slugify, artifactLandingSlug } from "./slug.js";
 import { generateModulePage } from "./pages/module.js";
 import { generateMemberPage } from "./pages/member.js";
 import { generateEndpointPage } from "./pages/endpoint.js";
@@ -44,6 +46,26 @@ export function generateArtifactPages(artifact: ResolvedArtifact): GeneratedPage
 
   const flows = spec.flows ?? [];
   const contexts = spec.contexts ?? [];
+
+  // ── Artifact overview page (serves as the Libraries parent item target) ──
+  pages.push({
+    type: PageType.MODULE,
+    slug: artifactLandingSlug(label),
+    title: label,
+    description: spec.project?.description || `Documentation for ${label}`,
+    artifactLabel: label,
+    artifactColor: color,
+    data: {
+      type: PageType.MODULE,
+      module: {
+        id: slugify(label),
+        name: label,
+        description: spec.project?.description || `${label} — ${spec.modules.length} modules, ${spec.modules.reduce((s, m) => s + (m.members?.length || 0), 0)} classes`,
+        members: [],
+      },
+      artifact: { label, color },
+    },
+  });
 
   // ── Module pages ─────────────────────────────────────────────────
   for (const mod of spec.modules) {

@@ -112,9 +112,10 @@ export function generateGraphPage(input: GraphPageInput): GeneratedPage {
 
   return {
     type: PageType.GRAPH,
-    slug: graphPageSlug(),
-    title: "Dependency Graph",
-    description: "Visual dependency graph across modules and artifacts",
+    slug: graphPageSlug(artifactLabel),
+    title: `${artifactLabel} — Dependency Graph`,
+    description: `Visual dependency graph across modules and artifacts for ${artifactLabel}`,
+    artifactLabel,
     data,
   };
 }

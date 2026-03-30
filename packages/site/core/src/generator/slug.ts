@@ -90,7 +90,10 @@ export function eventCatalogSlug(): string {
   return "/architecture/events";
 }
 
-export function graphPageSlug(): string {
+export function graphPageSlug(artifactLabel?: string): string {
+  if (artifactLabel) {
+    return `/architecture/${artifactSlug(artifactLabel)}/graph`;
+  }
   return "/architecture/graph";
 }
 

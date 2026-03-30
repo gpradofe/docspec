@@ -25,7 +25,6 @@ import {
   errorCatalogSlug,
   eventCatalogSlug,
   operationsPageSlug,
-  graphPageSlug,
   observabilityPageSlug,
   gapReportPageSlug,
   testDashboardSlug,
@@ -354,14 +353,24 @@ function autoArchitecture(
     });
   }
 
-  // Graph
-  const hasGraph = pages.some((p) => p.type === PageType.GRAPH);
-  if (hasGraph) {
+  // Graph (one per artifact)
+  const graphPages = pages.filter((p) => p.type === PageType.GRAPH);
+  if (graphPages.length === 1) {
     items.push({
       label: "Dependency Graph",
-      slug: graphPageSlug(),
+      slug: graphPages[0].slug,
       type: PageType.GRAPH,
       icon: "graph",
+    });
+  } else if (graphPages.length > 1) {
+    items.push({
+      label: "Dependency Graphs",
+      icon: "graph",
+      children: graphPages.map((p) => ({
+        label: p.artifactLabel ? `${p.artifactLabel}` : p.title,
+        slug: p.slug,
+        type: PageType.GRAPH,
+      })),
     });
   }
 

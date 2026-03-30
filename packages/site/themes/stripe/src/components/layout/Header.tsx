@@ -209,7 +209,7 @@ export function Header({
             opacity: 0.4,
           }}
         >
-          \u2318K
+          Ctrl+K
         </span>
       </div>
 
