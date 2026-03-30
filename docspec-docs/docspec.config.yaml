@@ -8,6 +8,10 @@ site:
   baseUrl: http://localhost:4000
 
 artifacts:
+  - path: ./docspec-annotations.json
+    label: "Annotations"
+    color: "#a855f7"
+
   - path: ./docspec-processor.json
     label: "DocSpec Processor"
     color: "#6366f1"

@@ -154,10 +154,11 @@ public class AutoDiscoveryScanner {
     }
 
     private boolean shouldInclude(TypeElement element) {
-        // Must be a class, interface, enum, or record
+        // Must be a class, interface, enum, record, or annotation type
         ElementKind kind = element.getKind();
         if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE
-                && kind != ElementKind.ENUM && kind != ElementKind.RECORD) {
+                && kind != ElementKind.ENUM && kind != ElementKind.RECORD
+                && kind != ElementKind.ANNOTATION_TYPE) {
             return false;
         }
         // Must be public
