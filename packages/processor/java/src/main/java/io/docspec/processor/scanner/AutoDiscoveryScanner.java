@@ -7,6 +7,7 @@ import io.docspec.processor.model.MethodModel;
 import io.docspec.processor.model.MethodParamModel;
 import io.docspec.processor.model.FieldModel;
 import io.docspec.processor.model.ConstructorModel;
+import io.docspec.processor.model.AnnotationModel;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
@@ -76,6 +77,29 @@ public class AutoDiscoveryScanner {
                 .toList();
         if (!interfaces.isEmpty()) {
             member.setImplementsList(interfaces);
+        }
+
+        // Annotations on the type itself
+        for (AnnotationMirror am : typeElement.getAnnotationMirrors()) {
+            TypeElement annotationType = (TypeElement) am.getAnnotationType().asElement();
+            String annoQualified = annotationType.getQualifiedName().toString();
+            // Skip internal Java annotations and our own processor markers
+            if (annoQualified.startsWith("java.lang.") || annoQualified.startsWith("javax.annotation.")) continue;
+            AnnotationModel annoModel = new AnnotationModel(
+                    annotationType.getSimpleName().toString(),
+                    annoQualified
+            );
+            // Extract string attribute values
+            for (var entry : am.getElementValues().entrySet()) {
+                String key = entry.getKey().getSimpleName().toString();
+                Object val = entry.getValue().getValue();
+                if (val instanceof String s) {
+                    annoModel.getAttributes().put(key, s);
+                } else {
+                    annoModel.getAttributes().put(key, val.toString());
+                }
+            }
+            member.getAnnotations().add(annoModel);
         }
 
         // Methods

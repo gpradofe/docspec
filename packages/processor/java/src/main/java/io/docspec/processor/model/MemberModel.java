@@ -34,6 +34,7 @@ public class MemberModel {
     private List<FieldModel> fields = new ArrayList<>();
     private List<String> values = new ArrayList<>();
     private List<ExampleModel> examples = new ArrayList<>();
+    private List<AnnotationModel> annotations = new ArrayList<>();
     private ReferencedByModel referencedBy;
     private String kindCategory;
     private List<MemberDependencyModel> dependencies = new ArrayList<>();
@@ -193,6 +194,14 @@ public class MemberModel {
 
     public void setExamples(List<ExampleModel> examples) {
         this.examples = examples;
+    }
+
+    public List<AnnotationModel> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<AnnotationModel> annotations) {
+        this.annotations = annotations;
     }
 
     public ReferencedByModel getReferencedBy() {

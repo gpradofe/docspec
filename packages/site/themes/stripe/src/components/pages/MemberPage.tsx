@@ -468,16 +468,29 @@ function DocsLens({
                     textAlign: "left",
                   }}
                 >
-                  <Tag color={T.accent}>method</Tag>
                   <code
                     style={{
-                      fontSize: 14,
-                      fontWeight: 650,
-                      color: T.accent,
+                      fontSize: 13,
+                      fontWeight: 600,
                       fontFamily: T.mono,
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: 4,
+                      flexWrap: "wrap",
                     }}
                   >
-                    {m.name}
+                    <span style={{ color: T.textDim, fontSize: 12 }}>{m.returns?.type || "void"}</span>
+                    <span style={{ color: T.accent, fontWeight: 650 }}>{m.name}</span>
+                    <span style={{ color: T.textDim, fontSize: 11.5 }}>
+                      ({(m.params || []).map((p: any, pi: number) => (
+                        <span key={pi}>
+                          {pi > 0 && ", "}
+                          <span style={{ color: T.textFaint }}>{p.type?.split(".").pop() || p.type}</span>
+                          {" "}
+                          <span style={{ color: T.textMuted }}>{p.name}</span>
+                        </span>
+                      ))})
+                    </span>
                   </code>
                   {m.since && (
                     <span
