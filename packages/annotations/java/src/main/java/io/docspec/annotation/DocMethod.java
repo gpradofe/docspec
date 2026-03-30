@@ -7,14 +7,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Adds lifecycle metadata to a documented method.
+ * Documents a method — replaces JavaDoc {@code /** * /} comments.
  *
- * <p>Use this annotation to record when a method was introduced and, if
- * applicable, when it was deprecated and what callers should use instead.</p>
+ * <p>The {@code value} serves as the method description and is used by both
+ * DocSpec (for structured documentation) and by the {@code docspec:inject-sources}
+ * goal to generate standard JavaDoc comments for IDE hover and Maven JavaDoc.</p>
  *
  * <pre>{@code
- * @DocMethod(since = "1.2", deprecated = "Use #generateV2 instead")
- * public Curriculum generate(Request request) { ... }
+ * @DocMethod(value = "Runs all 13 intent channels on every public method",
+ *            returns = "Populates model.intentGraph with extracted signals",
+ *            params = {
+ *                @Param(name = "typeElement", value = "The class/interface to analyze"),
+ *                @Param(name = "env", value = "Annotation processing environment"),
+ *                @Param(name = "model", value = "Output model to populate with intent signals")
+ *            },
+ *            throwsDoc = {
+ *                @ThrowsDoc(type = "NullPointerException", value = "If typeElement is null")
+ *            })
+ * public void extract(TypeElement typeElement, ProcessingEnvironment env, DocSpecModel model) {
+ * }</pre>
+ *
+ * <p>Short form for simple methods:</p>
+ * <pre>{@code
+ * @DocMethod("Checks if DSTI extraction is enabled")
+ * public boolean isAvailable(ProcessingEnvironment env) { ... }
  * }</pre>
  */
 @Documented
@@ -23,19 +39,38 @@ import java.lang.annotation.Target;
 public @interface DocMethod {
 
     /**
+     * Description of what this method does. This replaces the first line
+     * of a JavaDoc comment.
+     */
+    String value() default "";
+
+    /**
+     * Description of the return value. Replaces {@code @return} in JavaDoc.
+     */
+    String returns() default "";
+
+    /**
+     * Structured parameter documentation. Replaces {@code @param} tags in JavaDoc.
+     */
+    Param[] params() default {};
+
+    /**
+     * Structured throws documentation. Replaces {@code @throws} tags in JavaDoc.
+     */
+    ThrowsDoc[] throwsDoc() default {};
+
+    /**
      * Version in which this method was first introduced.
-     *
-     * @return the version string
      */
     String since() default "";
 
     /**
-     * Deprecation notice explaining why the method is deprecated and what
-     * callers should migrate to.
-     *
-     * <p>An empty string (the default) means the method is not deprecated.</p>
-     *
-     * @return the deprecation message, or empty if not deprecated
+     * Deprecation notice. Empty means not deprecated.
      */
     String deprecated() default "";
+
+    /**
+     * Code example showing usage of this method.
+     */
+    String example() default "";
 }

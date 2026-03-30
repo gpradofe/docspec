@@ -23,4 +23,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface DocDeterministic {
+    /** Optional description of what makes this method deterministic. */
+    String value() default "";
 }

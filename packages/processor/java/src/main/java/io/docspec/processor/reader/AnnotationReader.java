@@ -94,14 +94,88 @@ public class AnnotationReader {
     // --- @DocMethod ---
 
     @DocMethod(since = "3.0.0")
-    public void applyDocMethod(ExecutableElement method, MethodModel model) {
+    public void applyDocMethodFull(ExecutableElement method, MethodModel model) {
         AnnotationMirror mirror = findAnnotation(method, DOC_METHOD);
         if (mirror == null) return;
+
+        // Primary description from @DocMethod.value() — replaces JavaDoc
+        String description = getStringValue(mirror, "value");
+        if (description != null && !description.isEmpty()) {
+            model.setDescription(description);
+        }
+
+        // Return value description
+        String returns = getStringValue(mirror, "returns");
+        if (returns != null && !returns.isEmpty()) {
+            if (model.getReturns() == null) {
+                model.setReturns(new MethodModel.ReturnModel());
+            }
+            model.getReturns().setDescription(returns);
+        }
+
+        // Structured parameter descriptions from @Param annotations
+        List<? extends AnnotationValue> params = getAnnotationArrayValue(mirror, "params");
+        if (params != null) {
+            for (AnnotationValue paramAv : params) {
+                if (paramAv.getValue() instanceof AnnotationMirror paramMirror) {
+                    String paramName = getStringValue(paramMirror, "name");
+                    String paramDesc = getStringValue(paramMirror, "value");
+                    if (paramName != null && paramDesc != null && !paramDesc.isEmpty()) {
+                        // Find the matching parameter in the model and set its description
+                        if (model.getParams() != null) {
+                            for (var pm : model.getParams()) {
+                                if (paramName.equals(pm.getName())) {
+                                    pm.setDescription(paramDesc);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Structured throws descriptions from @ThrowsDoc annotations
+        List<? extends AnnotationValue> throwsDocs = getAnnotationArrayValue(mirror, "throwsDoc");
+        if (throwsDocs != null) {
+            for (AnnotationValue throwsAv : throwsDocs) {
+                if (throwsAv.getValue() instanceof AnnotationMirror throwsMirror) {
+                    String throwsType = getStringValue(throwsMirror, "type");
+                    String throwsDesc = getStringValue(throwsMirror, "value");
+                    if (throwsType != null && throwsDesc != null) {
+                        if (model.getThrowsList() != null) {
+                            for (var tm : model.getThrowsList()) {
+                                if (throwsType.equals(tm.getType()) || tm.getType().endsWith(throwsType)) {
+                                    tm.setDescription(throwsDesc);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Example code
+        String example = getStringValue(mirror, "example");
+        if (example != null && !example.isEmpty()) {
+            if (model.getExamples() == null) {
+                model.setExamples(new java.util.ArrayList<>());
+            }
+            ExampleModel ex = new ExampleModel();
+            ex.setLanguage("java");
+            ex.setCode(example);
+            model.getExamples().add(ex);
+        }
 
         String since = getStringValue(mirror, "since");
         String deprecated = getStringValue(mirror, "deprecated");
         if (since != null && !since.isEmpty()) model.setSince(since);
         if (deprecated != null && !deprecated.isEmpty()) model.setDeprecated(deprecated);
+    }
+
+    public void applyDocMethod(ExecutableElement method, MethodModel model) {
+        applyDocMethodFull(method, model);
     }
 
     // --- @DocField ---
