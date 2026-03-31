@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useCallback } from "react";
 import type { GraphPageData, GraphNode, GraphEdge } from "@docspec/core";
 import { T } from "../../lib/tokens.js";
+import { useLens } from "../../context/LensContext.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -330,9 +331,18 @@ function KindBadge({ kind, color }: { kind: string; color: string }) {
 export function GraphPage({ data }: GraphPageProps) {
   const allArtifacts = useMemo(() => data.artifacts || [], [data.artifacts]);
 
+  // Read selected artifacts from Layout context (synced with project selector)
+  let contextArtifacts: Set<string> | null = null;
+  try {
+    const { selectedArtifacts } = useLens();
+    contextArtifacts = selectedArtifacts;
+  } catch { /* outside provider — use all */ }
+  const scopeFilter = contextArtifacts && contextArtifacts.size > 0
+    ? contextArtifacts
+    : new Set(allArtifacts);
+
   // State
   const [viewMode, setViewMode] = useState<ViewMode>("class");
-  const [scopeFilter, setScopeFilter] = useState<Set<string>>(new Set(allArtifacts));
   const [edgeFilter, setEdgeFilter] = useState<Set<EdgeTypeFilter>>(new Set(["all"]));
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -340,8 +350,9 @@ export function GraphPage({ data }: GraphPageProps) {
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [animating, setAnimating] = useState(false);
 
-  // Scope-filtered data
+  // Scope-filtered data (synced with project selector)
   const scopedData = useMemo(() => {
     const nodes = data.nodes.filter((n) =>
       !n.artifact || scopeFilter.has(n.artifact),
@@ -633,7 +644,7 @@ export function GraphPage({ data }: GraphPageProps) {
                 width: "100%", height: "100%", display: "block",
                 transform: `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`,
                 transformOrigin: "center center",
-                transition: dragging ? "none" : "transform 0.15s ease",
+                transition: dragging ? "none" : animating ? "transform 0.5s ease" : "transform 0.15s ease",
               }}
               onClick={(e) => {
                 if ((e.target as SVGElement).tagName === "svg") {
@@ -730,27 +741,32 @@ export function GraphPage({ data }: GraphPageProps) {
                 return (
                   <g
                     key={n.id}
+                    transform={`translate(${n.x}, ${n.y})`}
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
                     onClick={(e) => {
                       e.stopPropagation();
+                      setAnimating(true);
                       setFocusedNode(focusedNode === n.id ? null : n.id);
+                      setZoom(1);
+                      setPan({ x: 0, y: 0 });
+                      setTimeout(() => setAnimating(false), 500);
                     }}
                     style={{
                       cursor: "pointer",
-                      transition: "opacity 0.3s",
+                      transition: animating ? "transform 0.4s ease, opacity 0.3s" : "opacity 0.3s",
                       opacity: connected ? 1 : 0.1,
                     }}
                   >
                     {/* Glow */}
                     {(isHov || isFocused) && (
-                      <circle cx={n.x} cy={n.y} r={r + 10} fill={n.color} opacity={0.15} />
+                      <circle cx={0} cy={0} r={r + 10} fill={n.color} opacity={0.15} />
                     )}
                     {/* Shape: rect for artifact/module, circle for class-level */}
                     {isArtifactOrModule ? (
                       <rect
-                        x={n.x - r}
-                        y={n.y - r}
+                        x={-r}
+                        y={-r}
                         width={r * 2}
                         height={r * 2}
                         rx={6}
@@ -760,7 +776,7 @@ export function GraphPage({ data }: GraphPageProps) {
                       />
                     ) : (
                       <circle
-                        cx={n.x} cy={n.y} r={r}
+                        cx={0} cy={0} r={r}
                         fill={(isHov || isFocused) ? n.color + "30" : T.bg}
                         stroke={n.color}
                         strokeWidth={isFocused ? 3 : isHov ? 2.5 : 1.5}
@@ -768,7 +784,7 @@ export function GraphPage({ data }: GraphPageProps) {
                     )}
                     {/* Type initial */}
                     <text
-                      x={n.x} y={n.y + 4}
+                      x={0} y={4}
                       textAnchor="middle"
                       style={{ fontSize: 9, fontWeight: 700, fill: n.color, fontFamily: T.mono }}
                     >
@@ -782,7 +798,7 @@ export function GraphPage({ data }: GraphPageProps) {
                     </text>
                     {/* Label */}
                     <text
-                      x={n.x} y={n.y + r + 14}
+                      x={0} y={r + 14}
                       textAnchor="middle"
                       style={{
                         fontSize: 8.5, fontWeight: isHov || isFocused ? 650 : 400,

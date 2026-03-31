@@ -127,7 +127,7 @@ export function Layout({
   };
 
   return (
-    <LensProvider lens={lens} setLens={setLens}>
+    <LensProvider lens={lens} setLens={setLens} selectedArtifacts={selectedArtifacts}>
       <div
         style={{
           fontFamily: T.sans,
