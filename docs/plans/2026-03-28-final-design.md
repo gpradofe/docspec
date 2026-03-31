@@ -293,6 +293,37 @@ Status:        green #34d399, yellow #fbbf24, red #f87171
 
 ---
 
+## Decision 9: Full Visibility Scanning + Auth-Based Access Control
+
+**Scan everything.** The processor discovers ALL classes, methods, fields regardless of visibility (public/protected/private/package). Each element is tagged with its actual visibility level and `@DocAudience` annotation.
+
+**Authentication controls who sees what:**
+- `@DocAudience("public")` → visible to everyone (API reference)
+- `@DocAudience("partner")` → authenticated partners (SDK details)
+- `@DocAudience("internal")` → team only (architecture, private methods, DSTI, full dependency graph)
+
+**Auth providers (pluggable via CLI):**
+- `npx docspec auth setup` — interactive wizard (@clack/prompts)
+- Supported: Google OAuth, GitHub OAuth, Microsoft/Azure AD, Kerberos/LDAP, OIDC, custom plugin
+- Config saved to docspec.config.yaml
+- `npx docspec dev` starts with auth middleware when configured
+- `npx docspec dev --auth none` for development (show everything)
+
+**Why:** Private fields ARE the dependency graph. Private methods ARE what DSTI tests. Hiding them defeats the purpose. Instead, control access — internal team sees everything, external users see only public API.
+
+---
+
+## Decision 10: @DocMethod Replaces JavaDoc
+
+DocSpec annotations are the single source of truth for documentation. No `/** */` JavaDoc needed.
+
+- `@DocMethod(value = "description", params = {@Param(...)}, returns = "...", throwsDoc = {@ThrowsDoc(...)})` replaces all JavaDoc tags
+- `@DocBoundary("description")` replaces class-level JavaDoc
+- `docspec:javadoc` Maven goal generates standard JavaDoc HTML from docspec.json (Maven Central compatibility)
+- `docspec:inject-sources` generates source copies with `/** */` injected (IDE hover compatibility)
+
+---
+
 ## Implementation Order — Java First
 
 ### Phase 1: Annotate Java Codebase

@@ -185,10 +185,8 @@ public class AutoDiscoveryScanner {
                 && kind != ElementKind.ANNOTATION_TYPE) {
             return false;
         }
-        // Must be public
-        if (!element.getModifiers().contains(Modifier.PUBLIC)) {
-            return false;
-        }
+        // Include all visibilities — access control is handled at the site layer
+        // via @DocAudience and visibility filtering
         // Must pass package filter
         String qualified = element.getQualifiedName().toString();
         return packageFilter.accepts(qualified);
@@ -196,14 +194,7 @@ public class AutoDiscoveryScanner {
 
     private boolean shouldIncludeMember(Element element) {
         Set<Modifier> mods = element.getModifiers();
-        // Visibility check
-        boolean visible = mods.contains(Modifier.PUBLIC)
-                || (config.isIncludeProtected() && mods.contains(Modifier.PROTECTED));
-        if (!visible && mods.contains(Modifier.PROTECTED)) {
-            // Protected but config says not to include
-            return false;
-        }
-        if (!visible) return false;
+        // Include all visibilities — tag with actual visibility, filter at site layer
 
         // Deprecated check
         if (!config.isIncludeDeprecated()) {

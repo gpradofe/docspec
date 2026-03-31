@@ -25,6 +25,9 @@
       "visibility" : "public",
       "discoveredFrom" : "auto",
       "modifiers" : [ "final" ],
+      "constructors" : [ {
+        "visibility" : "private"
+      } ],
       "methods" : [ {
         "name" : "values",
         "description" : "Values.",
@@ -254,6 +257,127 @@
           "type" : "boolean"
         }
       } ],
+      "fields" : [ {
+        "name" : "discoveryMode",
+        "type" : "DiscoveryMode",
+        "description" : "The discovery mode.",
+        "visibility" : "private"
+      }, {
+        "name" : "includePackages",
+        "type" : "List<String>",
+        "description" : "The include packages.",
+        "visibility" : "private"
+      }, {
+        "name" : "excludePackages",
+        "type" : "List<String>",
+        "description" : "The exclude packages.",
+        "visibility" : "private"
+      }, {
+        "name" : "inferDescriptions",
+        "type" : "boolean",
+        "description" : "The infer descriptions.",
+        "visibility" : "private"
+      }, {
+        "name" : "detectSpring",
+        "type" : "boolean",
+        "description" : "The detect spring.",
+        "visibility" : "private"
+      }, {
+        "name" : "detectJpa",
+        "type" : "boolean",
+        "description" : "The detect jpa.",
+        "visibility" : "private"
+      }, {
+        "name" : "detectJackson",
+        "type" : "boolean",
+        "description" : "The detect jackson.",
+        "visibility" : "private"
+      }, {
+        "name" : "groupBy",
+        "type" : "String",
+        "description" : "The group by.",
+        "visibility" : "private"
+      }, {
+        "name" : "openApiPath",
+        "type" : "String",
+        "description" : "The open api path.",
+        "visibility" : "private"
+      }, {
+        "name" : "outputDir",
+        "type" : "String",
+        "description" : "The output dir.",
+        "visibility" : "private"
+      }, {
+        "name" : "artifactGroupId",
+        "type" : "String",
+        "description" : "The artifact group id.",
+        "visibility" : "private"
+      }, {
+        "name" : "artifactId",
+        "type" : "String",
+        "description" : "The artifact id.",
+        "visibility" : "private"
+      }, {
+        "name" : "artifactVersion",
+        "type" : "String",
+        "description" : "The artifact version.",
+        "visibility" : "private"
+      }, {
+        "name" : "audience",
+        "type" : "String",
+        "description" : "The audience.",
+        "visibility" : "private"
+      }, {
+        "name" : "projectName",
+        "type" : "String",
+        "description" : "The project name.",
+        "visibility" : "private"
+      }, {
+        "name" : "projectDescription",
+        "type" : "String",
+        "description" : "The project description.",
+        "visibility" : "private"
+      }, {
+        "name" : "includeDeprecated",
+        "type" : "boolean",
+        "description" : "The include deprecated.",
+        "visibility" : "private"
+      }, {
+        "name" : "includeProtected",
+        "type" : "boolean",
+        "description" : "The include protected.",
+        "visibility" : "private"
+      }, {
+        "name" : "securityEnabled",
+        "type" : "boolean",
+        "description" : "The security enabled.",
+        "visibility" : "private"
+      }, {
+        "name" : "databaseIntrospect",
+        "type" : "boolean",
+        "description" : "The database introspect.",
+        "visibility" : "private"
+      }, {
+        "name" : "databaseConnectionUrl",
+        "type" : "String",
+        "description" : "The database connection url.",
+        "visibility" : "private"
+      }, {
+        "name" : "dstiEnabled",
+        "type" : "boolean",
+        "description" : "The dsti enabled.",
+        "visibility" : "private"
+      }, {
+        "name" : "privacyEnabled",
+        "type" : "boolean",
+        "description" : "The privacy enabled.",
+        "visibility" : "private"
+      }, {
+        "name" : "observabilityEnabled",
+        "type" : "boolean",
+        "description" : "The observability enabled.",
+        "visibility" : "private"
+      } ],
       "kindCategory" : "config"
     } ]
   }, {
@@ -281,6 +405,15 @@
           "required" : true
         } ]
       }, {
+        "name" : "initExtractors",
+        "description" : "Initializes an extractors from the given processing env.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
         "name" : "process",
         "description" : "Processes the resource.",
         "visibility" : "public",
@@ -300,6 +433,241 @@
           "expectedLatency" : "< 5s for projects with < 500 types",
           "bottleneck" : "DSTI intent extraction across all methods when Trees API is available"
         }
+      }, {
+        "name" : "processType",
+        "description" : "Processes a type from the given type element.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ]
+      }, {
+        "name" : "processMethod",
+        "description" : "Processes a method.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "ownerType",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "methodModel",
+          "type" : "io.docspec.processor.model.MethodModel",
+          "required" : true
+        } ]
+      }, {
+        "name" : "finalizeSpec",
+        "description" : "Finalize spec.",
+        "since" : "3.0.0",
+        "visibility" : "private"
+      }, {
+        "name" : "assignKindCategories",
+        "description" : "Assigns kindCategory to Members based on naming, annotations, and framework info",
+        "since" : "3.0.0",
+        "visibility" : "private"
+      }, {
+        "name" : "buildCrossReferences",
+        "description" : "Builds reverse cross-references: Error.thrownBy/endpoints, DataModel.usedBy, Member.referencedBy, Module.framework",
+        "since" : "3.0.0",
+        "visibility" : "private"
+      }, {
+        "name" : "methodReferencesType",
+        "description" : "Method references type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "method",
+          "type" : "io.docspec.processor.model.MethodModel",
+          "required" : true
+        }, {
+          "name" : "typeName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "mergeOpenApiIfPresent",
+        "description" : "Scans for openapi.json in the output directory and merges endpoint descriptions into discovered controller methods",
+        "since" : "3.0.0",
+        "visibility" : "private"
+      }, {
+        "name" : "detectFramework",
+        "description" : "Detect framework.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "FrameworkInfo"
+        }
+      }, {
+        "name" : "determineModuleGroup",
+        "description" : "Determine module group.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "frameworkInfo",
+          "type" : "io.docspec.processor.framework.FrameworkDetector.FrameworkInfo",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "createAutoModule",
+        "description" : "Creates an auto module.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "id",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "frameworkInfo",
+          "type" : "io.docspec.processor.framework.FrameworkDetector.FrameworkInfo",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "ModuleModel"
+        }
+      }, {
+        "name" : "formatModuleName",
+        "description" : "Format module name.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "id",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "findMethodElement",
+        "description" : "Finds a method element.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "methodName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "ExecutableElement"
+        }
+      }, {
+        "name" : "findFieldModel",
+        "description" : "Finds a field model.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "member",
+          "type" : "io.docspec.processor.model.MemberModel",
+          "required" : true
+        }, {
+          "name" : "fieldName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "FieldModel"
+        }
+      }, {
+        "name" : "note",
+        "description" : "Note.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "message",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      } ],
+      "fields" : [ {
+        "name" : "config",
+        "type" : "ProcessorConfig",
+        "description" : "The config.",
+        "visibility" : "private"
+      }, {
+        "name" : "scanner",
+        "type" : "AutoDiscoveryScanner",
+        "description" : "The scanner.",
+        "visibility" : "private"
+      }, {
+        "name" : "annotationReader",
+        "type" : "AnnotationReader",
+        "description" : "The annotation reader.",
+        "visibility" : "private"
+      }, {
+        "name" : "javaDocReader",
+        "type" : "JavaDocReader",
+        "description" : "The java doc reader.",
+        "visibility" : "private"
+      }, {
+        "name" : "descriptionInferrer",
+        "type" : "DescriptionInferrer",
+        "description" : "The description inferrer.",
+        "visibility" : "private"
+      }, {
+        "name" : "springDetector",
+        "type" : "SpringFrameworkDetector",
+        "description" : "The spring detector.",
+        "visibility" : "private"
+      }, {
+        "name" : "jpaExtractor",
+        "type" : "JpaEntityExtractor",
+        "description" : "The jpa extractor.",
+        "visibility" : "private"
+      }, {
+        "name" : "jacksonExtractor",
+        "type" : "JacksonShapeExtractor",
+        "description" : "The jackson extractor.",
+        "visibility" : "private"
+      }, {
+        "name" : "coverageCalculator",
+        "type" : "CoverageCalculator",
+        "description" : "The coverage calculator.",
+        "visibility" : "private"
+      }, {
+        "name" : "serializer",
+        "type" : "SpecSerializer",
+        "description" : "The serializer.",
+        "visibility" : "private"
+      }, {
+        "name" : "extractors",
+        "type" : "List<io.docspec.processor.extractor.DocSpecExtractor>",
+        "description" : "The extractors.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "model",
+        "type" : "DocSpecModel",
+        "description" : "The model.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "moduleMap",
+        "type" : "Map<String,io.docspec.processor.model.ModuleModel>",
+        "description" : "The module map.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "detectedFrameworks",
+        "type" : "List<String>",
+        "description" : "The detected frameworks.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "processed",
+        "type" : "boolean",
+        "description" : "The processed.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -371,6 +739,54 @@
         "returns" : {
           "type" : "boolean"
         }
+      }, {
+        "name" : "getStatements",
+        "description" : "Extracts the list of statements from a method tree body block",
+        "since" : "3.0.0",
+        "visibility" : "protected",
+        "params" : [ {
+          "name" : "methodTree",
+          "type" : "java.lang.Object",
+          "description" : "The method tree obtained from Trees.getTree()",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<?>",
+          "description" : "The list of statement tree objects, or an empty list if unavailable"
+        }
+      }, {
+        "name" : "getMethodSource",
+        "description" : "Returns the full source text of a method tree",
+        "visibility" : "protected",
+        "params" : [ {
+          "name" : "methodTree",
+          "type" : "java.lang.Object",
+          "description" : "The method tree obtained from Trees.getTree()",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String",
+          "description" : "The source text, or empty string if null"
+        }
+      }, {
+        "name" : "countOccurrences",
+        "description" : "Counts non-overlapping occurrences of a substring within a string",
+        "visibility" : "protected",
+        "params" : [ {
+          "name" : "text",
+          "type" : "java.lang.String",
+          "description" : "The text to search",
+          "required" : true
+        }, {
+          "name" : "substring",
+          "type" : "java.lang.String",
+          "description" : "The substring to count",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "int",
+          "description" : "The number of occurrences"
+        }
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -441,6 +857,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "CONSTANT_PATTERN",
+        "type" : "Pattern",
+        "description" : "The constant_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -515,6 +938,19 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "BUILDER_PATTERN",
+        "type" : "Pattern",
+        "description" : "The builder_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "CONSTRUCTOR_PATTERN",
+        "type" : "Pattern",
+        "description" : "The constructor_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      } ],
       "annotations" : [ {
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
@@ -587,6 +1023,34 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      }, {
+        "name" : "countKeywordOccurrences",
+        "description" : "Counts occurrences of a keyword followed by space/paren in source code, avoiding matches inside identifiers",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "source",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "keyword",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "int"
+        }
+      }, {
+        "name" : "countTernaryOps",
+        "description" : "Counts ternary operator occurrences in method source",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "source",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "int"
+        }
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -660,6 +1124,13 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "ASSERTION_CALL_PATTERN",
+        "type" : "Pattern",
+        "description" : "The assertion_call_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -952,6 +1423,67 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      }, {
+        "name" : "isGuardClause",
+        "description" : "Checks if a statement looks like a guard clause using if-then-throw heuristic",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "ifStmt",
+          "type" : "java.lang.Object",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.ExecutableElement",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringArrayValue",
+        "description" : "Gets a string array value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "env",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "DOC_INTENTIONAL",
+        "type" : "String",
+        "description" : "The doc_intentional.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_PRESERVES",
+        "type" : "String",
+        "description" : "The doc_preserves.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1101,6 +1633,25 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      }, {
+        "name" : "hasLoggerField",
+        "description" : "Checks if the enclosing type has a field whose type looks like a logger",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "owner",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "LOG_PATTERN",
+        "type" : "Pattern",
+        "description" : "The log_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1174,6 +1725,25 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      }, {
+        "name" : "isCollectionType",
+        "description" : "Returns whether collection type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "STREAM_OP_PATTERN",
+        "type" : "Pattern",
+        "description" : "The stream_op_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1326,6 +1896,13 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "namingAnalyzer",
+        "type" : "NamingAnalyzer",
+        "description" : "The naming analyzer.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      } ],
       "annotations" : [ {
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
@@ -1448,6 +2025,85 @@
           "verified" : false
         } ]
       } ],
+      "fields" : [ {
+        "name" : "W_NAME_SEMANTICS",
+        "type" : "double",
+        "description" : "The w_name_semantics.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_GUARD_CLAUSES",
+        "type" : "double",
+        "description" : "The w_guard_clauses.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_BRANCHES",
+        "type" : "double",
+        "description" : "The w_branches.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_DATA_FLOW",
+        "type" : "double",
+        "description" : "The w_data_flow.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_RETURN_TYPE",
+        "type" : "double",
+        "description" : "The w_return_type.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_LOOPS",
+        "type" : "double",
+        "description" : "The w_loops.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_ERROR_HANDLING",
+        "type" : "double",
+        "description" : "The w_error_handling.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_CONSTANTS",
+        "type" : "double",
+        "description" : "The w_constants.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_NULL_CHECKS",
+        "type" : "double",
+        "description" : "The w_null_checks.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_ASSERTIONS",
+        "type" : "double",
+        "description" : "The w_assertions.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_LOGGING",
+        "type" : "double",
+        "description" : "The w_logging.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_DEPENDENCIES",
+        "type" : "double",
+        "description" : "The w_dependencies.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "W_VALIDATION_ANNOTATIONS",
+        "type" : "double",
+        "description" : "The w_validation_annotations.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      } ],
       "annotations" : [ {
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
@@ -1534,6 +2190,78 @@
           "code" : "IntentGraphExtractor extractor = new IntentGraphExtractor(true);\nextractor.extract(typeElement, processingEnv, model);\n// model.getIntentGraph().getMethods() now contains ISD-scored intent signals",
           "verified" : false
         } ]
+      }, {
+        "name" : "resolveTrees",
+        "description" : "Obtains the com.sun.source.util.Trees instance via reflection for AST-level analysis",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "description" : "The annotation processing environment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Object",
+          "description" : "The Trees instance, or null if unavailable"
+        }
+      }, {
+        "name" : "resolveMethodTree",
+        "description" : "Resolves the method tree for a given method element using the Trees API",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "trees",
+          "type" : "java.lang.Object",
+          "description" : "The Trees instance, may be null",
+          "required" : true
+        }, {
+          "name" : "method",
+          "type" : "javax.lang.model.element.ExecutableElement",
+          "description" : "The method element to resolve",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Object",
+          "description" : "The method tree, or null if Trees is unavailable or resolution fails"
+        }
+      }, {
+        "name" : "extractDependencies",
+        "description" : "Collects injected non-static, non-JDK field types from the enclosing type as dependency signals",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "description" : "The enclosing type to scan",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>",
+          "description" : "The list of dependency type names"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "dstiEnabled",
+        "type" : "boolean",
+        "description" : "The dsti enabled.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "namingAnalyzer",
+        "type" : "NamingAnalyzer",
+        "description" : "The naming analyzer.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "densityCalculator",
+        "type" : "IntentDensityCalculator",
+        "description" : "The density calculator.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "channels",
+        "type" : "List<io.docspec.processor.dsti.channel.IntentChannel>",
+        "description" : "The channels.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1573,6 +2301,20 @@
         "visibility" : "public"
       } ],
       "methods" : [ {
+        "name" : "addVerb",
+        "description" : "Adds a verb.",
+        "visibility" : "private",
+        "modifiers" : [ "static" ],
+        "params" : [ {
+          "name" : "verb",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "intent",
+          "type" : "java.lang.String",
+          "required" : true
+        } ]
+      }, {
         "name" : "analyze",
         "description" : "Analyzes a method name and extracts its semantic components using verb-prefix matching with camelCase boundary detection",
         "since" : "3.0.0",
@@ -1593,6 +2335,51 @@
           "code" : "NamingAnalyzer analyzer = new NamingAnalyzer();\nNameSemantics result = analyzer.analyze(\"findUserByEmail\");\n// result.verb() == \"find\", result.object() == \"user by email\", result.intent() == \"query\"",
           "verified" : false
         } ]
+      }, {
+        "name" : "extractFirstCamelCaseWord",
+        "description" : "Extracts the first lowercase word from a camelCase identifier",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "name",
+          "type" : "java.lang.String",
+          "description" : "The camelCase identifier",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String",
+          "description" : "The first word, or null if the name starts with uppercase"
+        }
+      }, {
+        "name" : "inferFallbackIntent",
+        "description" : "Infers a fallback intent for method names that do not match any known verb, using common Java conventions to avoid returning unknown",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "methodName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "splitCamelCase",
+        "description" : "Split camel case.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "s",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "VERB_INTENT_MAP",
+        "type" : "Map<String,String>",
+        "description" : "The verb_intent_map.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1650,6 +2437,55 @@
           "type" : "List<io.docspec.processor.dsti.PropertyDSL.InvariantRule>",
           "description" : "List of successfully parsed rules, never null, may be empty"
         }
+      } ],
+      "fields" : [ {
+        "name" : "NOT_NULL_PATTERN",
+        "type" : "Pattern",
+        "description" : "The not_null_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "NOT_EMPTY_PATTERN",
+        "type" : "Pattern",
+        "description" : "The not_empty_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "NOT_BLANK_PATTERN",
+        "type" : "Pattern",
+        "description" : "The not_blank_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SIZE_PATTERN",
+        "type" : "Pattern",
+        "description" : "The size_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "IN_PATTERN",
+        "type" : "Pattern",
+        "description" : "The in_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "BETWEEN_PATTERN",
+        "type" : "Pattern",
+        "description" : "The between_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "MATCHES_PATTERN",
+        "type" : "Pattern",
+        "description" : "The matches_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "COMPARISON_PATTERN",
+        "type" : "Pattern",
+        "description" : "The comparison_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1719,6 +2555,106 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "extractConfigurationPropertiesFields",
+        "description" : "Extract configuration properties fields.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "prefix",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "ownerQualified",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "properties",
+          "type" : "java.util.List<io.docspec.processor.model.ConfigurationPropertyModel>",
+          "required" : true
+        } ]
+      }, {
+        "name" : "camelToKebab",
+        "description" : "Camel to kebab.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "camelCase",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "simplifyType",
+        "description" : "Simplify type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fullType",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "SPRING_VALUE",
+        "type" : "String",
+        "description" : "The spring_value.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "CONFIGURATION_PROPERTIES",
+        "type" : "String",
+        "description" : "The configuration_properties.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "VALUE_PATTERN",
+        "type" : "Pattern",
+        "description" : "The value_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1777,6 +2713,205 @@
           "required" : true
         } ]
       }, {
+        "name" : "extractTableMetadata",
+        "description" : "Extracts @Table metadata including table name, schema, catalog, indexes, and uniqueConstraints",
+        "since" : "3.0.0",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "dataModel",
+          "type" : "io.docspec.processor.model.DataModelInfo",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractIndexAnnotations",
+        "description" : "Parses @Index annotations from the @Table indexes array, extracting name, columnList, and unique attributes",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "tableValues",
+          "type" : "java.util.Map<java.lang.String,javax.lang.model.element.AnnotationValue>",
+          "required" : true
+        }, {
+          "name" : "attributeName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<io.docspec.processor.model.DataModelInfo.IndexModel>"
+        }
+      }, {
+        "name" : "extractUniqueConstraints",
+        "description" : "Parses @UniqueConstraint annotations from @Table uniqueConstraints array, converting to IndexModel entries with unique=true",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "tableValues",
+          "type" : "java.util.Map<java.lang.String,javax.lang.model.element.AnnotationValue>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<io.docspec.processor.model.DataModelInfo.IndexModel>"
+        }
+      }, {
+        "name" : "extractFieldMetadata",
+        "description" : "Extracts per-field metadata including @Column properties, @Id, @GeneratedValue, @Enumerated, and CHECK constraints",
+        "since" : "3.0.0",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "dataModel",
+          "type" : "io.docspec.processor.model.DataModelInfo",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractColumnDetails",
+        "description" : "Extracts @Column attributes including name, nullable, unique, length, precision, scale, and embedded CHECK constraints",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "fieldModel",
+          "type" : "io.docspec.processor.model.DataModelFieldModel",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractCheckConstraint",
+        "description" : "Extracts CHECK constraint expressions from a column definition string",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "columnDefinition",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "extractPrimaryKey",
+        "description" : "Marks a field as a primary key if it has @Id",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "fieldModel",
+          "type" : "io.docspec.processor.model.DataModelFieldModel",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractGeneratedValue",
+        "description" : "Extracts @GeneratedValue metadata and marks the field as generated, also reads @SequenceGenerator and @TableGenerator",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "fieldModel",
+          "type" : "io.docspec.processor.model.DataModelFieldModel",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractEnumeratedType",
+        "description" : "Extracts @Enumerated type, ORDINAL vs STRING",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "fieldModel",
+          "type" : "io.docspec.processor.model.DataModelFieldModel",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractJoinColumn",
+        "description" : "Extracts @JoinColumn metadata including foreign key column name, referenced column, and ON DELETE behavior",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "fieldModel",
+          "type" : "io.docspec.processor.model.DataModelFieldModel",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractOnDeleteAction",
+        "description" : "Extracts the ON DELETE action from a foreign key definition string",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "foreignKeyDefinition",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "extractRelationshipMetadata",
+        "description" : "Extracts relationship metadata from @ManyToOne, @OneToMany, @OneToOne, @ManyToMany including cascade, fetch, mappedBy, and orphanRemoval",
+        "since" : "3.0.0",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "dataModel",
+          "type" : "io.docspec.processor.model.DataModelInfo",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractCascadeTypes",
+        "description" : "Extracts cascade type values from a relationship annotation cascade attribute as comma-separated names",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "relValues",
+          "type" : "java.util.Map<java.lang.String,javax.lang.model.element.AnnotationValue>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
         "name" : "compareWithLiveSchema",
         "description" : "Compares JPA entity annotations against a live database schema via JDBC, returning a consistency report listing mismatches",
         "since" : "3.0.0",
@@ -1806,6 +2941,337 @@
           "type" : "List<io.docspec.processor.extractor.DatabaseSchemaIntrospector.SchemaConsistencyReport>",
           "description" : "List of mismatch descriptions; empty list means full consistency"
         }
+      }, {
+        "name" : "hasAnnotation",
+        "description" : "Returns whether annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getAnnotationValues",
+        "description" : "Gets all annotation values including defaults using the processing environment",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Map<String,javax.lang.model.element.AnnotationValue>"
+        }
+      }, {
+        "name" : "getRawAnnotationValues",
+        "description" : "Gets only explicitly set annotation values without defaults, used for nested annotation mirrors",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Map<String,javax.lang.model.element.AnnotationValue>"
+        }
+      }, {
+        "name" : "getStringFromValues",
+        "description" : "Gets a string from values.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "values",
+          "type" : "java.util.Map<java.lang.String,javax.lang.model.element.AnnotationValue>",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getBooleanFromValues",
+        "description" : "Gets a boolean from values.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "values",
+          "type" : "java.util.Map<java.lang.String,javax.lang.model.element.AnnotationValue>",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Boolean"
+        }
+      }, {
+        "name" : "getIntegerFromValues",
+        "description" : "Gets an integer from values.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "values",
+          "type" : "java.util.Map<java.lang.String,javax.lang.model.element.AnnotationValue>",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Integer"
+        }
+      }, {
+        "name" : "extractStringArray",
+        "description" : "Extracts a string array from an annotation value that holds a list",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "arrayValue",
+          "type" : "javax.lang.model.element.AnnotationValue",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      }, {
+        "name" : "extractAnnotationMirror",
+        "description" : "Extracts an AnnotationMirror from an annotation value, handling both direct AnnotationMirror and AnnotationValue wrapper",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "item",
+          "type" : "java.lang.Object",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "simplifyType",
+        "description" : "Simplify type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fullType",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "extractGenericType",
+        "description" : "Extract generic type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "type",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "toSnakeCase",
+        "description" : "To snake case.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "camelCase",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "JPA_TABLE",
+        "type" : "String",
+        "description" : "The jpa_table.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_TABLE",
+        "type" : "String",
+        "description" : "The javax_table.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_ENTITY",
+        "type" : "String",
+        "description" : "The jpa_entity.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_ENTITY",
+        "type" : "String",
+        "description" : "The javax_entity.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_COLUMN",
+        "type" : "String",
+        "description" : "The jpa_column.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_COLUMN",
+        "type" : "String",
+        "description" : "The javax_column.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_ID",
+        "type" : "String",
+        "description" : "The jpa_id.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_ID",
+        "type" : "String",
+        "description" : "The javax_id.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_GENERATED_VALUE",
+        "type" : "String",
+        "description" : "The jpa_generated_value.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_GENERATED_VALUE",
+        "type" : "String",
+        "description" : "The javax_generated_value.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_JOIN_COLUMN",
+        "type" : "String",
+        "description" : "The jpa_join_column.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_JOIN_COLUMN",
+        "type" : "String",
+        "description" : "The javax_join_column.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_ENUMERATED",
+        "type" : "String",
+        "description" : "The jpa_enumerated.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_ENUMERATED",
+        "type" : "String",
+        "description" : "The javax_enumerated.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_SEQUENCE_GENERATOR",
+        "type" : "String",
+        "description" : "The jpa_sequence_generator.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_SEQUENCE_GENERATOR",
+        "type" : "String",
+        "description" : "The javax_sequence_generator.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_TABLE_GENERATOR",
+        "type" : "String",
+        "description" : "The jpa_table_generator.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_TABLE_GENERATOR",
+        "type" : "String",
+        "description" : "The javax_table_generator.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_MANY_TO_ONE",
+        "type" : "String",
+        "description" : "The jpa_many_to_one.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_MANY_TO_ONE",
+        "type" : "String",
+        "description" : "The javax_many_to_one.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_ONE_TO_MANY",
+        "type" : "String",
+        "description" : "The jpa_one_to_many.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_ONE_TO_MANY",
+        "type" : "String",
+        "description" : "The javax_one_to_many.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_ONE_TO_ONE",
+        "type" : "String",
+        "description" : "The jpa_one_to_one.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_ONE_TO_ONE",
+        "type" : "String",
+        "description" : "The javax_one_to_one.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_MANY_TO_MANY",
+        "type" : "String",
+        "description" : "The jpa_many_to_many.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_MANY_TO_MANY",
+        "type" : "String",
+        "description" : "The javax_many_to_many.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "CHECK_CONSTRAINT_PATTERN",
+        "type" : "Pattern",
+        "description" : "The check_constraint_pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1863,6 +3329,207 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "extractJpaEntity",
+        "description" : "Extract jpa entity.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        }, {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.DocSpecModel",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractRepositoryDataStore",
+        "description" : "Extract repository data store.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        }, {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.DocSpecModel",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extendsRepository",
+        "description" : "Extends repository.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "addDataStoreIfAbsent",
+        "description" : "Adds a DataStoreModel with the given id if one does not already exist, returns the existing or newly created store",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.DocSpecModel",
+          "required" : true
+        }, {
+          "name" : "id",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "name",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "type",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "DataStoreModel"
+        }
+      }, {
+        "name" : "hasAnnotation",
+        "description" : "Returns whether annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getStringArrayValue",
+        "description" : "Gets a string array value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "JPA_ENTITY_JAVAX",
+        "type" : "String",
+        "description" : "The jpa_entity_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_ENTITY_JAKARTA",
+        "type" : "String",
+        "description" : "The jpa_entity_jakarta.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "TABLE_JAVAX",
+        "type" : "String",
+        "description" : "The table_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "TABLE_JAKARTA",
+        "type" : "String",
+        "description" : "The table_jakarta.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SPRING_DATA_REPOS",
+        "type" : "String[]",
+        "description" : "The spring_data_repos.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "REDIS_TEMPLATE",
+        "type" : "String",
+        "description" : "The redis_template.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "STRING_REDIS_TEMPLATE",
+        "type" : "String",
+        "description" : "The string_redis_template.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "KAFKA_TEMPLATE",
+        "type" : "String",
+        "description" : "The kafka_template.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "KAFKA_LISTENER",
+        "type" : "String",
+        "description" : "The kafka_listener.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -1981,6 +3648,128 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "extractFeignClient",
+        "description" : "Extract feign client.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "feignClient",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        }, {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.DocSpecModel",
+          "required" : true
+        } ]
+      }, {
+        "name" : "extractPathFromMapping",
+        "description" : "Extract path from mapping.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "annotation",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "extractMethodFromRequestMapping",
+        "description" : "Extract method from request mapping.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "annotation",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "REST_TEMPLATE",
+        "type" : "String",
+        "description" : "The rest_template.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "WEB_CLIENT",
+        "type" : "String",
+        "description" : "The web_client.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "REST_CLIENT",
+        "type" : "String",
+        "description" : "The rest_client.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "FEIGN_CLIENT",
+        "type" : "String",
+        "description" : "The feign_client.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "MAPPING_TO_METHOD",
+        "type" : "Map<String,String>",
+        "description" : "The mapping_to_method.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "REQUEST_MAPPING",
+        "type" : "String",
+        "description" : "The request_mapping.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2038,6 +3827,101 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "implementsInterface",
+        "description" : "Implements interface.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        }, {
+          "name" : "interfaceQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getStringArrayValue",
+        "description" : "Gets a string array value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "TIMED",
+        "type" : "String",
+        "description" : "The timed.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "COUNTED",
+        "type" : "String",
+        "description" : "The counted.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "HEALTH_INDICATOR",
+        "type" : "String",
+        "description" : "The health_indicator.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2108,6 +3992,30 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "mergeOpenApiSpec",
+        "description" : "Merge open api spec.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "is",
+          "type" : "java.io.InputStream",
+          "required" : true
+        }, {
+          "name" : "fileName",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.DocSpecModel",
+          "required" : true
+        } ]
+      } ],
+      "fields" : [ {
+        "name" : "OPENAPI_FILES",
+        "type" : "String[]",
+        "description" : "The openapi_files.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2165,6 +4073,75 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getBooleanValue",
+        "description" : "Gets a boolean value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Boolean"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "DOC_PII",
+        "type" : "String",
+        "description" : "The doc_pii.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_SENSITIVE",
+        "type" : "String",
+        "description" : "The doc_sensitive.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2222,6 +4199,32 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "analyzeQueryMethod",
+        "description" : "Analyze query method.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "methodName",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "model",
+          "type" : "io.docspec.processor.model.DocSpecModel",
+          "required" : true
+        } ]
+      } ],
+      "fields" : [ {
+        "name" : "SPRING_REPOSITORY",
+        "type" : "String",
+        "description" : "The spring_repository.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JPA_REPOSITORY",
+        "type" : "String",
+        "description" : "The jpa_repository.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2293,6 +4296,19 @@
           "description" : "List of consistency issues found"
         }
       } ],
+      "fields" : [ {
+        "name" : "JPA_ENTITY",
+        "type" : "String",
+        "description" : "The jpa_entity.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JAVAX_ENTITY",
+        "type" : "String",
+        "description" : "The javax_entity.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      } ],
       "annotations" : [ {
         "name" : "DocBoundary",
         "qualified" : "io.docspec.annotation.DocBoundary",
@@ -2349,6 +4365,164 @@
           "type" : "io.docspec.processor.model.DocSpecModel",
           "required" : true
         } ]
+      }, {
+        "name" : "extractRolesFromExpression",
+        "description" : "Extract roles from expression.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "expression",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "roles",
+          "type" : "java.util.Set<java.lang.String>",
+          "required" : true
+        } ]
+      }, {
+        "name" : "getClassBasePath",
+        "description" : "Gets a class base path from the given type element.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getMethodPath",
+        "description" : "Gets a method path from the given method.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "method",
+          "type" : "javax.lang.model.element.ExecutableElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "extractPathFromMapping",
+        "description" : "Extract path from mapping.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "annotation",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "normalizePath",
+        "description" : "Normalize path.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "basePath",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "methodPath",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getStringArrayValue",
+        "description" : "Gets a string array value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "PRE_AUTHORIZE",
+        "type" : "String",
+        "description" : "The pre_authorize.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SECURED",
+        "type" : "String",
+        "description" : "The secured.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ROLES_ALLOWED_JAVAX",
+        "type" : "String",
+        "description" : "The roles_allowed_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ROLES_ALLOWED_JAKARTA",
+        "type" : "String",
+        "description" : "The roles_allowed_jakarta.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "MAPPING_TO_METHOD",
+        "type" : "Map<String,String>",
+        "description" : "The mapping_to_method.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "REQUEST_MAPPING",
+        "type" : "String",
+        "description" : "The request_mapping.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2492,6 +4666,151 @@
         "returns" : {
           "type" : "JsonShapeModel"
         }
+      }, {
+        "name" : "getNamingStrategy",
+        "description" : "Gets a naming strategy from the given type element.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "typeElement",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "applyNamingStrategy",
+        "description" : "Apply naming strategy.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fieldName",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "strategy",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "resolveTypeElement",
+        "description" : "Resolve type element.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.VariableElement",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "TypeElement"
+        }
+      }, {
+        "name" : "hasAnnotation",
+        "description" : "Returns whether annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getAnnotationStringValue",
+        "description" : "Gets an annotation string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "env",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "simplifyType",
+        "description" : "Simplify type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fullType",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "toSnakeCase",
+        "description" : "To snake case.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "camelCase",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "JSON_PROPERTY",
+        "type" : "String",
+        "description" : "The json_property.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JSON_IGNORE",
+        "type" : "String",
+        "description" : "The json_ignore.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JSON_NAMING",
+        "type" : "String",
+        "description" : "The json_naming.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "JSON_SUB_TYPES",
+        "type" : "String",
+        "description" : "The json_sub_types.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2575,6 +4894,301 @@
         "returns" : {
           "type" : "DataModelInfo"
         }
+      }, {
+        "name" : "extractRelationship",
+        "description" : "Extract relationship.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.VariableElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "DataModelRelationshipModel"
+        }
+      }, {
+        "name" : "getTableName",
+        "description" : "Gets a table name from the given element.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "hasAnnotation",
+        "description" : "Returns whether annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "findAnnotationAny",
+        "description" : "Finds an annotation any.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "qualifiedNames",
+          "type" : "java.lang.String[]",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getBooleanValue",
+        "description" : "Gets a boolean value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Boolean"
+        }
+      }, {
+        "name" : "getIntValue",
+        "description" : "Gets an int value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "processingEnv",
+          "type" : "javax.annotation.processing.ProcessingEnvironment",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Integer"
+        }
+      }, {
+        "name" : "simplifyType",
+        "description" : "Simplify type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fullType",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "extractGenericType",
+        "description" : "Extract generic type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "type",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "toSnakeCase",
+        "description" : "To snake case.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "camelCase",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "ENTITY",
+        "type" : "String",
+        "description" : "The entity.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ENTITY_JAVAX",
+        "type" : "String",
+        "description" : "The entity_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "TABLE",
+        "type" : "String",
+        "description" : "The table.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "TABLE_JAVAX",
+        "type" : "String",
+        "description" : "The table_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "COLUMN",
+        "type" : "String",
+        "description" : "The column.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "COLUMN_JAVAX",
+        "type" : "String",
+        "description" : "The column_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ID",
+        "type" : "String",
+        "description" : "The ID.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ID_JAVAX",
+        "type" : "String",
+        "description" : "The id_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "GENERATED_VALUE",
+        "type" : "String",
+        "description" : "The generated_value.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ENUMERATED",
+        "type" : "String",
+        "description" : "The enumerated.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ENUMERATED_JAVAX",
+        "type" : "String",
+        "description" : "The enumerated_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "MANY_TO_ONE",
+        "type" : "String",
+        "description" : "The many_to_one.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ONE_TO_MANY",
+        "type" : "String",
+        "description" : "The one_to_many.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "MANY_TO_MANY",
+        "type" : "String",
+        "description" : "The many_to_many.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "ONE_TO_ONE",
+        "type" : "String",
+        "description" : "The one_to_one.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "NOT_NULL",
+        "type" : "String",
+        "description" : "The not_null.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "NOT_NULL_JAVAX",
+        "type" : "String",
+        "description" : "The not_null_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SIZE",
+        "type" : "String",
+        "description" : "The size.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SIZE_JAVAX",
+        "type" : "String",
+        "description" : "The size_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "PATTERN",
+        "type" : "String",
+        "description" : "The pattern.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "PATTERN_JAVAX",
+        "type" : "String",
+        "description" : "The pattern_javax.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2710,6 +5324,62 @@
           "type" : "String"
         }
       }, {
+        "name" : "extractPathFromMapping",
+        "description" : "Extract path from mapping.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "annotation",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "extractMethodFromRequestMapping",
+        "description" : "Extract method from request mapping.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "annotation",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "normalizePath",
+        "description" : "Normalize path.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "basePath",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "methodPath",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
         "name" : "getScheduleInfo",
         "description" : "Extracts cron or fixedRate info from @Scheduled annotation",
         "visibility" : "public",
@@ -2721,6 +5391,89 @@
         "returns" : {
           "type" : "String"
         }
+      }, {
+        "name" : "hasAnnotation",
+        "description" : "Returns whether annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "REST_CONTROLLER",
+        "type" : "String",
+        "description" : "The rest_controller.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "CONTROLLER",
+        "type" : "String",
+        "description" : "The controller.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SERVICE",
+        "type" : "String",
+        "description" : "The service.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "REPOSITORY",
+        "type" : "String",
+        "description" : "The repository.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "COMPONENT",
+        "type" : "String",
+        "description" : "The component.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "CONFIGURATION",
+        "type" : "String",
+        "description" : "The configuration.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "SCHEDULED",
+        "type" : "String",
+        "description" : "The scheduled.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "EVENT_LISTENER",
+        "type" : "String",
+        "description" : "The event_listener.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "TRANSACTIONAL",
+        "type" : "String",
+        "description" : "The transactional.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "CACHEABLE",
+        "type" : "String",
+        "description" : "The cacheable.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "STEREOTYPE_MAP",
+        "type" : "Map<String,io.docspec.processor.framework.SpringFrameworkDetector.StereotypeMapping>",
+        "description" : "The stereotype_map.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -2807,6 +5560,52 @@
           "type" : "double"
         }
       } ],
+      "fields" : [ {
+        "name" : "totalClasses",
+        "type" : "int",
+        "description" : "The total classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "documentedClasses",
+        "type" : "int",
+        "description" : "The documented classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "autoDiscoveredClasses",
+        "type" : "int",
+        "description" : "The auto discovered classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "annotatedClasses",
+        "type" : "int",
+        "description" : "The annotated classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "inferredDescriptions",
+        "type" : "int",
+        "description" : "The inferred descriptions.",
+        "visibility" : "private"
+      }, {
+        "name" : "totalMethods",
+        "type" : "int",
+        "description" : "The total methods.",
+        "visibility" : "private"
+      }, {
+        "name" : "documentedMethods",
+        "type" : "int",
+        "description" : "The documented methods.",
+        "visibility" : "private"
+      }, {
+        "name" : "totalParams",
+        "type" : "int",
+        "description" : "The total params.",
+        "visibility" : "private"
+      }, {
+        "name" : "documentedParams",
+        "type" : "int",
+        "description" : "The documented params.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -2892,6 +5691,22 @@
           "type" : "java.util.Map<java.lang.String,java.lang.Object>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "qualified",
+        "type" : "String",
+        "description" : "The qualified.",
+        "visibility" : "private"
+      }, {
+        "name" : "attributes",
+        "type" : "Map<String,Object>",
+        "description" : "The attributes.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -3039,6 +5854,47 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "groupId",
+        "type" : "String",
+        "description" : "The group id.",
+        "visibility" : "private"
+      }, {
+        "name" : "artifactId",
+        "type" : "String",
+        "description" : "The artifact id.",
+        "visibility" : "private"
+      }, {
+        "name" : "version",
+        "type" : "String",
+        "description" : "The version.",
+        "visibility" : "private"
+      }, {
+        "name" : "language",
+        "type" : "String",
+        "description" : "The language.",
+        "visibility" : "private"
+      }, {
+        "name" : "repository",
+        "type" : "String",
+        "description" : "The repository.",
+        "visibility" : "private"
+      }, {
+        "name" : "sourceUrl",
+        "type" : "String",
+        "description" : "The source url.",
+        "visibility" : "private"
+      }, {
+        "name" : "buildTool",
+        "type" : "String",
+        "description" : "The build tool.",
+        "visibility" : "private"
+      }, {
+        "name" : "frameworks",
+        "type" : "List<String>",
+        "description" : "The frameworks.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -3095,6 +5951,17 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "strategy",
+        "type" : "String",
+        "description" : "The strategy.",
+        "visibility" : "private"
+      }, {
+        "name" : "fields",
+        "type" : "List<String>",
+        "description" : "The fields.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -3274,6 +6141,57 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "key",
+        "type" : "String",
+        "description" : "The key.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "defaultValue",
+        "type" : "String",
+        "description" : "The default value.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "source",
+        "type" : "String",
+        "description" : "The source.",
+        "visibility" : "private"
+      }, {
+        "name" : "usedBy",
+        "type" : "List<String>",
+        "description" : "The used by.",
+        "visibility" : "private"
+      }, {
+        "name" : "affectsFlow",
+        "type" : "List<String>",
+        "description" : "The affects flow.",
+        "visibility" : "private"
+      }, {
+        "name" : "validRange",
+        "type" : "ValidRangeModel",
+        "description" : "The valid range.",
+        "visibility" : "private"
+      }, {
+        "name" : "environment",
+        "type" : "String",
+        "description" : "The environment.",
+        "visibility" : "private"
+      }, {
+        "name" : "affectsStep",
+        "type" : "String",
+        "description" : "The affects step.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -3340,6 +6258,22 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "quantity",
+        "type" : "String",
+        "description" : "The quantity.",
+        "visibility" : "private"
+      }, {
+        "name" : "scope",
+        "type" : "String",
+        "description" : "The scope.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -3405,6 +6339,22 @@
           "type" : "java.util.List<io.docspec.processor.model.MethodParamModel>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "visibility",
+        "type" : "String",
+        "description" : "The visibility.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "params",
+        "type" : "List<io.docspec.processor.model.MethodParamModel>",
+        "description" : "The params.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -3487,6 +6437,27 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "source",
+        "type" : "String",
+        "description" : "The source.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "items",
+        "type" : "List<String>",
+        "description" : "The items.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -3602,6 +6573,37 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "id",
+        "type" : "String",
+        "description" : "The id.",
+        "visibility" : "private"
+      }, {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "attachedTo",
+        "type" : "String",
+        "description" : "The attached to.",
+        "visibility" : "private"
+      }, {
+        "name" : "flow",
+        "type" : "String",
+        "description" : "The flow.",
+        "visibility" : "private"
+      }, {
+        "name" : "inputs",
+        "type" : "List<io.docspec.processor.model.ContextInputModel>",
+        "description" : "The inputs.",
+        "visibility" : "private"
+      }, {
+        "name" : "uses",
+        "type" : "List<io.docspec.processor.model.ContextUsesModel>",
+        "description" : "The uses.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -3674,6 +6676,22 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "artifact",
+        "type" : "String",
+        "description" : "The artifact.",
+        "visibility" : "private"
+      }, {
+        "name" : "what",
+        "type" : "String",
+        "description" : "The what.",
+        "visibility" : "private"
+      }, {
+        "name" : "why",
+        "type" : "String",
+        "description" : "The why.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -3788,6 +6806,37 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "sourceQualified",
+        "type" : "String",
+        "description" : "The source qualified.",
+        "visibility" : "private"
+      }, {
+        "name" : "targetArtifact",
+        "type" : "String",
+        "description" : "The target artifact.",
+        "visibility" : "private"
+      }, {
+        "name" : "targetFlow",
+        "type" : "String",
+        "description" : "The target flow.",
+        "visibility" : "private"
+      }, {
+        "name" : "targetStep",
+        "type" : "String",
+        "description" : "The target step.",
+        "visibility" : "private"
+      }, {
+        "name" : "targetMember",
+        "type" : "String",
+        "description" : "The target member.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "DocInvariant",
@@ -4038,6 +7087,77 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "column",
+        "type" : "String",
+        "description" : "The column.",
+        "visibility" : "private"
+      }, {
+        "name" : "enumType",
+        "type" : "String",
+        "description" : "The enum type.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "primaryKey",
+        "type" : "Boolean",
+        "description" : "The primary key.",
+        "visibility" : "private"
+      }, {
+        "name" : "nullable",
+        "type" : "Boolean",
+        "description" : "The nullable.",
+        "visibility" : "private"
+      }, {
+        "name" : "unique",
+        "type" : "Boolean",
+        "description" : "The unique.",
+        "visibility" : "private"
+      }, {
+        "name" : "length",
+        "type" : "Integer",
+        "description" : "The length.",
+        "visibility" : "private"
+      }, {
+        "name" : "pattern",
+        "type" : "String",
+        "description" : "The pattern.",
+        "visibility" : "private"
+      }, {
+        "name" : "generated",
+        "type" : "Boolean",
+        "description" : "The generated.",
+        "visibility" : "private"
+      }, {
+        "name" : "foreignKey",
+        "type" : "ForeignKeyModel",
+        "description" : "The foreign key.",
+        "visibility" : "private"
+      }, {
+        "name" : "checkConstraint",
+        "type" : "String",
+        "description" : "The check constraint.",
+        "visibility" : "private"
+      }, {
+        "name" : "maxLength",
+        "type" : "Integer",
+        "description" : "The max length.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -4216,6 +7336,57 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "qualified",
+        "type" : "String",
+        "description" : "The qualified.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "table",
+        "type" : "String",
+        "description" : "The table.",
+        "visibility" : "private"
+      }, {
+        "name" : "discoveredFrom",
+        "type" : "String",
+        "description" : "The discovered from.",
+        "visibility" : "private"
+      }, {
+        "name" : "fields",
+        "type" : "List<io.docspec.processor.model.DataModelFieldModel>",
+        "description" : "The fields.",
+        "visibility" : "private"
+      }, {
+        "name" : "relationships",
+        "type" : "List<io.docspec.processor.model.DataModelRelationshipModel>",
+        "description" : "The relationships.",
+        "visibility" : "private"
+      }, {
+        "name" : "jsonShape",
+        "type" : "JsonShapeModel",
+        "description" : "The json shape.",
+        "visibility" : "private"
+      }, {
+        "name" : "usedBy",
+        "type" : "DataModelUsedByModel",
+        "description" : "The used by.",
+        "visibility" : "private"
+      }, {
+        "name" : "indexes",
+        "type" : "List<io.docspec.processor.model.DataModelInfo.IndexModel>",
+        "description" : "The indexes.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -4314,6 +7485,32 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "target",
+        "type" : "String",
+        "description" : "The target.",
+        "visibility" : "private"
+      }, {
+        "name" : "field",
+        "type" : "String",
+        "description" : "The field.",
+        "visibility" : "private"
+      }, {
+        "name" : "mappedBy",
+        "type" : "String",
+        "description" : "The mapped by.",
+        "visibility" : "private"
+      }, {
+        "name" : "cascade",
+        "type" : "String",
+        "description" : "The cascade.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -4379,6 +7576,22 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "keyPattern",
+        "type" : "String",
+        "description" : "The key pattern.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -4462,6 +7675,27 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "pattern",
+        "type" : "String",
+        "description" : "The pattern.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "ttl",
+        "type" : "String",
+        "description" : "The ttl.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -4543,6 +7777,27 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "version",
+        "type" : "String",
+        "description" : "The version.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "date",
+        "type" : "String",
+        "description" : "The date.",
+        "visibility" : "private"
+      }, {
+        "name" : "tables",
+        "type" : "List<String>",
+        "description" : "The tables.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -4722,6 +7977,57 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "id",
+        "type" : "String",
+        "description" : "The id.",
+        "visibility" : "private"
+      }, {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "tables",
+        "type" : "List<String>",
+        "description" : "The tables.",
+        "visibility" : "private"
+      }, {
+        "name" : "schemaSource",
+        "type" : "String",
+        "description" : "The schema source.",
+        "visibility" : "private"
+      }, {
+        "name" : "migrationTool",
+        "type" : "String",
+        "description" : "The migration tool.",
+        "visibility" : "private"
+      }, {
+        "name" : "migrations",
+        "type" : "List<io.docspec.processor.model.DataStoreMigrationModel>",
+        "description" : "The migrations.",
+        "visibility" : "private"
+      }, {
+        "name" : "keyPatterns",
+        "type" : "List<io.docspec.processor.model.DataStoreKeyPatternModel>",
+        "description" : "The key patterns.",
+        "visibility" : "private"
+      }, {
+        "name" : "buckets",
+        "type" : "List<io.docspec.processor.model.DataStoreBucketModel>",
+        "description" : "The buckets.",
+        "visibility" : "private"
+      }, {
+        "name" : "topics",
+        "type" : "List<io.docspec.processor.model.DataStoreTopicModel>",
+        "description" : "The topics.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -4810,6 +8116,27 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "partitionKey",
+        "type" : "String",
+        "description" : "The partition key.",
+        "visibility" : "private"
+      }, {
+        "name" : "schema",
+        "type" : "String",
+        "description" : "The schema.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -5052,6 +8379,77 @@
           "type" : "double",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "mode",
+        "type" : "String",
+        "description" : "The mode.",
+        "visibility" : "private"
+      }, {
+        "name" : "frameworks",
+        "type" : "List<String>",
+        "description" : "The frameworks.",
+        "visibility" : "private"
+      }, {
+        "name" : "scannedPackages",
+        "type" : "List<String>",
+        "description" : "The scanned packages.",
+        "visibility" : "private"
+      }, {
+        "name" : "excludedPackages",
+        "type" : "List<String>",
+        "description" : "The excluded packages.",
+        "visibility" : "private"
+      }, {
+        "name" : "totalClasses",
+        "type" : "int",
+        "description" : "The total classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "documentedClasses",
+        "type" : "int",
+        "description" : "The documented classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "autoDiscoveredClasses",
+        "type" : "int",
+        "description" : "The auto discovered classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "annotatedClasses",
+        "type" : "int",
+        "description" : "The annotated classes.",
+        "visibility" : "private"
+      }, {
+        "name" : "inferredDescriptions",
+        "type" : "int",
+        "description" : "The inferred descriptions.",
+        "visibility" : "private"
+      }, {
+        "name" : "totalMethods",
+        "type" : "int",
+        "description" : "The total methods.",
+        "visibility" : "private"
+      }, {
+        "name" : "documentedMethods",
+        "type" : "int",
+        "description" : "The documented methods.",
+        "visibility" : "private"
+      }, {
+        "name" : "totalParams",
+        "type" : "int",
+        "description" : "The total params.",
+        "visibility" : "private"
+      }, {
+        "name" : "documentedParams",
+        "type" : "int",
+        "description" : "The documented params.",
+        "visibility" : "private"
+      }, {
+        "name" : "coveragePercent",
+        "type" : "double",
+        "description" : "The coverage percent.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "DocInvariant",
@@ -5366,6 +8764,97 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "version",
+        "type" : "String",
+        "description" : "The version.",
+        "visibility" : "private"
+      }, {
+        "name" : "artifact",
+        "type" : "ArtifactModel",
+        "description" : "The artifact.",
+        "visibility" : "private"
+      }, {
+        "name" : "project",
+        "type" : "ProjectModel",
+        "description" : "The project.",
+        "visibility" : "private"
+      }, {
+        "name" : "modules",
+        "type" : "List<io.docspec.processor.model.ModuleModel>",
+        "description" : "The modules.",
+        "visibility" : "private"
+      }, {
+        "name" : "flows",
+        "type" : "List<io.docspec.processor.model.FlowModel>",
+        "description" : "The flows.",
+        "visibility" : "private"
+      }, {
+        "name" : "contexts",
+        "type" : "List<io.docspec.processor.model.ContextModel>",
+        "description" : "The contexts.",
+        "visibility" : "private"
+      }, {
+        "name" : "crossRefs",
+        "type" : "List<io.docspec.processor.model.CrossRefModel>",
+        "description" : "The cross refs.",
+        "visibility" : "private"
+      }, {
+        "name" : "errors",
+        "type" : "List<io.docspec.processor.model.ErrorModel>",
+        "description" : "The errors.",
+        "visibility" : "private"
+      }, {
+        "name" : "events",
+        "type" : "List<io.docspec.processor.model.EventModel>",
+        "description" : "The events.",
+        "visibility" : "private"
+      }, {
+        "name" : "dataModels",
+        "type" : "List<io.docspec.processor.model.DataModelInfo>",
+        "description" : "The data models.",
+        "visibility" : "private"
+      }, {
+        "name" : "dataStores",
+        "type" : "List<io.docspec.processor.model.DataStoreModel>",
+        "description" : "The data stores.",
+        "visibility" : "private"
+      }, {
+        "name" : "configuration",
+        "type" : "List<io.docspec.processor.model.ConfigurationPropertyModel>",
+        "description" : "The configuration.",
+        "visibility" : "private"
+      }, {
+        "name" : "security",
+        "type" : "SecurityModel",
+        "description" : "The security.",
+        "visibility" : "private"
+      }, {
+        "name" : "externalDependencies",
+        "type" : "List<io.docspec.processor.model.ExternalDependencyModel>",
+        "description" : "The external dependencies.",
+        "visibility" : "private"
+      }, {
+        "name" : "observability",
+        "type" : "ObservabilityModel",
+        "description" : "The observability.",
+        "visibility" : "private"
+      }, {
+        "name" : "privacy",
+        "type" : "List<io.docspec.processor.model.PrivacyFieldModel>",
+        "description" : "The privacy.",
+        "visibility" : "private"
+      }, {
+        "name" : "intentGraph",
+        "type" : "IntentGraphModel",
+        "description" : "The intent graph.",
+        "visibility" : "private"
+      }, {
+        "name" : "discovery",
+        "type" : "DiscoveryModel",
+        "description" : "The discovery.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -5444,6 +8933,22 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "method",
+        "type" : "String",
+        "description" : "The method.",
+        "visibility" : "private"
+      }, {
+        "name" : "path",
+        "type" : "String",
+        "description" : "The path.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -5607,6 +9112,52 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "code",
+        "type" : "String",
+        "description" : "The code.",
+        "visibility" : "private"
+      }, {
+        "name" : "exception",
+        "type" : "String",
+        "description" : "The exception.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "resolution",
+        "type" : "String",
+        "description" : "The resolution.",
+        "visibility" : "private"
+      }, {
+        "name" : "since",
+        "type" : "String",
+        "description" : "The since.",
+        "visibility" : "private"
+      }, {
+        "name" : "httpStatus",
+        "type" : "Integer",
+        "description" : "The http status.",
+        "visibility" : "private"
+      }, {
+        "name" : "causes",
+        "type" : "List<String>",
+        "description" : "The causes.",
+        "visibility" : "private"
+      }, {
+        "name" : "thrownBy",
+        "type" : "List<String>",
+        "description" : "The thrown by.",
+        "visibility" : "private"
+      }, {
+        "name" : "endpoints",
+        "type" : "List<String>",
+        "description" : "The endpoints.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -5760,6 +9311,47 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "trigger",
+        "type" : "String",
+        "description" : "The trigger.",
+        "visibility" : "private"
+      }, {
+        "name" : "channel",
+        "type" : "String",
+        "description" : "The channel.",
+        "visibility" : "private"
+      }, {
+        "name" : "deliveryGuarantee",
+        "type" : "String",
+        "description" : "The delivery guarantee.",
+        "visibility" : "private"
+      }, {
+        "name" : "retryPolicy",
+        "type" : "String",
+        "description" : "The retry policy.",
+        "visibility" : "private"
+      }, {
+        "name" : "since",
+        "type" : "String",
+        "description" : "The since.",
+        "visibility" : "private"
+      }, {
+        "name" : "payload",
+        "type" : "EventPayloadModel",
+        "description" : "The payload.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -5833,6 +9425,22 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -5882,6 +9490,17 @@
           "type" : "java.util.List<io.docspec.processor.model.EventPayloadFieldModel>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "fields",
+        "type" : "List<io.docspec.processor.model.EventPayloadFieldModel>",
+        "description" : "The fields.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -5981,6 +9600,32 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "title",
+        "type" : "String",
+        "description" : "The title.",
+        "visibility" : "private"
+      }, {
+        "name" : "language",
+        "type" : "String",
+        "description" : "The language.",
+        "visibility" : "private"
+      }, {
+        "name" : "code",
+        "type" : "String",
+        "description" : "The code.",
+        "visibility" : "private"
+      }, {
+        "name" : "sourceFile",
+        "type" : "String",
+        "description" : "The source file.",
+        "visibility" : "private"
+      }, {
+        "name" : "verified",
+        "type" : "boolean",
+        "description" : "The verified.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -6046,6 +9691,22 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "method",
+        "type" : "String",
+        "description" : "The method.",
+        "visibility" : "private"
+      }, {
+        "name" : "path",
+        "type" : "String",
+        "description" : "The path.",
+        "visibility" : "private"
+      }, {
+        "name" : "usedBy",
+        "type" : "List<String>",
+        "description" : "The used by.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -6177,6 +9838,42 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "baseUrl",
+        "type" : "String",
+        "description" : "The base url.",
+        "visibility" : "private"
+      }, {
+        "name" : "auth",
+        "type" : "String",
+        "description" : "The auth.",
+        "visibility" : "private"
+      }, {
+        "name" : "endpoints",
+        "type" : "List<io.docspec.processor.model.ExternalDependencyEndpointModel>",
+        "description" : "The endpoints.",
+        "visibility" : "private"
+      }, {
+        "name" : "rateLimit",
+        "type" : "RateLimitModel",
+        "description" : "The rate limit.",
+        "visibility" : "private"
+      }, {
+        "name" : "sla",
+        "type" : "String",
+        "description" : "The sla.",
+        "visibility" : "private"
+      }, {
+        "name" : "fallback",
+        "type" : "String",
+        "description" : "The fallback.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -6298,6 +9995,37 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "since",
+        "type" : "String",
+        "description" : "The since.",
+        "visibility" : "private"
+      }, {
+        "name" : "visibility",
+        "type" : "String",
+        "description" : "The visibility.",
+        "visibility" : "private"
+      }, {
+        "name" : "modifiers",
+        "type" : "List<String>",
+        "description" : "The modifiers.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -6395,6 +10123,32 @@
           "type" : "java.util.List<io.docspec.processor.model.FlowStepModel>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "id",
+        "type" : "String",
+        "description" : "The id.",
+        "visibility" : "private"
+      }, {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "trigger",
+        "type" : "String",
+        "description" : "The trigger.",
+        "visibility" : "private"
+      }, {
+        "name" : "steps",
+        "type" : "List<io.docspec.processor.model.FlowStepModel>",
+        "description" : "The steps.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "DocInvariant",
@@ -6500,6 +10254,32 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "store",
+        "type" : "String",
+        "description" : "The store.",
+        "visibility" : "private"
+      }, {
+        "name" : "operation",
+        "type" : "String",
+        "description" : "The operation.",
+        "visibility" : "private"
+      }, {
+        "name" : "tables",
+        "type" : "List<String>",
+        "description" : "The tables.",
+        "visibility" : "private"
+      }, {
+        "name" : "transactional",
+        "type" : "boolean",
+        "description" : "The transactional.",
+        "visibility" : "private"
+      }, {
+        "name" : "cascading",
+        "type" : "boolean",
+        "description" : "The cascading.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -6727,6 +10507,72 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "id",
+        "type" : "String",
+        "description" : "The id.",
+        "visibility" : "private"
+      }, {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "actor",
+        "type" : "String",
+        "description" : "The actor.",
+        "visibility" : "private"
+      }, {
+        "name" : "actorQualified",
+        "type" : "String",
+        "description" : "The actor qualified.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "retryTarget",
+        "type" : "String",
+        "description" : "The retry target.",
+        "visibility" : "private"
+      }, {
+        "name" : "ai",
+        "type" : "boolean",
+        "description" : "The ai.",
+        "visibility" : "private"
+      }, {
+        "name" : "inputs",
+        "type" : "List<String>",
+        "description" : "The inputs.",
+        "visibility" : "private"
+      }, {
+        "name" : "outputs",
+        "type" : "List<String>",
+        "description" : "The outputs.",
+        "visibility" : "private"
+      }, {
+        "name" : "dataStoreOps",
+        "type" : "List<io.docspec.processor.model.FlowStepDataStoreOpModel>",
+        "description" : "The data store ops.",
+        "visibility" : "private"
+      }, {
+        "name" : "configDependencies",
+        "type" : "List<String>",
+        "description" : "The config dependencies.",
+        "visibility" : "private"
+      }, {
+        "name" : "observability",
+        "type" : "FlowStepObservabilityModel",
+        "description" : "The observability.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -6777,6 +10623,17 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "metrics",
+        "type" : "List<String>",
+        "description" : "The metrics.",
+        "visibility" : "private"
+      }, {
+        "name" : "logLevel",
+        "type" : "String",
+        "description" : "The log level.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -6810,6 +10667,12 @@
           "type" : "java.util.List<io.docspec.processor.model.IntentMethodModel>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "methods",
+        "type" : "List<io.docspec.processor.model.IntentMethodModel>",
+        "description" : "The methods.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "DocInvariant",
@@ -6867,6 +10730,17 @@
           "type" : "io.docspec.processor.model.IntentSignalsModel",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "qualified",
+        "type" : "String",
+        "description" : "The qualified.",
+        "visibility" : "private"
+      }, {
+        "name" : "intentSignals",
+        "type" : "IntentSignalsModel",
+        "description" : "The intent signals.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -7094,6 +10968,72 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "nameSemantics",
+        "type" : "NameSemanticsModel",
+        "description" : "The name semantics.",
+        "visibility" : "private"
+      }, {
+        "name" : "guardClauses",
+        "type" : "Integer",
+        "description" : "The guard clauses.",
+        "visibility" : "private"
+      }, {
+        "name" : "branches",
+        "type" : "Integer",
+        "description" : "The branches.",
+        "visibility" : "private"
+      }, {
+        "name" : "dataFlow",
+        "type" : "DataFlowModel",
+        "description" : "The data flow.",
+        "visibility" : "private"
+      }, {
+        "name" : "loopProperties",
+        "type" : "LoopPropertiesModel",
+        "description" : "The loop properties.",
+        "visibility" : "private"
+      }, {
+        "name" : "errorHandling",
+        "type" : "ErrorHandlingModel",
+        "description" : "The error handling.",
+        "visibility" : "private"
+      }, {
+        "name" : "constants",
+        "type" : "List<String>",
+        "description" : "The constants.",
+        "visibility" : "private"
+      }, {
+        "name" : "nullChecks",
+        "type" : "int",
+        "description" : "The null checks.",
+        "visibility" : "private"
+      }, {
+        "name" : "assertions",
+        "type" : "int",
+        "description" : "The assertions.",
+        "visibility" : "private"
+      }, {
+        "name" : "logStatements",
+        "type" : "int",
+        "description" : "The log statements.",
+        "visibility" : "private"
+      }, {
+        "name" : "validationAnnotations",
+        "type" : "int",
+        "description" : "The validation annotations.",
+        "visibility" : "private"
+      }, {
+        "name" : "dependencies",
+        "type" : "List<String>",
+        "description" : "The dependencies.",
+        "visibility" : "private"
+      }, {
+        "name" : "intentDensityScore",
+        "type" : "Double",
+        "description" : "The intent density score.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -7199,6 +11139,32 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "jsonProperty",
+        "type" : "String",
+        "description" : "The json property.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "enumValues",
+        "type" : "List<String>",
+        "description" : "The enum values.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -7264,6 +11230,22 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "fields",
+        "type" : "List<io.docspec.processor.model.JsonShapeFieldModel>",
+        "description" : "The fields.",
+        "visibility" : "private"
+      }, {
+        "name" : "subtypes",
+        "type" : "List<String>",
+        "description" : "The subtypes.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -7362,6 +11344,32 @@
           "type" : "boolean",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "classification",
+        "type" : "String",
+        "description" : "The classification.",
+        "visibility" : "private"
+      }, {
+        "name" : "injectionMechanism",
+        "type" : "String",
+        "description" : "The injection mechanism.",
+        "visibility" : "private"
+      }, {
+        "name" : "required",
+        "type" : "boolean",
+        "description" : "The required.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -7829,6 +11837,147 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "kind",
+        "type" : "String",
+        "description" : "The kind.",
+        "visibility" : "private"
+      }, {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "qualified",
+        "type" : "String",
+        "description" : "The qualified.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "since",
+        "type" : "String",
+        "description" : "The since.",
+        "visibility" : "private"
+      }, {
+        "name" : "deprecated",
+        "type" : "String",
+        "description" : "The deprecated.",
+        "visibility" : "private"
+      }, {
+        "name" : "visibility",
+        "type" : "String",
+        "description" : "The visibility.",
+        "visibility" : "private"
+      }, {
+        "name" : "audience",
+        "type" : "String",
+        "description" : "The audience.",
+        "visibility" : "private"
+      }, {
+        "name" : "discoveredFrom",
+        "type" : "String",
+        "description" : "The discovered from.",
+        "visibility" : "private"
+      }, {
+        "name" : "tags",
+        "type" : "List<String>",
+        "description" : "The tags.",
+        "visibility" : "private"
+      }, {
+        "name" : "modifiers",
+        "type" : "List<String>",
+        "description" : "The modifiers.",
+        "visibility" : "private"
+      }, {
+        "name" : "typeParams",
+        "type" : "List<String>",
+        "description" : "The type params.",
+        "visibility" : "private"
+      }, {
+        "name" : "implementsList",
+        "type" : "List<String>",
+        "description" : "The implements list.",
+        "visibility" : "private"
+      }, {
+        "name" : "extendsType",
+        "type" : "String",
+        "description" : "The extends type.",
+        "visibility" : "private"
+      }, {
+        "name" : "constructors",
+        "type" : "List<io.docspec.processor.model.ConstructorModel>",
+        "description" : "The constructors.",
+        "visibility" : "private"
+      }, {
+        "name" : "methods",
+        "type" : "List<io.docspec.processor.model.MethodModel>",
+        "description" : "The methods.",
+        "visibility" : "private"
+      }, {
+        "name" : "fields",
+        "type" : "List<io.docspec.processor.model.FieldModel>",
+        "description" : "The fields.",
+        "visibility" : "private"
+      }, {
+        "name" : "values",
+        "type" : "List<String>",
+        "description" : "The values.",
+        "visibility" : "private"
+      }, {
+        "name" : "examples",
+        "type" : "List<io.docspec.processor.model.ExampleModel>",
+        "description" : "The examples.",
+        "visibility" : "private"
+      }, {
+        "name" : "annotations",
+        "type" : "List<io.docspec.processor.model.AnnotationModel>",
+        "description" : "The annotations.",
+        "visibility" : "private"
+      }, {
+        "name" : "referencedBy",
+        "type" : "ReferencedByModel",
+        "description" : "The referenced by.",
+        "visibility" : "private"
+      }, {
+        "name" : "kindCategory",
+        "type" : "String",
+        "description" : "The kind category.",
+        "visibility" : "private"
+      }, {
+        "name" : "dependencies",
+        "type" : "List<io.docspec.processor.model.MemberDependencyModel>",
+        "description" : "The dependencies.",
+        "visibility" : "private"
+      }, {
+        "name" : "ordering",
+        "type" : "OrderingModel",
+        "description" : "The ordering.",
+        "visibility" : "private"
+      }, {
+        "name" : "monotonic",
+        "type" : "MonotonicModel",
+        "description" : "The monotonic.",
+        "visibility" : "private"
+      }, {
+        "name" : "conservation",
+        "type" : "ConservationModel",
+        "description" : "The conservation.",
+        "visibility" : "private"
+      }, {
+        "name" : "comparisons",
+        "type" : "List<io.docspec.processor.model.CompareModel>",
+        "description" : "The comparisons.",
+        "visibility" : "private"
+      }, {
+        "name" : "relations",
+        "type" : "List<io.docspec.processor.model.RelationModel>",
+        "description" : "The relations.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -7917,6 +12066,27 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "mechanism",
+        "type" : "String",
+        "description" : "The mechanism.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "code",
+        "type" : "String",
+        "description" : "The code.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -8192,6 +12362,87 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "since",
+        "type" : "String",
+        "description" : "The since.",
+        "visibility" : "private"
+      }, {
+        "name" : "deprecated",
+        "type" : "String",
+        "description" : "The deprecated.",
+        "visibility" : "private"
+      }, {
+        "name" : "visibility",
+        "type" : "String",
+        "description" : "The visibility.",
+        "visibility" : "private"
+      }, {
+        "name" : "modifiers",
+        "type" : "List<String>",
+        "description" : "The modifiers.",
+        "visibility" : "private"
+      }, {
+        "name" : "tags",
+        "type" : "List<String>",
+        "description" : "The tags.",
+        "visibility" : "private"
+      }, {
+        "name" : "params",
+        "type" : "List<io.docspec.processor.model.MethodParamModel>",
+        "description" : "The params.",
+        "visibility" : "private"
+      }, {
+        "name" : "returns",
+        "type" : "ReturnModel",
+        "description" : "The returns.",
+        "visibility" : "private"
+      }, {
+        "name" : "throwsList",
+        "type" : "List<io.docspec.processor.model.MethodModel.ThrowsModel>",
+        "description" : "The throws list.",
+        "visibility" : "private"
+      }, {
+        "name" : "examples",
+        "type" : "List<io.docspec.processor.model.ExampleModel>",
+        "description" : "The examples.",
+        "visibility" : "private"
+      }, {
+        "name" : "endpointMapping",
+        "type" : "EndpointMappingModel",
+        "description" : "The endpoint mapping.",
+        "visibility" : "private"
+      }, {
+        "name" : "errorConditions",
+        "type" : "List<io.docspec.processor.model.MethodErrorConditionModel>",
+        "description" : "The error conditions.",
+        "visibility" : "private"
+      }, {
+        "name" : "performance",
+        "type" : "MethodPerformanceModel",
+        "description" : "The performance.",
+        "visibility" : "private"
+      }, {
+        "name" : "async",
+        "type" : "AsyncModel",
+        "description" : "The async.",
+        "visibility" : "private"
+      }, {
+        "name" : "asyncApi",
+        "type" : "String",
+        "description" : "The async api.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -8297,6 +12548,32 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "defaultValue",
+        "type" : "String",
+        "description" : "The default value.",
+        "visibility" : "private"
+      }, {
+        "name" : "required",
+        "type" : "boolean",
+        "description" : "The required.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -8346,6 +12623,17 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "expectedLatency",
+        "type" : "String",
+        "description" : "The expected latency.",
+        "visibility" : "private"
+      }, {
+        "name" : "bottleneck",
+        "type" : "String",
+        "description" : "The bottleneck.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -8509,6 +12797,52 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "id",
+        "type" : "String",
+        "description" : "The id.",
+        "visibility" : "private"
+      }, {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "since",
+        "type" : "String",
+        "description" : "The since.",
+        "visibility" : "private"
+      }, {
+        "name" : "audience",
+        "type" : "String",
+        "description" : "The audience.",
+        "visibility" : "private"
+      }, {
+        "name" : "stereotype",
+        "type" : "String",
+        "description" : "The stereotype.",
+        "visibility" : "private"
+      }, {
+        "name" : "discoveredFrom",
+        "type" : "String",
+        "description" : "The discovered from.",
+        "visibility" : "private"
+      }, {
+        "name" : "framework",
+        "type" : "String",
+        "description" : "The framework.",
+        "visibility" : "private"
+      }, {
+        "name" : "members",
+        "type" : "List<io.docspec.processor.model.MemberModel>",
+        "description" : "The members.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -8582,6 +12916,22 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "field",
+        "type" : "String",
+        "description" : "The field.",
+        "visibility" : "private"
+      }, {
+        "name" : "direction",
+        "type" : "String",
+        "description" : "The direction.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -8631,6 +12981,17 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "path",
+        "type" : "String",
+        "description" : "The path.",
+        "visibility" : "private"
+      }, {
+        "name" : "checks",
+        "type" : "List<String>",
+        "description" : "The checks.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -8714,6 +13075,27 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "labels",
+        "type" : "List<String>",
+        "description" : "The labels.",
+        "visibility" : "private"
+      }, {
+        "name" : "emittedBy",
+        "type" : "List<String>",
+        "description" : "The emitted by.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -8779,6 +13161,22 @@
           "type" : "java.util.List<io.docspec.processor.model.ObservabilityHealthCheckModel>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "metrics",
+        "type" : "List<io.docspec.processor.model.ObservabilityMetricModel>",
+        "description" : "The metrics.",
+        "visibility" : "private"
+      }, {
+        "name" : "traces",
+        "type" : "List<io.docspec.processor.model.ObservabilityTraceModel>",
+        "description" : "The traces.",
+        "visibility" : "private"
+      }, {
+        "name" : "healthChecks",
+        "type" : "List<io.docspec.processor.model.ObservabilityHealthCheckModel>",
+        "description" : "The health checks.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "DocInvariant",
@@ -8853,6 +13251,22 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "spanName",
+        "type" : "String",
+        "description" : "The span name.",
+        "visibility" : "private"
+      }, {
+        "name" : "service",
+        "type" : "String",
+        "description" : "The service.",
+        "visibility" : "private"
+      }, {
+        "name" : "parentSpan",
+        "type" : "String",
+        "description" : "The parent span.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -8918,6 +13332,22 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "strategy",
+        "type" : "String",
+        "description" : "The strategy.",
+        "visibility" : "private"
+      }, {
+        "name" : "field",
+        "type" : "String",
+        "description" : "The field.",
+        "visibility" : "private"
+      }, {
+        "name" : "comparator",
+        "type" : "String",
+        "description" : "The comparator.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -9065,6 +13495,47 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "field",
+        "type" : "String",
+        "description" : "The field.",
+        "visibility" : "private"
+      }, {
+        "name" : "piiType",
+        "type" : "String",
+        "description" : "The pii type.",
+        "visibility" : "private"
+      }, {
+        "name" : "retention",
+        "type" : "String",
+        "description" : "The retention.",
+        "visibility" : "private"
+      }, {
+        "name" : "gdprBasis",
+        "type" : "String",
+        "description" : "The gdpr basis.",
+        "visibility" : "private"
+      }, {
+        "name" : "encrypted",
+        "type" : "boolean",
+        "description" : "The encrypted.",
+        "visibility" : "private"
+      }, {
+        "name" : "neverLog",
+        "type" : "boolean",
+        "description" : "The never log.",
+        "visibility" : "private"
+      }, {
+        "name" : "neverReturn",
+        "type" : "boolean",
+        "description" : "The never return.",
+        "visibility" : "private"
+      }, {
+        "name" : "maskedInResponses",
+        "type" : "boolean",
+        "description" : "The masked in responses.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -9195,6 +13666,42 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "name",
+        "type" : "String",
+        "description" : "The name.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      }, {
+        "name" : "homepage",
+        "type" : "String",
+        "description" : "The homepage.",
+        "visibility" : "private"
+      }, {
+        "name" : "license",
+        "type" : "String",
+        "description" : "The license.",
+        "visibility" : "private"
+      }, {
+        "name" : "authors",
+        "type" : "List<String>",
+        "description" : "The authors.",
+        "visibility" : "private"
+      }, {
+        "name" : "tags",
+        "type" : "List<String>",
+        "description" : "The tags.",
+        "visibility" : "private"
+      }, {
+        "name" : "audiences",
+        "type" : "List<String>",
+        "description" : "The audiences.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -9244,6 +13751,17 @@
           "type" : "java.lang.String",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "requests",
+        "type" : "Integer",
+        "description" : "The requests.",
+        "visibility" : "private"
+      }, {
+        "name" : "window",
+        "type" : "String",
+        "description" : "The window.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -9310,6 +13828,22 @@
           "type" : "java.util.List<java.lang.String>",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "endpoints",
+        "type" : "List<String>",
+        "description" : "The endpoints.",
+        "visibility" : "private"
+      }, {
+        "name" : "flows",
+        "type" : "List<String>",
+        "description" : "The flows.",
+        "visibility" : "private"
+      }, {
+        "name" : "contexts",
+        "type" : "List<String>",
+        "description" : "The contexts.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -9393,6 +13927,27 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "type",
+        "type" : "String",
+        "description" : "The type.",
+        "visibility" : "private"
+      }, {
+        "name" : "target",
+        "type" : "String",
+        "description" : "The target.",
+        "visibility" : "private"
+      }, {
+        "name" : "via",
+        "type" : "String",
+        "description" : "The via.",
+        "visibility" : "private"
+      }, {
+        "name" : "description",
+        "type" : "String",
+        "description" : "The description.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "JsonInclude",
         "qualified" : "com.fasterxml.jackson.annotation.JsonInclude",
@@ -9474,6 +14029,27 @@
           "type" : "io.docspec.processor.model.RateLimitModel",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "path",
+        "type" : "String",
+        "description" : "The path.",
+        "visibility" : "private"
+      }, {
+        "name" : "rules",
+        "type" : "List<String>",
+        "description" : "The rules.",
+        "visibility" : "private"
+      }, {
+        "name" : "isPublic",
+        "type" : "boolean",
+        "description" : "The is public.",
+        "visibility" : "private"
+      }, {
+        "name" : "rateLimit",
+        "type" : "RateLimitModel",
+        "description" : "The rate limit.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -9557,6 +14133,27 @@
           "required" : true
         } ]
       } ],
+      "fields" : [ {
+        "name" : "authMechanism",
+        "type" : "String",
+        "description" : "The auth mechanism.",
+        "visibility" : "private"
+      }, {
+        "name" : "endpoints",
+        "type" : "List<io.docspec.processor.model.SecurityEndpointRuleModel>",
+        "description" : "The endpoints.",
+        "visibility" : "private"
+      }, {
+        "name" : "roles",
+        "type" : "List<String>",
+        "description" : "The roles.",
+        "visibility" : "private"
+      }, {
+        "name" : "scopes",
+        "type" : "List<String>",
+        "description" : "The scopes.",
+        "visibility" : "private"
+      } ],
       "annotations" : [ {
         "name" : "DocInvariant",
         "qualified" : "io.docspec.annotation.DocInvariant",
@@ -9613,6 +14210,17 @@
           "type" : "java.lang.Double",
           "required" : true
         } ]
+      } ],
+      "fields" : [ {
+        "name" : "min",
+        "type" : "Double",
+        "description" : "The min.",
+        "visibility" : "private"
+      }, {
+        "name" : "max",
+        "type" : "Double",
+        "description" : "The max.",
+        "visibility" : "private"
       } ],
       "annotations" : [ {
         "name" : "JsonInclude",
@@ -9686,6 +14294,13 @@
         "returns" : {
           "type" : "String"
         }
+      } ],
+      "fields" : [ {
+        "name" : "mapper",
+        "type" : "ObjectMapper",
+        "description" : "The mapper.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -9878,6 +14493,22 @@
           "type" : "List<io.docspec.processor.model.CrossRefModel>"
         }
       }, {
+        "name" : "readSingleDocUses",
+        "description" : "Gets a single doc uses.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "CrossRefModel"
+        }
+      }, {
         "name" : "readDocContext",
         "description" : "Gets a doc context from the given element.",
         "since" : "3.0.0",
@@ -9941,6 +14572,18 @@
         } ],
         "returns" : {
           "type" : "List<io.docspec.processor.model.ExampleModel>"
+        }
+      }, {
+        "name" : "readSingleExample",
+        "description" : "Gets a single example from the given mirror.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "ExampleModel"
         }
       }, {
         "name" : "hasDocPII",
@@ -10241,6 +14884,377 @@
         "returns" : {
           "type" : "String"
         }
+      }, {
+        "name" : "hasAnnotation",
+        "description" : "Returns whether annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "findAnnotation",
+        "description" : "Finds an annotation.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        }, {
+          "name" : "annotationQualifiedName",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "AnnotationMirror"
+        }
+      }, {
+        "name" : "getStringValue",
+        "description" : "Gets a string value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "getIntValue",
+        "description" : "Gets an int value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Integer"
+        }
+      }, {
+        "name" : "getBooleanValue",
+        "description" : "Gets a boolean value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "Boolean"
+        }
+      }, {
+        "name" : "getStringArrayValue",
+        "description" : "Gets a string array value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      }, {
+        "name" : "getAnnotationArrayValue",
+        "description" : "Gets an annotation array value.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "mirror",
+          "type" : "javax.lang.model.element.AnnotationMirror",
+          "required" : true
+        }, {
+          "name" : "key",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<? extends javax.lang.model.element.AnnotationValue>"
+        }
+      }, {
+        "name" : "simplifyType",
+        "description" : "Simplify type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fullType",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "PKG",
+        "type" : "String",
+        "description" : "The PKG.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_MODULE",
+        "type" : "String",
+        "description" : "The doc_module.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_METHOD",
+        "type" : "String",
+        "description" : "The doc_method.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_FIELD",
+        "type" : "String",
+        "description" : "The doc_field.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_TAGS",
+        "type" : "String",
+        "description" : "The doc_tags.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_OPTIONAL",
+        "type" : "String",
+        "description" : "The doc_optional.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_HIDDEN",
+        "type" : "String",
+        "description" : "The doc_hidden.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_AUDIENCE",
+        "type" : "String",
+        "description" : "The doc_audience.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_FLOW",
+        "type" : "String",
+        "description" : "The doc_flow.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_USES",
+        "type" : "String",
+        "description" : "The doc_uses.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_USES_ALL",
+        "type" : "String",
+        "description" : "The doc_uses_all.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_CONTEXT",
+        "type" : "String",
+        "description" : "The doc_context.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_ERROR",
+        "type" : "String",
+        "description" : "The doc_error.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_EVENT",
+        "type" : "String",
+        "description" : "The doc_event.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_ENDPOINT",
+        "type" : "String",
+        "description" : "The doc_endpoint.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_EXAMPLE",
+        "type" : "String",
+        "description" : "The doc_example.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_EXAMPLES",
+        "type" : "String",
+        "description" : "The doc_examples.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_SPEC_EXAMPLE",
+        "type" : "String",
+        "description" : "The doc_spec_example.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_PII",
+        "type" : "String",
+        "description" : "The doc_pii.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_SENSITIVE",
+        "type" : "String",
+        "description" : "The doc_sensitive.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_INTENTIONAL",
+        "type" : "String",
+        "description" : "The doc_intentional.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_PRESERVES",
+        "type" : "String",
+        "description" : "The doc_preserves.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_ORDERING",
+        "type" : "String",
+        "description" : "The doc_ordering.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_INVARIANT",
+        "type" : "String",
+        "description" : "The doc_invariant.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_MONOTONIC",
+        "type" : "String",
+        "description" : "The doc_monotonic.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_CONSERVATION",
+        "type" : "String",
+        "description" : "The doc_conservation.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_IDEMPOTENT",
+        "type" : "String",
+        "description" : "The doc_idempotent.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_DETERMINISTIC",
+        "type" : "String",
+        "description" : "The doc_deterministic.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_STATE_MACHINE",
+        "type" : "String",
+        "description" : "The doc_state_machine.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_BOUNDARY",
+        "type" : "String",
+        "description" : "The doc_boundary.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_COMPARE",
+        "type" : "String",
+        "description" : "The doc_compare.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_RELATION",
+        "type" : "String",
+        "description" : "The doc_relation.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_TEST_STRATEGY",
+        "type" : "String",
+        "description" : "The doc_test_strategy.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_TEST_SKIP",
+        "type" : "String",
+        "description" : "The doc_test_skip.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_PERFORMANCE",
+        "type" : "String",
+        "description" : "The doc_performance.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_WEBSOCKET",
+        "type" : "String",
+        "description" : "The doc_websocket.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_COMMAND",
+        "type" : "String",
+        "description" : "The doc_command.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_ASYNC_API",
+        "type" : "String",
+        "description" : "The doc_async_api.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_GRAPHQL",
+        "type" : "String",
+        "description" : "The doc_graphql.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "DOC_GRPC",
+        "type" : "String",
+        "description" : "The doc_grpc.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
+      }, {
+        "name" : "processingEnv",
+        "type" : "ProcessingEnvironment",
+        "description" : "The processing env.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -10309,6 +15323,177 @@
         "returns" : {
           "type" : "String"
         }
+      }, {
+        "name" : "formatWithArticle",
+        "description" : "Format with article.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "verb",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "rest",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "paramNames",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        }, {
+          "name" : "paramTypes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "formatFind",
+        "description" : "Format find.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "rest",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "paramNames",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        }, {
+          "name" : "paramTypes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "formatDelete",
+        "description" : "Format delete.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "rest",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "paramNames",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        }, {
+          "name" : "paramTypes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "addContext",
+        "description" : "Adds a context.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "rest",
+          "type" : "java.lang.String",
+          "required" : true
+        }, {
+          "name" : "paramNames",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        }, {
+          "name" : "paramTypes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "paramContext",
+        "description" : "Param context.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "paramNames",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        }, {
+          "name" : "paramTypes",
+          "type" : "java.util.List<java.lang.String>",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "splitCamelCase",
+        "description" : "Split camel case.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "name",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String[]"
+        }
+      }, {
+        "name" : "joinWords",
+        "description" : "Join words.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "words",
+          "type" : "java.lang.String[]",
+          "required" : true
+        }, {
+          "name" : "startIndex",
+          "type" : "int",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "splitAndLower",
+        "description" : "Split and lower.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "camelCase",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "capitalize",
+        "description" : "Capitalize.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "s",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "aOrAn",
+        "description" : "A or an.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "noun",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "CAMEL_CASE",
+        "type" : "Pattern",
+        "description" : "The camel_case.",
+        "visibility" : "private",
+        "modifiers" : [ "final", "static" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -10397,6 +15582,26 @@
         "returns" : {
           "type" : "String"
         }
+      }, {
+        "name" : "appendDocTree",
+        "description" : "Append doc tree.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "sb",
+          "type" : "java.lang.StringBuilder",
+          "required" : true
+        }, {
+          "name" : "tree",
+          "type" : "com.sun.source.doctree.DocTree",
+          "required" : true
+        } ]
+      } ],
+      "fields" : [ {
+        "name" : "docTrees",
+        "type" : "DocTrees",
+        "description" : "The doc trees.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -10468,6 +15673,133 @@
         "returns" : {
           "type" : "MethodModel"
         }
+      }, {
+        "name" : "toConstructorModel",
+        "description" : "To constructor model.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "constructor",
+          "type" : "javax.lang.model.element.ExecutableElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "ConstructorModel"
+        }
+      }, {
+        "name" : "toFieldModel",
+        "description" : "To field model.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "field",
+          "type" : "javax.lang.model.element.VariableElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "FieldModel"
+        }
+      }, {
+        "name" : "shouldInclude",
+        "description" : "Returns whether include.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "shouldIncludeMember",
+        "description" : "Returns whether include member.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "isPublicOrProtected",
+        "description" : "Returns whether public or protected.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "boolean"
+        }
+      }, {
+        "name" : "resolveKind",
+        "description" : "Resolve kind.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.TypeElement",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "resolveVisibility",
+        "description" : "Resolve visibility.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      }, {
+        "name" : "resolveModifiers",
+        "description" : "Resolve modifiers.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "element",
+          "type" : "javax.lang.model.element.Element",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "List<String>"
+        }
+      }, {
+        "name" : "simplifyType",
+        "description" : "Simplify type.",
+        "visibility" : "private",
+        "params" : [ {
+          "name" : "fullType",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "processingEnv",
+        "type" : "ProcessingEnvironment",
+        "description" : "The processing env.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "packageFilter",
+        "type" : "PackageFilter",
+        "description" : "The package filter.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "config",
+        "type" : "ProcessorConfig",
+        "description" : "The config.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
       } ],
       "annotations" : [ {
         "name" : "DocBoundary",
@@ -10511,6 +15843,32 @@
         "returns" : {
           "type" : "boolean"
         }
+      }, {
+        "name" : "globToRegex",
+        "description" : "Glob to regex.",
+        "visibility" : "package-private",
+        "modifiers" : [ "static" ],
+        "params" : [ {
+          "name" : "glob",
+          "type" : "java.lang.String",
+          "required" : true
+        } ],
+        "returns" : {
+          "type" : "String"
+        }
+      } ],
+      "fields" : [ {
+        "name" : "includePatterns",
+        "type" : "List<regex.Pattern>",
+        "description" : "The include patterns.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
+      }, {
+        "name" : "excludePatterns",
+        "type" : "List<regex.Pattern>",
+        "description" : "The exclude patterns.",
+        "visibility" : "private",
+        "modifiers" : [ "final" ]
       } ]
     } ]
   } ],
@@ -30086,17 +35444,17 @@
           "object" : "include",
           "intent" : "predicate"
         },
-        "branches" : 2,
+        "branches" : 1,
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
-        "constants" : [ "CLASS", "INTERFACE", "ENUM", "RECORD", "ANNOTATION_TYPE", "PUBLIC" ],
+        "constants" : [ "CLASS", "INTERFACE", "ENUM", "RECORD", "ANNOTATION_TYPE" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "dependencies" : [ "io.docspec.processor.scanner.PackageFilter", "io.docspec.processor.config.ProcessorConfig" ],
-        "intentDensityScore" : 4.3
+        "intentDensityScore" : 3.9
       }
     }, {
       "qualified" : "io.docspec.processor.scanner.AutoDiscoveryScanner.shouldIncludeMember",
@@ -30106,20 +35464,19 @@
           "object" : "include member",
           "intent" : "predicate"
         },
-        "branches" : 4,
+        "branches" : 2,
         "dataFlow" : {
           "reads" : [ "return:scalar" ]
         },
         "loopProperties" : {
           "hasEnhancedFor" : true
         },
-        "constants" : [ "PUBLIC", "PROTECTED" ],
         "nullChecks" : 0,
         "assertions" : 0,
         "logStatements" : 0,
         "validationAnnotations" : 0,
         "dependencies" : [ "io.docspec.processor.scanner.PackageFilter", "io.docspec.processor.config.ProcessorConfig" ],
-        "intentDensityScore" : 4.72
+        "intentDensityScore" : 4.12
       }
     }, {
       "qualified" : "io.docspec.processor.scanner.AutoDiscoveryScanner.isPublicOrProtected",
@@ -30268,11 +35625,11 @@
     "documentedClasses" : 103,
     "autoDiscoveredClasses" : 103,
     "annotatedClasses" : 0,
-    "inferredDescriptions" : 997,
-    "totalMethods" : 914,
-    "documentedMethods" : 914,
-    "totalParams" : 596,
-    "documentedParams" : 20,
+    "inferredDescriptions" : 1690,
+    "totalMethods" : 1061,
+    "documentedMethods" : 1061,
+    "totalParams" : 861,
+    "documentedParams" : 29,
     "coveragePercent" : 100.0
   }
 }
