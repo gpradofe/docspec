@@ -10,6 +10,7 @@ interface SidebarProps {
   lens: "docs" | "tests";
   artifacts?: Array<{ label: string; color?: string; version?: string }>;
   activeArtifact?: string;
+  selectedArtifacts?: Set<string>;
   onArtifactChange?: (label: string) => void;
 }
 
@@ -86,12 +87,16 @@ export function Sidebar({
   lens,
   artifacts,
   activeArtifact,
+  selectedArtifacts,
   onArtifactChange,
 }: SidebarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const current =
-    artifacts?.find((a) => a.label === activeArtifact) || artifacts?.[0];
+  const selectedCount = selectedArtifacts?.size ?? artifacts?.length ?? 0;
+  const allSelected = selectedCount === (artifacts?.length ?? 0);
+  const current = allSelected
+    ? null  // show "All Projects" when all selected
+    : artifacts?.find((a) => selectedArtifacts?.has(a.label)) || artifacts?.[0];
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -168,7 +173,7 @@ export function Sidebar({
                 flexShrink: 0,
               }}
             >
-              {(current?.label || "P").charAt(0).toUpperCase()}
+              {allSelected ? "A" : (current?.label || "P").charAt(0).toUpperCase()}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
@@ -181,9 +186,9 @@ export function Sidebar({
                   textOverflow: "ellipsis",
                 }}
               >
-                {current?.label || "Select project"}
+                {allSelected ? "All Projects" : selectedCount > 1 ? `${selectedCount} Projects` : (current?.label || "Select project")}
               </div>
-              {current?.version && (
+              {!allSelected && selectedCount === 1 && current?.version && (
                 <div
                   style={{
                     fontSize: 10.5,
@@ -234,13 +239,13 @@ export function Sidebar({
               }}
             >
               {artifacts.map((artifact) => {
-                const isActive = artifact.label === activeArtifact;
+                const isSelected = selectedArtifacts?.has(artifact.label) ?? true;
                 return (
                   <button
                     key={artifact.label}
                     onClick={() => {
                       onArtifactChange?.(artifact.label);
-                      setDropdownOpen(false);
+                      // Don't close — multi-select
                     }}
                     style={{
                       display: "flex",
@@ -248,8 +253,8 @@ export function Sidebar({
                       gap: 8,
                       width: "100%",
                       padding: "8px 8px",
-                      background: isActive
-                        ? "rgba(129,140,248,0.08)"
+                      background: isSelected
+                        ? (artifact.color || T.accent) + "14"
                         : "transparent",
                       border: "none",
                       borderRadius: 7,
@@ -260,30 +265,34 @@ export function Sidebar({
                       color: T.text,
                     }}
                     onMouseEnter={(e) => {
-                      if (!isActive)
+                      if (!isSelected)
                         e.currentTarget.style.background = T.surfaceHover;
                     }}
                     onMouseLeave={(e) => {
-                      if (!isActive)
+                      if (!isSelected)
                         e.currentTarget.style.background = "transparent";
                     }}
                   >
+                    {/* Selection indicator */}
                     <div
                       style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 6,
-                        background: `linear-gradient(135deg,${artifact.color || T.accent},${(artifact.color || T.accent)}90)`,
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                        border: `2px solid ${artifact.color || T.accent}`,
+                        background: isSelected ? (artifact.color || T.accent) : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "#fff",
-                        fontSize: 11,
-                        fontWeight: 700,
                         flexShrink: 0,
+                        transition: "all 0.15s",
                       }}
                     >
-                      {artifact.label.charAt(0).toUpperCase()}
+                      {isSelected && (
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div

@@ -162,6 +162,7 @@ export function Layout({
               lens={lens}
               artifacts={artifacts}
               activeArtifact={selectedArtifacts.size === allArtifactLabels.length ? undefined : [...selectedArtifacts][0]}
+              selectedArtifacts={selectedArtifacts}
               onArtifactChange={(label) => {
                 toggleArtifact(label);
               }}
