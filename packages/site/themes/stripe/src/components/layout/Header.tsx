@@ -12,6 +12,7 @@ interface HeaderProps {
   onOpenSearch?: () => void;
   artifacts?: Array<{ label: string; color?: string }>;
   activeArtifact?: string;
+  selectedArtifacts?: Set<string>;
   onArtifactChange?: (label: string) => void;
 }
 
@@ -24,6 +25,7 @@ export function Header({
   onOpenSearch,
   artifacts,
   activeArtifact,
+  selectedArtifacts,
   onArtifactChange,
 }: HeaderProps) {
   return (
@@ -223,22 +225,25 @@ export function Header({
           }}
         >
           {artifacts.map((artifact) => {
-            const isActive = artifact.label === activeArtifact;
+            const isSelected = selectedArtifacts
+              ? selectedArtifacts.has(artifact.label)
+              : artifact.label === activeArtifact;
             return (
               <div
                 key={artifact.label}
                 onClick={() => onArtifactChange?.(artifact.label)}
-                title={artifact.label}
+                title={`${artifact.label}${isSelected ? " (selected)" : ""}`}
                 style={{
-                  width: 8,
-                  height: 8,
+                  width: 10,
+                  height: 10,
                   borderRadius: "50%",
                   cursor: "pointer",
-                  background: isActive
+                  background: isSelected
                     ? artifact.color || T.accent
-                    : T.textFaint,
+                    : "transparent",
+                  border: `2px solid ${artifact.color || T.accent}`,
                   transition: "all 0.2s",
-                  transform: isActive ? "scale(1.5)" : "scale(1)",
+                  opacity: isSelected ? 1 : 0.35,
                 }}
               />
             );

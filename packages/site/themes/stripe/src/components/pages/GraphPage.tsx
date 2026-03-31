@@ -589,26 +589,7 @@ export function GraphPage({ data }: GraphPageProps) {
         ))}
       </div>
 
-      {/* ── Scope filter ──────────────────────────────────────────── */}
-      {allArtifacts.length > 1 && (
-        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: T.textDim, marginRight: 4 }}>Scope:</span>
-          <FilterBtn
-            label="All"
-            active={scopeFilter.size === allArtifacts.length}
-            onClick={() => setScopeFilter(new Set(allArtifacts))}
-          />
-          {allArtifacts.map((art) => (
-            <FilterBtn
-              key={art}
-              label={art}
-              active={scopeFilter.has(art)}
-              onClick={() => toggleScope(art)}
-              color={getArtifactColor(art, allArtifacts)}
-            />
-          ))}
-        </div>
-      )}
+      {/* Scope is controlled by the project selector in the header — no separate scope filter here */}
 
       {/* ── Edge type filter ──────────────────────────────────────── */}
       <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>

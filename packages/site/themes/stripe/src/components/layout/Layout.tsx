@@ -148,6 +148,7 @@ export function Layout({
           onOpenSearch={onOpenSearch}
           artifacts={artifacts}
           activeArtifact={selectedArtifacts.size === allArtifactLabels.length ? undefined : [...selectedArtifacts][0]}
+          selectedArtifacts={selectedArtifacts}
           onArtifactChange={(label) => {
             toggleArtifact(label);
             onArtifactChange?.(label);
