@@ -166,8 +166,8 @@ describe('generateArtifactPages', () => {
     const graphPages = pages.filter((p) => p.type === PageType.GRAPH);
 
     expect(graphPages).toHaveLength(1);
-    expect(graphPages[0].title).toBe('Dependency Graph');
-    expect(graphPages[0].slug).toBe('/architecture/graph');
+    expect(graphPages[0].title).toContain('Dependency Graph');
+    expect(graphPages[0].slug).toContain('/graph');
   });
 
   it('does not produce a graph page for empty modules and no crossRefs', () => {

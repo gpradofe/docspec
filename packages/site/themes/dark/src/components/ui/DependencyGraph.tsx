@@ -29,7 +29,11 @@ export function DependencyGraph({ nodes, edges }: DependencyGraphProps) {
   const TYPE_COLORS: Record<string, string> = {
     artifact: "#58a6ff",
     module: "#3fb950",
-    member: "#8b949e",
+    class: "#8b949e",
+    interface: "#58a6ff",
+    enum: "#d29922",
+    record: "#3fb950",
+    annotation: "#f778ba",
   };
 
   return (
@@ -53,7 +57,7 @@ export function DependencyGraph({ nodes, edges }: DependencyGraphProps) {
 
       {nodes.map((node, i) => {
         const pos = positions[i];
-        const color = TYPE_COLORS[node.type] || TYPE_COLORS.member;
+        const color = TYPE_COLORS[node.type] || TYPE_COLORS.class;
         return (
           <g key={node.id}>
             <circle

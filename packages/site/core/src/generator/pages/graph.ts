@@ -1,14 +1,24 @@
 /**
  * Graph page generator.
  *
- * Produces a GeneratedPage containing a dependency graph built from
- * cross-references between artifacts, modules, and members.
+ * Produces GeneratedPage instances containing dependency graphs built
+ * from structural relationships between members: extends, implements,
+ * field types, method parameter types, return types, constructor
+ * parameter types, and cross-reference annotations.
+ *
+ * Generates:
+ *  - One combined graph at /architecture/graph with ALL artifacts
+ *  - Per-artifact graphs at /architecture/{artifact-slug}/graph
  */
 
-import type { CrossRef, Module } from "../../types/docspec.js";
+import type { Module, CrossRef } from "../../types/docspec.js";
 import type { GeneratedPage, GraphPageData, GraphNode, GraphEdge } from "../../types/page.js";
 import { PageType } from "../../types/page.js";
 import { graphPageSlug } from "../slug.js";
+
+// ---------------------------------------------------------------------------
+// Public input types
+// ---------------------------------------------------------------------------
 
 export interface GraphPageInput {
   modules: Module[];
@@ -16,106 +26,300 @@ export interface GraphPageInput {
   artifactLabel: string;
 }
 
+export interface CombinedGraphPageInput {
+  artifacts: { modules: Module[]; crossRefs: CrossRef[]; artifactLabel: string }[];
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 /**
- * Build a graph from modules and cross-references.
+ * Extract the base type from a possibly-generic type string.
  *
- * Nodes are created for each module and each member. Edges are created
- * from cross-reference entries linking source members to their targets.
+ * - "List<io.docspec.Foo>"           -> "io.docspec.Foo"
+ * - "Map<String, io.docspec.Bar>"    -> "Map" (multi-param generic, skip)
+ * - "io.docspec.Foo"                 -> "io.docspec.Foo"
+ * - "Optional<io.docspec.Baz>"       -> "io.docspec.Baz"
+ * - "String"                         -> "String"
+ *
+ * For single-param generics (List, Set, Optional, Collection, etc.), we
+ * extract the inner type. For multi-param generics (Map), we return the
+ * outer type so it won't match any documented member.
  */
-function buildGraph(
-  modules: Module[],
-  crossRefs: CrossRef[],
-  artifactLabel: string,
-): { nodes: GraphNode[]; edges: GraphEdge[] } {
+function extractBaseType(type: string): string {
+  if (!type) return type;
+
+  // Check for single-parameter generic: SomeType<InnerType>
+  const genericMatch = type.match(/^([a-zA-Z0-9_.]+)<\s*([a-zA-Z0-9_.]+)\s*>$/);
+  if (genericMatch) {
+    // Single type param -- return the inner type
+    return genericMatch[2];
+  }
+
+  // If it has angle brackets but more complex (Map<K,V>, etc.), return outer
+  const simpleMatch = type.match(/^([a-zA-Z0-9_.]+)/);
+  return simpleMatch ? simpleMatch[1] : type;
+}
+
+/**
+ * Derive a package-level group from a qualified name.
+ * e.g. "io.docspec.processor.dsti.NamingAnalyzer" -> "dsti"
+ *      "io.docspec.annotation.DocModule" -> "annotation"
+ */
+function deriveGroup(qualified: string): string {
+  const parts = qualified.split(".");
+  if (parts.length >= 2) {
+    // Use the second-to-last segment (the immediate package)
+    return parts[parts.length - 2];
+  }
+  return parts[0] || "default";
+}
+
+/**
+ * Map a member kind to a GraphNode type.
+ */
+function memberKindToNodeType(kind: string): GraphNode["type"] {
+  switch (kind) {
+    case "class": return "class";
+    case "interface": return "interface";
+    case "enum": return "enum";
+    case "record": return "record";
+    case "annotation": return "annotation";
+    default: return "class";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Edge extraction
+// ---------------------------------------------------------------------------
+
+interface BuildGraphOptions {
+  modules: Module[];
+  crossRefs: CrossRef[];
+  artifactLabel: string;
+}
+
+function buildNodesAndEdges(
+  inputs: BuildGraphOptions[],
+): { nodes: GraphNode[]; edges: GraphEdge[]; artifactLabels: string[] } {
   const nodes: GraphNode[] = [];
   const nodeIds = new Set<string>();
   const edges: GraphEdge[] = [];
+  const qualifiedNames = new Set<string>();
+  const artifactLabels: string[] = [];
 
-  // Add module nodes and member nodes
-  for (const mod of modules) {
-    if (!nodeIds.has(mod.id)) {
-      nodes.push({
-        id: mod.id,
-        label: mod.name ?? mod.id,
-        type: "module",
-        artifact: artifactLabel,
-      });
-      nodeIds.add(mod.id);
+  // First pass: collect all qualified names across all artifacts
+  for (const { modules, artifactLabel } of inputs) {
+    if (!artifactLabels.includes(artifactLabel)) {
+      artifactLabels.push(artifactLabel);
+    }
+    for (const mod of modules) {
+      for (const member of mod.members ?? []) {
+        qualifiedNames.add(member.qualified);
+      }
+    }
+  }
+
+  // Second pass: build nodes and extract edges
+  for (const { modules, crossRefs, artifactLabel } of inputs) {
+    for (const mod of modules) {
+      for (const member of mod.members ?? []) {
+        const sourceId = member.qualified;
+
+        // Add node if not yet present
+        if (!nodeIds.has(sourceId)) {
+          nodes.push({
+            id: sourceId,
+            label: member.name,
+            type: memberKindToNodeType(member.kind),
+            artifact: artifactLabel,
+            module: mod.id,
+            group: deriveGroup(sourceId),
+          });
+          nodeIds.add(sourceId);
+        }
+
+        // ── Extends edge ──────────────────────────────────────────
+        if (member.extends && qualifiedNames.has(member.extends)) {
+          edges.push({
+            source: sourceId,
+            target: member.extends,
+            type: "extends",
+          });
+        }
+
+        // ── Implements edges ──────────────────────────────────────
+        for (const iface of member.implements ?? []) {
+          if (qualifiedNames.has(iface)) {
+            edges.push({
+              source: sourceId,
+              target: iface,
+              type: "implements",
+            });
+          }
+        }
+
+        // ── Field type edges ──────────────────────────────────────
+        for (const field of member.fields ?? []) {
+          const fieldType = extractBaseType(field.type);
+          if (fieldType && qualifiedNames.has(fieldType) && fieldType !== sourceId) {
+            edges.push({
+              source: sourceId,
+              target: fieldType,
+              type: "field",
+              detail: field.name,
+            });
+          }
+        }
+
+        // ── Method params + returns edges ─────────────────────────
+        for (const method of member.methods ?? []) {
+          // Parameter types
+          for (const param of method.params ?? []) {
+            const paramType = extractBaseType(param.type);
+            if (paramType && qualifiedNames.has(paramType) && paramType !== sourceId) {
+              edges.push({
+                source: sourceId,
+                target: paramType,
+                type: "parameter",
+                detail: method.name,
+              });
+            }
+          }
+
+          // Return type
+          if (method.returns?.type) {
+            const retType = extractBaseType(method.returns.type);
+            if (retType && qualifiedNames.has(retType) && retType !== sourceId) {
+              edges.push({
+                source: sourceId,
+                target: retType,
+                type: "returns",
+                detail: method.name,
+              });
+            }
+          }
+        }
+
+        // ── Constructor param edges ───────────────────────────────
+        for (const ctor of member.constructors ?? []) {
+          for (const param of ctor.params ?? []) {
+            const paramType = extractBaseType(param.type);
+            if (paramType && qualifiedNames.has(paramType) && paramType !== sourceId) {
+              edges.push({
+                source: sourceId,
+                target: paramType,
+                type: "parameter",
+                detail: "(constructor)",
+              });
+            }
+          }
+        }
+      }
     }
 
-    for (const member of mod.members ?? []) {
-      if (!nodeIds.has(member.qualified)) {
+    // ── Cross-reference edges ───────────────────────────────────────
+    for (const ref of crossRefs) {
+      const targetId = ref.targetMember ?? ref.targetFlow ?? ref.targetArtifact;
+
+      // Ensure source node exists
+      if (!nodeIds.has(ref.sourceQualified)) {
         nodes.push({
-          id: member.qualified,
-          label: member.name,
-          type: "member",
+          id: ref.sourceQualified,
+          label: ref.sourceQualified.split(".").pop() ?? ref.sourceQualified,
+          type: "class",
           artifact: artifactLabel,
+          group: deriveGroup(ref.sourceQualified),
         });
-        nodeIds.add(member.qualified);
+        nodeIds.add(ref.sourceQualified);
       }
 
-      // Edge from module to member (containment)
+      // Ensure target node exists
+      if (!nodeIds.has(targetId)) {
+        const isArtifact = targetId === ref.targetArtifact && !ref.targetMember && !ref.targetFlow;
+        nodes.push({
+          id: targetId,
+          label: targetId.split(".").pop() ?? targetId,
+          type: isArtifact ? "artifact" : "class",
+        });
+        nodeIds.add(targetId);
+      }
+
       edges.push({
-        source: mod.id,
-        target: member.qualified,
-        label: "contains",
+        source: ref.sourceQualified,
+        target: targetId,
+        type: "uses",
+        label: ref.description ?? "references",
+        detail: ref.description,
       });
     }
   }
 
-  // Add edges from cross-refs
-  for (const ref of crossRefs) {
-    // Ensure source node exists
-    if (!nodeIds.has(ref.sourceQualified)) {
-      nodes.push({
-        id: ref.sourceQualified,
-        label: ref.sourceQualified.split(".").pop() ?? ref.sourceQualified,
-        type: "member",
-        artifact: artifactLabel,
-      });
-      nodeIds.add(ref.sourceQualified);
+  // Deduplicate edges: same source+target+type should only appear once
+  const edgeKey = (e: GraphEdge): string =>
+    `${e.source}|${e.target}|${e.type ?? ""}|${e.detail ?? ""}`;
+  const seenEdges = new Set<string>();
+  const dedupedEdges: GraphEdge[] = [];
+  for (const edge of edges) {
+    const key = edgeKey(edge);
+    if (!seenEdges.has(key)) {
+      seenEdges.add(key);
+      dedupedEdges.push(edge);
     }
-
-    // Determine target id
-    const targetId = ref.targetMember ?? ref.targetFlow ?? ref.targetArtifact;
-
-    // Ensure target node exists
-    if (!nodeIds.has(targetId)) {
-      const isArtifact = targetId === ref.targetArtifact && !ref.targetMember && !ref.targetFlow;
-      nodes.push({
-        id: targetId,
-        label: targetId.split(".").pop() ?? targetId,
-        type: isArtifact ? "artifact" : "member",
-      });
-      nodeIds.add(targetId);
-    }
-
-    edges.push({
-      source: ref.sourceQualified,
-      target: targetId,
-      label: ref.description ?? "references",
-    });
   }
 
-  return { nodes, edges };
+  return { nodes, edges: dedupedEdges, artifactLabels };
 }
 
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate a graph page for a single artifact.
+ */
 export function generateGraphPage(input: GraphPageInput): GeneratedPage {
   const { modules, crossRefs, artifactLabel } = input;
-  const { nodes, edges } = buildGraph(modules, crossRefs, artifactLabel);
+  const { nodes, edges, artifactLabels } = buildNodesAndEdges([
+    { modules, crossRefs, artifactLabel },
+  ]);
 
   const data: GraphPageData = {
     type: PageType.GRAPH,
     nodes,
     edges,
+    artifacts: artifactLabels,
   };
 
   return {
     type: PageType.GRAPH,
     slug: graphPageSlug(artifactLabel),
     title: `${artifactLabel} — Dependency Graph`,
-    description: `Visual dependency graph across modules and artifacts for ${artifactLabel}`,
+    description: `Visual dependency graph for ${artifactLabel}`,
     artifactLabel,
+    data,
+  };
+}
+
+/**
+ * Generate a combined graph page across all artifacts.
+ */
+export function generateCombinedGraphPage(input: CombinedGraphPageInput): GeneratedPage {
+  const { nodes, edges, artifactLabels } = buildNodesAndEdges(input.artifacts);
+
+  const data: GraphPageData = {
+    type: PageType.GRAPH,
+    nodes,
+    edges,
+    artifacts: artifactLabels,
+  };
+
+  return {
+    type: PageType.GRAPH,
+    slug: graphPageSlug(),
+    title: "Architecture — Dependency Graph",
+    description: `Combined dependency graph across ${artifactLabels.length} artifacts`,
     data,
   };
 }

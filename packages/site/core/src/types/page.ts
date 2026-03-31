@@ -185,19 +185,25 @@ export interface GraphPageData {
   type: PageType.GRAPH;
   nodes: GraphNode[];
   edges: GraphEdge[];
+  /** All artifact labels present in this graph (for scope filters). */
+  artifacts?: string[];
 }
 
 export interface GraphNode {
   id: string;
   label: string;
-  type: "module" | "member" | "artifact";
+  type: "class" | "interface" | "enum" | "record" | "annotation" | "module" | "artifact";
   artifact?: string;
+  module?: string;
+  group?: string;
 }
 
 export interface GraphEdge {
   source: string;
   target: string;
+  type?: "field" | "extends" | "implements" | "parameter" | "returns" | "uses";
   label?: string;
+  detail?: string;
 }
 
 export interface OperationsPageData {

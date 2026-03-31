@@ -20,6 +20,7 @@ import { PageType } from "../types/page.js";
 import { generateArtifactPages } from "./page-factory.js";
 import { generateGuidePage } from "./pages/guide.js";
 import { generateChangelogPage } from "./pages/changelog.js";
+import { generateCombinedGraphPage } from "./pages/graph.js";
 import { buildNavigation } from "./navigation.js";
 import { artifactLandingSlug, testDashboardSlug, testOverviewPageSlug } from "./slug.js";
 
@@ -58,6 +59,18 @@ export async function generatePages(
   for (const artifact of artifacts) {
     const artifactPages = generateArtifactPages(artifact);
     pages.push(...artifactPages);
+  }
+
+  // ── 1b. Generate combined graph page across all artifacts ────────
+  const graphArtifacts = artifacts
+    .filter((art) => art.spec.modules.length > 0 || (art.spec.crossRefs ?? []).length > 0)
+    .map((art) => ({
+      modules: art.spec.modules,
+      crossRefs: art.spec.crossRefs ?? [],
+      artifactLabel: art.label,
+    }));
+  if (graphArtifacts.length > 0) {
+    pages.push(generateCombinedGraphPage({ artifacts: graphArtifacts }));
   }
 
   // ── 2. Generate guide pages ──────────────────────────────────────
