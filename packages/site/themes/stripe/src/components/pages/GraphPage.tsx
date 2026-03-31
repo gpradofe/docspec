@@ -476,19 +476,6 @@ export function GraphPage({ data }: GraphPageProps) {
     setZoom((z) => Math.max(0.2, Math.min(3, z * delta)));
   }, []);
 
-  // Scope toggle
-  const toggleScope = useCallback((art: string) => {
-    setScopeFilter((prev) => {
-      const next = new Set(prev);
-      if (next.has(art)) {
-        if (next.size > 1) next.delete(art);
-      } else {
-        next.add(art);
-      }
-      return next;
-    });
-  }, []);
-
   // Edge filter toggle
   const toggleEdgeFilter = useCallback((type: EdgeTypeFilter) => {
     if (type === "all") {
@@ -808,6 +795,16 @@ export function GraphPage({ data }: GraphPageProps) {
                     >
                       {n.label.length > 22 ? n.label.substring(0, 20) + ".." : n.label}
                     </text>
+                    {/* Class count for artifact/module nodes */}
+                    {n.classCount !== undefined && n.classCount > 0 && (
+                      <text
+                        x={0} y={r + 25}
+                        textAnchor="middle"
+                        style={{ fontSize: 7.5, fill: T.textDim, fontFamily: T.mono }}
+                      >
+                        {n.classCount} classes
+                      </text>
+                    )}
                   </g>
                 );
               })}
