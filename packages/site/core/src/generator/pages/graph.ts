@@ -109,7 +109,8 @@ function buildNodesAndEdges(
   const qualifiedNames = new Set<string>();
   const artifactLabels: string[] = [];
 
-  // First pass: collect all qualified names across all artifacts
+  // First pass: collect all qualified names + build simple-to-qualified lookup
+  const simpleToQualified = new Map<string, string>();
   for (const { modules, artifactLabel } of inputs) {
     if (!artifactLabels.includes(artifactLabel)) {
       artifactLabels.push(artifactLabel);
@@ -117,8 +118,25 @@ function buildNodesAndEdges(
     for (const mod of modules) {
       for (const member of mod.members ?? []) {
         qualifiedNames.add(member.qualified);
+        // Map simple name → qualified (last one wins if ambiguous)
+        simpleToQualified.set(member.name, member.qualified);
       }
     }
+  }
+
+  // Helper: resolve a type name (simple or qualified) to a known qualified name
+  function resolveType(name: string): string | null {
+    if (!name) return null;
+    // Direct match on qualified name
+    if (qualifiedNames.has(name)) return name;
+    // Try simple name lookup
+    const fromSimple = simpleToQualified.get(name);
+    if (fromSimple) return fromSimple;
+    // Try extracting simple name from qualified and matching
+    const simpleName = name.includes(".") ? name.split(".").pop()! : name;
+    const fromExtracted = simpleToQualified.get(simpleName);
+    if (fromExtracted) return fromExtracted;
+    return null;
   }
 
   // Second pass: build nodes and extract edges
@@ -141,63 +159,44 @@ function buildNodesAndEdges(
         }
 
         // ── Extends edge ──────────────────────────────────────────
-        if (member.extends && qualifiedNames.has(member.extends)) {
-          edges.push({
-            source: sourceId,
-            target: member.extends,
-            type: "extends",
-          });
+        if (member.extends) {
+          const target = resolveType(member.extends);
+          if (target && target !== sourceId) {
+            edges.push({ source: sourceId, target, type: "extends" });
+          }
         }
 
         // ── Implements edges ──────────────────────────────────────
         for (const iface of member.implements ?? []) {
-          if (qualifiedNames.has(iface)) {
-            edges.push({
-              source: sourceId,
-              target: iface,
-              type: "implements",
-            });
+          const target = resolveType(iface);
+          if (target && target !== sourceId) {
+            edges.push({ source: sourceId, target, type: "implements" });
           }
         }
 
         // ── Field type edges ──────────────────────────────────────
         for (const field of member.fields ?? []) {
           const fieldType = extractBaseType(field.type);
-          if (fieldType && qualifiedNames.has(fieldType) && fieldType !== sourceId) {
-            edges.push({
-              source: sourceId,
-              target: fieldType,
-              type: "field",
-              detail: field.name,
-            });
+          const resolvedField = fieldType ? resolveType(fieldType) : null;
+          if (resolvedField && resolvedField !== sourceId) {
+            edges.push({ source: sourceId, target: resolvedField, type: "field", detail: field.name });
           }
         }
 
         // ── Method params + returns edges ─────────────────────────
         for (const method of member.methods ?? []) {
-          // Parameter types
           for (const param of method.params ?? []) {
             const paramType = extractBaseType(param.type);
-            if (paramType && qualifiedNames.has(paramType) && paramType !== sourceId) {
-              edges.push({
-                source: sourceId,
-                target: paramType,
-                type: "parameter",
-                detail: method.name,
-              });
+            const resolved = paramType ? resolveType(paramType) : null;
+            if (resolved && resolved !== sourceId) {
+              edges.push({ source: sourceId, target: resolved, type: "parameter", detail: method.name });
             }
           }
-
-          // Return type
           if (method.returns?.type) {
             const retType = extractBaseType(method.returns.type);
-            if (retType && qualifiedNames.has(retType) && retType !== sourceId) {
-              edges.push({
-                source: sourceId,
-                target: retType,
-                type: "returns",
-                detail: method.name,
-              });
+            const resolved = retType ? resolveType(retType) : null;
+            if (resolved && resolved !== sourceId) {
+              edges.push({ source: sourceId, target: resolved, type: "returns", detail: method.name });
             }
           }
         }
@@ -206,13 +205,9 @@ function buildNodesAndEdges(
         for (const ctor of member.constructors ?? []) {
           for (const param of ctor.params ?? []) {
             const paramType = extractBaseType(param.type);
-            if (paramType && qualifiedNames.has(paramType) && paramType !== sourceId) {
-              edges.push({
-                source: sourceId,
-                target: paramType,
-                type: "parameter",
-                detail: "(constructor)",
-              });
+            const resolved = paramType ? resolveType(paramType) : null;
+            if (resolved && resolved !== sourceId) {
+              edges.push({ source: sourceId, target: resolved, type: "parameter", detail: "(constructor)" });
             }
           }
         }
