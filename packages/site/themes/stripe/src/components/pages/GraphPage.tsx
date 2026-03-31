@@ -370,13 +370,7 @@ export function GraphPage({ data }: GraphPageProps) {
     return viewData.edges.filter((e) => e.type && edgeFilter.has(e.type as EdgeTypeFilter));
   }, [viewData.edges, edgeFilter]);
 
-  // Layout
-  const layoutData = useMemo(
-    () => hierarchicalLayout(viewData.nodes, filteredEdges, allArtifacts),
-    [viewData.nodes, filteredEdges, allArtifacts],
-  );
-
-  // Focus set
+  // Focus set — compute which nodes are in scope when a node is clicked
   const focusSet = useMemo(() => {
     if (!focusedNode) return null;
     const set = new Set<string>([focusedNode]);
@@ -387,10 +381,23 @@ export function GraphPage({ data }: GraphPageProps) {
     return set;
   }, [focusedNode, filteredEdges]);
 
-  const visibleNodes = focusSet ? layoutData.filter((n) => focusSet.has(n.id)) : layoutData;
-  const visibleEdges = focusSet
+  // When focused: filter nodes/edges THEN re-layout (so nodes spread out)
+  // When unfocused: layout all nodes
+  const focusedNodes = focusSet
+    ? viewData.nodes.filter((n) => focusSet.has(n.id))
+    : viewData.nodes;
+  const focusedEdges = focusSet
     ? filteredEdges.filter((e) => focusSet.has(e.source) && focusSet.has(e.target))
     : filteredEdges;
+
+  // Layout runs on the FOCUSED set (re-organizes when focus changes)
+  const layoutData = useMemo(
+    () => hierarchicalLayout(focusedNodes, focusedEdges, allArtifacts),
+    [focusedNodes, focusedEdges, allArtifacts],
+  );
+
+  const visibleNodes = layoutData;
+  const visibleEdges = focusedEdges;
 
   const getNode = useCallback(
     (id: string) => layoutData.find((n) => n.id === id),

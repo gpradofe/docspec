@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { NavigationTree } from "@docspec/core";
 import { T } from "../../lib/tokens.js";
 import { Sidebar } from "./Sidebar.js";
@@ -56,20 +56,43 @@ export function Layout({
 
   const setLens = externalOnLensChange ?? setInternalLens;
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedArtifact, setSelectedArtifact] = useState<string | undefined>(activeArtifact);
+  const allArtifactLabels = (artifacts || []).map((a) => a.label);
+  const [selectedArtifacts, setSelectedArtifacts] = useState<Set<string>>(new Set(allArtifactLabels));
 
   // After hydration, restore persisted artifact selection from sessionStorage
   useEffect(() => {
-    const stored = sessionStorage.getItem("docspec-artifact");
+    const stored = sessionStorage.getItem("docspec-artifacts");
     if (stored && stored !== "all") {
-      setSelectedArtifact(stored);
+      try {
+        const parsed = JSON.parse(stored) as string[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSelectedArtifacts(new Set(parsed));
+        }
+      } catch {}
     }
   }, []);
 
   // Persist artifact selection changes to sessionStorage
   useEffect(() => {
-    sessionStorage.setItem("docspec-artifact", selectedArtifact || "all");
-  }, [selectedArtifact]);
+    if (selectedArtifacts.size === allArtifactLabels.length) {
+      sessionStorage.setItem("docspec-artifacts", "all");
+    } else {
+      sessionStorage.setItem("docspec-artifacts", JSON.stringify([...selectedArtifacts]));
+    }
+  }, [selectedArtifacts, allArtifactLabels.length]);
+
+  // Toggle a single artifact in multi-select (at least 1 must remain)
+  const toggleArtifact = useCallback((label: string) => {
+    setSelectedArtifacts((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        if (next.size > 1) next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }, []);
 
   // Filter navigation by lens tab AND by selected artifact
   // In tests lens: show Tests section AND Libraries section (same class tree with test badges)
@@ -82,18 +105,20 @@ export function Layout({
         return s.tab === "docs";
       })
       .map((s) => {
-        if (!selectedArtifact) return s;
-        // Filter section items to only show the selected artifact's items
+        // If all artifacts selected, no filtering needed
+        if (selectedArtifacts.size === allArtifactLabels.length) return s;
+        // Filter section items to only show selected artifacts' items
         const filteredItems = s.items.filter((item) => {
-          // If item label matches selected artifact, keep it
-          if (item.label === selectedArtifact) return true;
-          // If item has no artifact association (like "Flows" container, "Dashboard"), keep it
+          // If item label matches any selected artifact, keep it
+          if (selectedArtifacts.has(item.label)) return true;
+          // If item has no artifact association, keep it
           if (!item.slug || item.slug === "/" || item.slug === "/tests") return true;
-          // Check if slug contains the artifact name
-          const artifactSlug = selectedArtifact.toLowerCase().replace(/\s+/g, "-");
-          if (item.slug?.includes(artifactSlug)) return true;
-          // Check children
-          if (item.children?.some((c) => c.slug?.includes(artifactSlug))) return true;
+          // Check if slug contains any selected artifact name
+          for (const art of selectedArtifacts) {
+            const artifactSlug = art.toLowerCase().replace(/\s+/g, "-");
+            if (item.slug?.includes(artifactSlug)) return true;
+            if (item.children?.some((c) => c.slug?.includes(artifactSlug))) return true;
+          }
           return false;
         });
         return { ...s, items: filteredItems };
@@ -122,10 +147,9 @@ export function Layout({
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           onOpenSearch={onOpenSearch}
           artifacts={artifacts}
-          activeArtifact={selectedArtifact}
+          activeArtifact={selectedArtifacts.size === allArtifactLabels.length ? undefined : [...selectedArtifacts][0]}
           onArtifactChange={(label) => {
-            // Toggle: clicking same artifact deselects (shows all)
-            setSelectedArtifact(selectedArtifact === label ? undefined : label);
+            toggleArtifact(label);
             onArtifactChange?.(label);
           }}
         />
@@ -136,9 +160,9 @@ export function Layout({
               currentSlug={currentSlug}
               lens={lens}
               artifacts={artifacts}
-              activeArtifact={selectedArtifact}
+              activeArtifact={selectedArtifacts.size === allArtifactLabels.length ? undefined : [...selectedArtifacts][0]}
               onArtifactChange={(label) => {
-                setSelectedArtifact(selectedArtifact === label ? undefined : label);
+                toggleArtifact(label);
               }}
             />
           )}
