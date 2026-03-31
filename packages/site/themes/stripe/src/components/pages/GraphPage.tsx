@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useCallback } from "react";
+import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import type { GraphPageData, GraphNode, GraphEdge } from "@docspec/core";
 import { T } from "../../lib/tokens.js";
 import { useLens } from "../../context/LensContext.js";
@@ -11,6 +11,7 @@ import { useLens } from "../../context/LensContext.js";
 
 type ViewMode = "artifact" | "module" | "class";
 type EdgeTypeFilter = "all" | "field" | "extends" | "implements" | "parameter" | "returns" | "uses";
+type AnimPhase = "idle" | "fadeOut" | "moving" | "fadeIn";
 
 interface GraphPageProps {
   data: GraphPageData;
@@ -45,6 +46,14 @@ const EDGE_STYLES: Record<string, { stroke: string; dash: string; width: number;
   returns:    { stroke: T.orange,  dash: "3,3",    width: 1,   label: "Return type" },
   uses:       { stroke: T.pink,    dash: "",       width: 2,   label: "Uses (@DocUses / cross-ref)" },
 };
+
+/** Timing constants (ms) for the staged animation */
+const ANIM = {
+  fadeOutDuration: 300,
+  moveDuration: 600,
+  fadeInDuration: 300,
+  zoomTransition: 0.3,
+} as const;
 
 // ---------------------------------------------------------------------------
 // Helper functions
@@ -350,7 +359,16 @@ export function GraphPage({ data }: GraphPageProps) {
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [animating, setAnimating] = useState(false);
+  const [animPhase, setAnimPhase] = useState<AnimPhase>("idle");
+  const animTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Clear pending animation timers on unmount
+  useEffect(() => {
+    return () => {
+      for (const t of animTimers.current) clearTimeout(t);
+    };
+  }, []);
 
   // Scope-filtered data (synced with project selector)
   const scopedData = useMemo(() => {
@@ -381,7 +399,7 @@ export function GraphPage({ data }: GraphPageProps) {
     return viewData.edges.filter((e) => e.type && edgeFilter.has(e.type as EdgeTypeFilter));
   }, [viewData.edges, edgeFilter]);
 
-  // Focus set — compute which nodes are in scope when a node is clicked
+  // Focus set — compute which nodes are connected when a node is focused
   const focusSet = useMemo(() => {
     if (!focusedNode) return null;
     const set = new Set<string>([focusedNode]);
@@ -392,27 +410,140 @@ export function GraphPage({ data }: GraphPageProps) {
     return set;
   }, [focusedNode, filteredEdges]);
 
-  // When focused: filter nodes/edges THEN re-layout (so nodes spread out)
-  // When unfocused: layout all nodes
-  const focusedNodes = focusSet
-    ? viewData.nodes.filter((n) => focusSet.has(n.id))
-    : viewData.nodes;
-  const focusedEdges = focusSet
-    ? filteredEdges.filter((e) => focusSet.has(e.source) && focusSet.has(e.target))
-    : filteredEdges;
+  // ---------------------------------------------------------------------------
+  // Dual layout: always compute BOTH full and focused layouts
+  // ---------------------------------------------------------------------------
 
-  // Layout runs on the FOCUSED set (re-organizes when focus changes)
-  const layoutData = useMemo(
-    () => hierarchicalLayout(focusedNodes, focusedEdges, allArtifacts),
-    [focusedNodes, focusedEdges, allArtifacts],
+  // Full layout: all nodes laid out together
+  const fullLayout = useMemo(
+    () => hierarchicalLayout(viewData.nodes, filteredEdges, allArtifacts),
+    [viewData.nodes, filteredEdges, allArtifacts],
   );
 
-  const visibleNodes = layoutData;
-  const visibleEdges = focusedEdges;
+  // Focused subset nodes/edges (for focused layout computation)
+  const focusedSubsetNodes = useMemo(() => {
+    if (!focusSet) return viewData.nodes;
+    return viewData.nodes.filter((n) => focusSet.has(n.id));
+  }, [focusSet, viewData.nodes]);
 
-  const getNode = useCallback(
-    (id: string) => layoutData.find((n) => n.id === id),
-    [layoutData],
+  const focusedSubsetEdges = useMemo(() => {
+    if (!focusSet) return filteredEdges;
+    return filteredEdges.filter((e) => focusSet.has(e.source) && focusSet.has(e.target));
+  }, [focusSet, filteredEdges]);
+
+  // Focused layout: only connected nodes, re-laid out
+  const focusedLayout = useMemo(
+    () => hierarchicalLayout(focusedSubsetNodes, focusedSubsetEdges, allArtifacts),
+    [focusedSubsetNodes, focusedSubsetEdges, allArtifacts],
+  );
+
+  // Build position lookup maps
+  const fullPositions = useMemo(() => {
+    const m = new Map<string, { x: number; y: number }>();
+    for (const n of fullLayout) m.set(n.id, { x: n.x, y: n.y });
+    return m;
+  }, [fullLayout]);
+
+  const focusedPositions = useMemo(() => {
+    const m = new Map<string, { x: number; y: number }>();
+    for (const n of focusedLayout) m.set(n.id, { x: n.x, y: n.y });
+    return m;
+  }, [focusedLayout]);
+
+  // The active position map: nodes read their target position from here
+  const activePositions = focusedNode ? focusedPositions : fullPositions;
+
+  // All nodes are always rendered (from fullLayout for metadata). Their positions
+  // come from whichever layout is active.
+  const allNodes = fullLayout;
+
+  // Visible edges depend on focus state
+  const visibleEdges = focusedNode ? focusedSubsetEdges : filteredEdges;
+
+  // ---------------------------------------------------------------------------
+  // Auto-zoom to fit a set of nodes
+  // ---------------------------------------------------------------------------
+
+  const fitToView = useCallback((positions: Map<string, { x: number; y: number }>) => {
+    if (positions.size === 0) return;
+    const coords = Array.from(positions.values());
+    const minX = Math.min(...coords.map((c) => c.x));
+    const maxX = Math.max(...coords.map((c) => c.x));
+    const minY = Math.min(...coords.map((c) => c.y));
+    const maxY = Math.max(...coords.map((c) => c.y));
+    const graphW = maxX - minX + 160;
+    const graphH = maxY - minY + 160;
+    const containerW = containerRef.current?.clientWidth || 800;
+    const containerH = containerRef.current?.clientHeight || 520;
+    const newZoom = Math.min(containerW / graphW, containerH / graphH, 2);
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    setZoom(Math.max(0.3, newZoom));
+    setPan({ x: -centerX + containerW / (2 * newZoom), y: -centerY + containerH / (2 * newZoom) });
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Staged animation handler
+  // ---------------------------------------------------------------------------
+
+  const handleFocusChange = useCallback((nodeId: string | null) => {
+    // Cancel any in-progress animation
+    for (const t of animTimers.current) clearTimeout(t);
+    animTimers.current = [];
+
+    // Phase 1: Fade out edges (and unconnected nodes for focus, or nothing for unfocus)
+    setAnimPhase("fadeOut");
+
+    const t1 = setTimeout(() => {
+      // Phase 2: Update the focused node (triggers new layout), move nodes
+      setFocusedNode(nodeId);
+      setAnimPhase("moving");
+
+      // After a brief frame, auto-zoom to fit the target layout
+      const t1b = setTimeout(() => {
+        if (nodeId) {
+          // Focusing: build a temporary focus set to compute positions
+          const tempFocusSet = new Set<string>([nodeId]);
+          for (const e of filteredEdges) {
+            if (e.source === nodeId) tempFocusSet.add(e.target);
+            if (e.target === nodeId) tempFocusSet.add(e.source);
+          }
+          const tempNodes = viewData.nodes.filter((n) => tempFocusSet.has(n.id));
+          const tempEdges = filteredEdges.filter(
+            (e) => tempFocusSet.has(e.source) && tempFocusSet.has(e.target),
+          );
+          const tempLayout = hierarchicalLayout(tempNodes, tempEdges, allArtifacts);
+          const posMap = new Map<string, { x: number; y: number }>();
+          for (const n of tempLayout) posMap.set(n.id, { x: n.x, y: n.y });
+          fitToView(posMap);
+        } else {
+          // Unfocusing: fit to full layout
+          fitToView(fullPositions);
+        }
+      }, 16);
+      animTimers.current.push(t1b);
+
+      // Phase 3: Fade in edges
+      const t2 = setTimeout(() => {
+        setAnimPhase("fadeIn");
+
+        const t3 = setTimeout(() => {
+          setAnimPhase("idle");
+        }, ANIM.fadeInDuration);
+        animTimers.current.push(t3);
+      }, ANIM.moveDuration);
+      animTimers.current.push(t2);
+    }, ANIM.fadeOutDuration);
+    animTimers.current.push(t1);
+  }, [filteredEdges, viewData.nodes, allArtifacts, fullPositions, fitToView]);
+
+  // ---------------------------------------------------------------------------
+  // Node helpers
+  // ---------------------------------------------------------------------------
+
+  const getNodeById = useCallback(
+    (id: string) => fullLayout.find((n) => n.id === id),
+    [fullLayout],
   );
 
   const isConnected = useCallback(
@@ -427,33 +558,61 @@ export function GraphPage({ data }: GraphPageProps) {
     [focusSet, hovered, filteredEdges],
   );
 
-  // Artifact clusters (bounding boxes for Class view)
+  // ---------------------------------------------------------------------------
+  // Artifact cluster bounding boxes (class view only, based on active positions)
+  // ---------------------------------------------------------------------------
+
   const artifactClusters = useMemo(() => {
     if (viewMode !== "class") return [];
     const clusters = new Map<string, { minX: number; maxX: number; minY: number; maxY: number; color: string }>();
-    for (const n of visibleNodes) {
+    for (const n of allNodes) {
+      if (focusedNode && focusSet && !focusSet.has(n.id)) continue;
       const art = n.artifact;
       if (!art) continue;
+      const pos = activePositions.get(n.id);
+      if (!pos) continue;
       if (!clusters.has(art)) {
         clusters.set(art, {
-          minX: n.x, maxX: n.x, minY: n.y, maxY: n.y,
+          minX: pos.x, maxX: pos.x, minY: pos.y, maxY: pos.y,
           color: getArtifactColor(art, allArtifacts),
         });
       } else {
         const c = clusters.get(art)!;
-        c.minX = Math.min(c.minX, n.x);
-        c.maxX = Math.max(c.maxX, n.x);
-        c.minY = Math.min(c.minY, n.y);
-        c.maxY = Math.max(c.maxY, n.y);
+        c.minX = Math.min(c.minX, pos.x);
+        c.maxX = Math.max(c.maxX, pos.x);
+        c.minY = Math.min(c.minY, pos.y);
+        c.maxY = Math.max(c.maxY, pos.y);
       }
     }
     return Array.from(clusters.entries()).map(([art, bounds]) => ({
       artifact: art,
       ...bounds,
     }));
-  }, [viewMode, visibleNodes, allArtifacts]);
+  }, [viewMode, allNodes, allArtifacts, focusedNode, focusSet, activePositions]);
 
+  // ---------------------------------------------------------------------------
+  // Legend filtering: only show types/groups present in the current view
+  // ---------------------------------------------------------------------------
+
+  const visibleEdgeTypes = useMemo(() => {
+    return new Set(visibleEdges.map((e) => e.type).filter(Boolean) as string[]);
+  }, [visibleEdges]);
+
+  const visibleArtifactGroups = useMemo(() => {
+    if (!focusedNode) return new Set(allArtifacts);
+    const groups = new Set<string>();
+    for (const n of allNodes) {
+      if (focusSet && focusSet.has(n.id) && n.artifact) {
+        groups.add(n.artifact);
+      }
+    }
+    return groups;
+  }, [focusedNode, focusSet, allNodes, allArtifacts]);
+
+  // ---------------------------------------------------------------------------
   // Mouse handlers for pan
+  // ---------------------------------------------------------------------------
+
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setDragging(true);
@@ -495,10 +654,13 @@ export function GraphPage({ data }: GraphPageProps) {
     });
   }, []);
 
-  // Compute viewBox to center the graph
+  // ---------------------------------------------------------------------------
+  // Compute viewBox from all node positions (full layout — stable viewBox)
+  // ---------------------------------------------------------------------------
+
   const padding = 80;
-  const allX = layoutData.map((n) => n.x);
-  const allY = layoutData.map((n) => n.y);
+  const allX = fullLayout.map((n) => n.x);
+  const allY = fullLayout.map((n) => n.y);
   const minX = (allX.length > 0 ? Math.min(...allX) : 0) - padding;
   const maxX = (allX.length > 0 ? Math.max(...allX) : 0) + padding;
   const minY = (allY.length > 0 ? Math.min(...allY) : 0) - padding;
@@ -511,9 +673,26 @@ export function GraphPage({ data }: GraphPageProps) {
     return EDGE_STYLES[type || "uses"] || EDGE_STYLES.uses;
   };
 
+  // ---------------------------------------------------------------------------
+  // Animation-derived styles
+  // ---------------------------------------------------------------------------
+
+  // Edge opacity: hidden during fadeOut and moving phases, visible during fadeIn and idle
+  const edgeOpacity = animPhase === "fadeOut" || animPhase === "moving" ? 0 : 1;
+
+  // Node CSS transition depends on the current phase
+  const nodeTransition = animPhase === "moving"
+    ? `transform ${ANIM.moveDuration}ms ease, opacity ${ANIM.fadeOutDuration}ms ease`
+    : `opacity ${ANIM.fadeOutDuration}ms ease`;
+
+  // SVG-level transform transition: smooth for zoom buttons, off during drag
+  const svgTransformTransition = dragging
+    ? "none"
+    : `transform ${ANIM.zoomTransition}s ease-out`;
+
   // Detail panel data
   const detailNode = focusedNode || hovered;
-  const detailLayout = detailNode ? getNode(detailNode) : null;
+  const detailLayout = detailNode ? getNodeById(detailNode) : null;
 
   return (
     <div>
@@ -531,7 +710,7 @@ export function GraphPage({ data }: GraphPageProps) {
         <div style={{ display: "flex", gap: 6 }}>
           {focusedNode && (
             <button
-              onClick={() => { setFocusedNode(null); setZoom(1); setPan({ x: 0, y: 0 }); }}
+              onClick={() => handleFocusChange(null)}
               style={{
                 padding: "5px 12px", fontSize: 11, fontWeight: 600,
                 background: T.accentBg, color: T.accent, border: `1px solid ${T.accentBorder}`,
@@ -574,7 +753,7 @@ export function GraphPage({ data }: GraphPageProps) {
         </div>
       </div>
 
-      {/* ── View mode toggles ─────────────────────────────────────── */}
+      {/* View mode toggles */}
       <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
         <span style={{ fontSize: 11, fontWeight: 600, color: T.textDim, marginRight: 4 }}>View:</span>
         {(["artifact", "module", "class"] as ViewMode[]).map((mode) => (
@@ -582,14 +761,12 @@ export function GraphPage({ data }: GraphPageProps) {
             key={mode}
             label={mode.charAt(0).toUpperCase() + mode.slice(1)}
             active={viewMode === mode}
-            onClick={() => { setViewMode(mode); setFocusedNode(null); }}
+            onClick={() => { setViewMode(mode); setFocusedNode(null); setAnimPhase("idle"); }}
           />
         ))}
       </div>
 
-      {/* Scope is controlled by the project selector in the header — no separate scope filter here */}
-
-      {/* ── Edge type filter ──────────────────────────────────────── */}
+      {/* Edge type filter */}
       <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
         <span style={{ fontSize: 11, fontWeight: 600, color: T.textDim, marginRight: 4 }}>Edges:</span>
         <FilterBtn label="All" active={edgeFilter.has("all")} onClick={() => toggleEdgeFilter("all")} />
@@ -610,8 +787,9 @@ export function GraphPage({ data }: GraphPageProps) {
         </div>
       ) : (
         <>
-          {/* ── Graph canvas ────────────────────────────────────────── */}
+          {/* Graph canvas */}
           <div
+            ref={containerRef}
             style={{
               borderRadius: 12, border: `1px solid ${T.surfaceBorder}`,
               background: T.cardBg, overflow: "hidden",
@@ -631,11 +809,11 @@ export function GraphPage({ data }: GraphPageProps) {
                 width: "100%", height: "100%", display: "block",
                 transform: `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`,
                 transformOrigin: "center center",
-                transition: dragging ? "none" : animating ? "transform 0.5s ease" : "transform 0.15s ease",
+                transition: svgTransformTransition,
               }}
               onClick={(e) => {
                 if ((e.target as SVGElement).tagName === "svg") {
-                  setFocusedNode(null);
+                  if (focusedNode) handleFocusChange(null);
                 }
               }}
             >
@@ -675,6 +853,7 @@ export function GraphPage({ data }: GraphPageProps) {
                   fill={c.color + "0D"}
                   stroke={c.color + "15"}
                   strokeWidth={1}
+                  style={{ transition: `all ${ANIM.moveDuration}ms ease` }}
                 />
               ))}
 
@@ -691,58 +870,66 @@ export function GraphPage({ data }: GraphPageProps) {
                     fontFamily: T.sans,
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
+                    transition: `all ${ANIM.moveDuration}ms ease`,
                   }}
                 >
                   {c.artifact}
                 </text>
               ))}
 
-              {/* Edges */}
+              {/* Edges — rendered from visibleEdges, positions read from active layout */}
               {visibleEdges.map((e, i) => {
-                const f = getNode(e.source);
-                const t = getNode(e.target);
-                if (!f || !t) return null;
+                const fPos = activePositions.get(e.source);
+                const tPos = activePositions.get(e.target);
+                if (!fPos || !tPos) return null;
                 const active = !hovered || e.source === hovered || e.target === hovered;
                 const style = getEdgeStyle(e.type);
                 return (
                   <line
-                    key={i}
-                    x1={f.x} y1={f.y} x2={t.x} y2={t.y}
+                    key={`${e.source}-${e.target}-${e.type || i}`}
+                    x1={fPos.x} y1={fPos.y} x2={tPos.x} y2={tPos.y}
                     stroke={active ? style.stroke : style.stroke + "30"}
                     strokeWidth={active ? style.width : 0.5}
                     strokeDasharray={active ? style.dash : "4,4"}
                     markerEnd={active ? `url(#arrow-${e.type || "uses"})` : undefined}
-                    style={{ transition: "all 0.3s" }}
+                    style={{
+                      opacity: edgeOpacity,
+                      transition: `opacity ${ANIM.fadeOutDuration}ms ease, x1 ${ANIM.moveDuration}ms ease, y1 ${ANIM.moveDuration}ms ease, x2 ${ANIM.moveDuration}ms ease, y2 ${ANIM.moveDuration}ms ease`,
+                    }}
                   />
                 );
               })}
 
-              {/* Nodes */}
-              {visibleNodes.map((n) => {
+              {/* Nodes — ALL nodes always rendered; position and opacity driven by animation */}
+              {allNodes.map((n) => {
                 const connected = isConnected(n.id);
                 const isHov = hovered === n.id;
                 const isFocused = focusedNode === n.id;
                 const isArtifactOrModule = n.nodeType === "artifact" || n.nodeType === "module";
                 const r = isArtifactOrModule ? 22 : 16;
 
+                // Read target position from the active layout; fall back to full layout position
+                const pos = activePositions.get(n.id) || { x: n.x, y: n.y };
+
+                // Node opacity: fully connected = 1, unconnected during focus = 0
+                const nodeOpacity = connected ? 1 : 0;
+
                 return (
                   <g
                     key={n.id}
-                    transform={`translate(${n.x}, ${n.y})`}
+                    transform={`translate(${pos.x}, ${pos.y})`}
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setAnimating(true);
-                      setFocusedNode(focusedNode === n.id ? null : n.id);
-                      setZoom(1);
-                      setPan({ x: 0, y: 0 });
-                      setTimeout(() => setAnimating(false), 500);
+                      if (animPhase !== "idle") return; // Ignore clicks during animation
+                      handleFocusChange(focusedNode === n.id ? null : n.id);
                     }}
                     style={{
-                      cursor: "pointer",
-                      transition: animating ? "transform 0.4s ease, opacity 0.3s" : "opacity 0.3s",
-                      opacity: connected ? 1 : 0.1,
+                      cursor: animPhase !== "idle" ? "default" : "pointer",
+                      transition: nodeTransition,
+                      opacity: nodeOpacity,
+                      pointerEvents: connected ? "auto" : "none",
                     }}
                   >
                     {/* Glow */}
@@ -811,39 +998,43 @@ export function GraphPage({ data }: GraphPageProps) {
             </svg>
           </div>
 
-          {/* ── Edge legend ─────────────────────────────────────────── */}
+          {/* Edge legend — only show types present in visible edges */}
           <div style={{ display: "flex", gap: 16, marginTop: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            {Object.entries(EDGE_STYLES).map(([type, style]) => (
-              <div key={type} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T.textMuted }}>
-                <svg width={24} height={8}>
-                  <line
-                    x1={0} y1={4} x2={24} y2={4}
-                    stroke={style.stroke}
-                    strokeWidth={style.width}
-                    strokeDasharray={style.dash}
-                  />
-                </svg>
-                {style.label}
-              </div>
-            ))}
-          </div>
-
-          {/* ── Artifact color legend ──────────────────────────────── */}
-          {allArtifacts.length > 1 && (
-            <div style={{ display: "flex", gap: 14, marginTop: 8, justifyContent: "center", flexWrap: "wrap" }}>
-              {allArtifacts.map((art) => (
-                <div key={art} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: T.textMuted }}>
-                  <div style={{
-                    width: 8, height: 8, borderRadius: "50%",
-                    background: getArtifactColor(art, allArtifacts),
-                  }} />
-                  {art}
+            {Object.entries(EDGE_STYLES)
+              .filter(([type]) => !focusedNode || visibleEdgeTypes.has(type))
+              .map(([type, style]) => (
+                <div key={type} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T.textMuted }}>
+                  <svg width={24} height={8}>
+                    <line
+                      x1={0} y1={4} x2={24} y2={4}
+                      stroke={style.stroke}
+                      strokeWidth={style.width}
+                      strokeDasharray={style.dash}
+                    />
+                  </svg>
+                  {style.label}
                 </div>
               ))}
+          </div>
+
+          {/* Artifact color legend — only show artifacts present in visible nodes */}
+          {allArtifacts.length > 1 && (
+            <div style={{ display: "flex", gap: 14, marginTop: 8, justifyContent: "center", flexWrap: "wrap" }}>
+              {allArtifacts
+                .filter((art) => visibleArtifactGroups.has(art))
+                .map((art) => (
+                  <div key={art} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: T.textMuted }}>
+                    <div style={{
+                      width: 8, height: 8, borderRadius: "50%",
+                      background: getArtifactColor(art, allArtifacts),
+                    }} />
+                    {art}
+                  </div>
+                ))}
             </div>
           )}
 
-          {/* ── Detail panel ───────────────────────────────────────── */}
+          {/* Detail panel */}
           {detailLayout && (() => {
             const n = detailLayout;
             const nId = n.id;
@@ -861,7 +1052,7 @@ export function GraphPage({ data }: GraphPageProps) {
             }
 
             const usedByNames = usedByEdges
-              .map((e) => getNode(e.source))
+              .map((e) => getNodeById(e.source))
               .filter(Boolean) as LayoutNode[];
 
             return (
@@ -912,12 +1103,14 @@ export function GraphPage({ data }: GraphPageProps) {
                           {type}:
                         </span>{" "}
                         {targets.map((t, i) => {
-                          const targetNode = getNode(t.target);
+                          const targetNode = getNodeById(t.target);
                           return (
                             <span key={`${t.target}-${i}`}>
                               <span
                                 style={{ color: targetNode?.color || T.text, cursor: "pointer", fontWeight: 500 }}
-                                onClick={() => setFocusedNode(t.target)}
+                                onClick={() => {
+                                  if (animPhase === "idle") handleFocusChange(t.target);
+                                }}
                               >
                                 {targetNode?.label || t.target.split(".").pop()}
                               </span>
@@ -941,7 +1134,9 @@ export function GraphPage({ data }: GraphPageProps) {
                       <span key={u.id}>
                         <span
                           style={{ color: u.color, cursor: "pointer", fontWeight: 500 }}
-                          onClick={() => setFocusedNode(u.id)}
+                          onClick={() => {
+                            if (animPhase === "idle") handleFocusChange(u.id);
+                          }}
                         >
                           {u.label}
                         </span>
