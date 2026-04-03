@@ -886,7 +886,7 @@ export function GraphPage({ data }: GraphPageProps) {
                 const style = getEdgeStyle(e.type);
                 return (
                   <line
-                    key={`${e.source}-${e.target}-${e.type || i}`}
+                    key={`edge-${i}`}
                     x1={fPos.x} y1={fPos.y} x2={tPos.x} y2={tPos.y}
                     stroke={active ? style.stroke : style.stroke + "30"}
                     strokeWidth={active ? style.width : 0.5}
